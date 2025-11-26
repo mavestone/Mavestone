@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
@@ -8,13 +9,17 @@ import { Collaboration } from '../components/Collaboration';
 import { Contact } from '../components/Contact';
 import { Footer } from '../components/Footer';
 import { AdminPanel } from '../components/AdminPanel';
+import { ScrollIndicator } from '../components/ui/ScrollIndicator';
+import { InProduction } from '../components/InProduction';
 
 export const Home: React.FC = () => {
   return (
     <>
+        <ScrollIndicator />
         <Navbar />
         <main>
             <Hero />
+            <InProduction />
             <LatestVideo />
             <Shorts />
             <Films />

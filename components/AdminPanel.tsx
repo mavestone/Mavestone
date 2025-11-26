@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
@@ -11,6 +12,8 @@ export const AdminPanel: React.FC = () => {
     toggleAdmin, 
     latestVideo, 
     updateLatestVideo, 
+    inProduction,
+    updateInProduction,
     shorts, 
     updateShort,
     saveChanges,
@@ -142,6 +145,61 @@ export const AdminPanel: React.FC = () => {
                     Use videos that allow embedding (no movie trailers or restricted music videos).
                 </div>
               </div>
+
+               {/* In Production Section */}
+               <section className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-orange-400">In Production</h3>
+                <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Project Title</label>
+                    <input 
+                      type="text" 
+                      value={inProduction.title}
+                      onChange={(e) => updateInProduction({ title: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Status Tag</label>
+                    <input 
+                      type="text" 
+                      value={inProduction.status}
+                      placeholder="e.g. Pre-Production, Filming..."
+                      onChange={(e) => updateInProduction({ status: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                   <div>
+                    <label className="block text-xs text-gray-500 mb-1">Image</label>
+                    <div className="relative">
+                        <input 
+                          type="text" 
+                          value={inProduction.image}
+                          onChange={(e) => updateInProduction({ image: e.target.value })}
+                          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-xs text-gray-300 focus:outline-none focus:border-white/30 pr-10"
+                        />
+                        <label className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/10 hover:bg-white/20 rounded-md cursor-pointer transition-colors" title="Upload Image">
+                            <Camera size={14} className="text-white" />
+                            <input 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*"
+                                onChange={(e) => handleImageUpload(e, (url) => updateInProduction({ image: url }))}
+                            />
+                        </label>
+                    </div>
+                  </div>
+                   <div>
+                    <label className="block text-xs text-gray-500 mb-1">Description</label>
+                    <textarea 
+                      rows={3}
+                      value={inProduction.description}
+                      onChange={(e) => updateInProduction({ description: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                </div>
+              </section>
 
               {/* Latest Video Section */}
               <section className="space-y-4">

@@ -1,10 +1,12 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { LATEST_VIDEO, SHORTS, FILMS } from '../constants';
-import { Film, Short, LatestVideoData } from '../types';
+import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION } from '../constants';
+import { Film, Short, LatestVideoData, InProductionData } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
+  inProduction: InProductionData;
   shorts: Short[];
   films: Film[];
   isAdminOpen: boolean;
@@ -13,6 +15,7 @@ interface ContentContextType {
   toggleAdmin: () => void;
   openAdmin: () => void;
   updateLatestVideo: (data: Partial<LatestVideoData>) => void;
+  updateInProduction: (data: Partial<InProductionData>) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
   updateFilm: (id: string, data: Partial<Film>) => void;
   saveChanges: () => Promise<void>;
@@ -31,6 +34,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Content State - Initialize with defaults so UI is never empty
   const [latestVideo, setLatestVideo] = useState<LatestVideoData>(LATEST_VIDEO);
+  const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
 
@@ -57,6 +61,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (!error && data && data.length > 0) {
           data.forEach(row => {
             if (row.key === 'latest_video') setLatestVideo(row.data);
+            if (row.key === 'in_production') setInProduction(row.data);
             if (row.key === 'shorts') setShorts(row.data);
             if (row.key === 'films') setFilms(row.data);
           });
@@ -95,6 +100,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setLatestVideo(prev => ({ ...prev, ...data }));
   };
 
+  const updateInProduction = (data: Partial<InProductionData>) => {
+    setInProduction(prev => ({ ...prev, ...data }));
+  };
+
   const updateShort = (id: string, data: Partial<Short>) => {
     setShorts(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   };
@@ -112,6 +121,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     const updates = [
       { key: 'latest_video', data: latestVideo },
+      { key: 'in_production', data: inProduction },
       { key: 'shorts', data: shorts },
       { key: 'films', data: films }
     ];
@@ -171,6 +181,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
       const updates = [
         { key: 'latest_video', data: LATEST_VIDEO },
+        { key: 'in_production', data: IN_PRODUCTION },
         { key: 'shorts', data: SHORTS },
         { key: 'films', data: FILMS }
       ];
@@ -181,6 +192,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <ContentContext.Provider value={{
       latestVideo,
+      inProduction,
       shorts,
       films,
       isAdminOpen,
@@ -189,6 +201,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       toggleAdmin,
       openAdmin,
       updateLatestVideo,
+      updateInProduction,
       updateShort,
       updateFilm,
       saveChanges,

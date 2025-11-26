@@ -1,8 +1,9 @@
 
-import { Film, Short, NavItem } from './types';
+import { Film, Short, NavItem, InProductionData } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Work', href: '#work' },
+  { label: 'In Production', href: '#in-production' },
   { label: 'Films', href: '#films' },
   { label: 'Shorts', href: '#shorts' },
   { label: 'About', href: '#about' },
@@ -17,6 +18,13 @@ export const LATEST_VIDEO = {
   description: "Clive Owen returns as The Driver in this action-packed short film featuring high-stakes driving and cinematic storytelling.",
   image: PLACEHOLDER_IMAGE, 
   videoId: "jfopjfSYLcM",
+};
+
+export const IN_PRODUCTION: InProductionData = {
+  title: "Neon Horizon",
+  description: "A cyberpunk noir exploring the intersection of memory and digital consciousness. Currently calling locations in Tokyo.",
+  status: "Pre-Production",
+  image: PLACEHOLDER_IMAGE,
 };
 
 export const SHORTS: Short[] = [

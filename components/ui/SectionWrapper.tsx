@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 
@@ -12,7 +13,11 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ children, classN
   const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
 
   return (
-    <section id={id} ref={ref} className={`relative w-full px-6 md:px-12 lg:px-24 py-24 md:py-32 overflow-hidden ${className}`}>
+    <section 
+        id={id} 
+        ref={ref} 
+        className={`relative w-full px-6 md:px-12 lg:px-24 py-24 md:py-32 overflow-hidden snap-start ${className}`}
+    >
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}

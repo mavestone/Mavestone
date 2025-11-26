@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface MagneticButtonProps {
   children: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   variant?: 'primary' | 'secondary' | 'glass';
   className?: string;
 }
@@ -29,7 +29,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
     setPosition({ x: 0, y: 0 });
   };
 
-  const baseStyles = "relative px-8 py-4 rounded-full font-medium text-sm tracking-wide transition-colors duration-300 flex items-center justify-center overflow-hidden group";
+  const baseStyles = "relative px-8 py-4 rounded-full font-medium text-sm tracking-wide transition-colors duration-300 flex items-center justify-center overflow-hidden group cursor-pointer";
   
   const variants = {
     primary: "bg-white text-black hover:bg-gray-200",

@@ -84,7 +84,7 @@ export const Navbar: React.FC = () => {
                     </button>
                   </div>
               ) : (
-                <MagneticButton variant="primary" className="!py-3 !px-6 text-xs cursor-pointer" onClick={(e) => handleScroll(e as any, '#contact')}>
+                <MagneticButton variant="primary" className="!py-3 !px-6 text-xs cursor-pointer" onClick={(e) => handleScroll(e, '#contact')}>
                     Start a Project
                 </MagneticButton>
               )}
@@ -131,7 +131,7 @@ export const Navbar: React.FC = () => {
                         Logout
                     </MagneticButton>
                 ) : (
-                    <MagneticButton variant="primary" onClick={(e) => handleScroll(e as any, '#contact')}>
+                    <MagneticButton variant="primary" onClick={(e) => handleScroll(e, '#contact')}>
                         Start a Project
                     </MagneticButton>
                 )}

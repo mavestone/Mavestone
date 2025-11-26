@@ -22,6 +22,13 @@ export interface LatestVideoData {
   videoId: string;
 }
 
+export interface InProductionData {
+  title: string;
+  description: string;
+  status: string;
+  image: string;
+}
+
 export interface NavItem {
   label: string;
   href: string;

@@ -1,7 +1,48 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useRef, useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { MagneticButton } from './ui/MagneticButton';
 import { Play } from 'lucide-react';
+
+// Star Component
+const Star: React.FC<{ mouseX: any; mouseY: any }> = ({ mouseX, mouseY }) => {
+    // Random initial positions and sizes
+    const randomTop = Math.random() * 100;
+    const randomLeft = Math.random() * 100;
+    const size = Math.random() * 2 + 1;
+    const duration = Math.random() * 2 + 1.5;
+    const delay = Math.random() * 2;
+    
+    // Parallax factor (some move faster than others)
+    const factor = Math.random() * 30 + 10; 
+    
+    const x = useTransform(mouseX, [0, window.innerWidth], [factor, -factor]);
+    const y = useTransform(mouseY, [0, window.innerHeight], [factor, -factor]);
+
+    return (
+        <motion.div
+            style={{ 
+                top: `${randomTop}%`, 
+                left: `${randomLeft}%`,
+                x,
+                y
+            }}
+            className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ 
+                opacity: [0.2, 0.8, 0.2], 
+                scale: [1, 1.2, 1] 
+            }}
+            transition={{
+                duration: duration,
+                repeat: Infinity,
+                delay: delay,
+                ease: "easeInOut"
+            }}
+        >
+            <div style={{ width: size, height: size }} />
+        </motion.div>
+    );
+};
 
 export const Hero: React.FC = () => {
   const ref = useRef(null);
@@ -10,20 +51,42 @@ export const Hero: React.FC = () => {
     offset: ["start start", "end start"],
   });
 
+  // Mouse tracking for star parallax
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+  const smoothY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+  };
+
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
+  // Generate a fixed set of stars
+  const [stars, setStars] = useState<number[]>([]);
+  useEffect(() => {
+    setStars(Array.from({ length: 40 }, (_, i) => i));
+  }, []);
+
   return (
-    <div ref={ref} className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-      {/* Background with slight parallax */}
+    <div 
+        ref={ref} 
+        className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black"
+        onMouseMove={handleMouseMove}
+    >
+      {/* Stars Background */}
       <motion.div 
         style={{ y, opacity }}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800 via-black to-black opacity-60"></div>
-        <div className="absolute inset-0 bg-black/40"></div>
-        {/* Abstract animated orb */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute inset-0 w-full h-full max-w-6xl mx-auto opacity-70">
+            {stars.map((i) => (
+                <Star key={i} mouseX={smoothX} mouseY={smoothY} />
+            ))}
+        </div>
       </motion.div>
 
       <div className="relative z-10 container px-6 mx-auto flex flex-col items-center text-center">
@@ -52,7 +115,7 @@ export const Hero: React.FC = () => {
             <MagneticButton variant="primary">
               View Work
             </MagneticButton>
-            <MagneticButton variant="glass" onClick={() => console.log('Show reel')}>
+            <MagneticButton variant="glass" onClick={(e) => { e.preventDefault(); console.log('Show reel')}}>
                 <Play size={16} fill="currentColor" />
                 <span className="ml-1">Watch Reel</span>
             </MagneticButton>
