@@ -27,6 +27,11 @@ export interface NavItem {
   href: string;
 }
 
+export interface SiteContent {
+  key: string;
+  data: any;
+}
+
 // Global types for YouTube API
 declare global {
   interface Window {

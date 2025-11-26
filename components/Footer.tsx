@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useContent } from '../context/ContentContext';
 import { Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Custom Icons for X and TikTok
 const XIcon = ({ className }: { className?: string }) => (
@@ -17,7 +17,6 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 );
 
 export const Footer: React.FC = () => {
-  const { toggleAdmin } = useContent();
 
   const socialLinks = [
     { href: "https://www.instagram.com/mavestonemedia", icon: <Instagram size={20} />, label: "Instagram" },
@@ -51,12 +50,12 @@ export const Footer: React.FC = () => {
             <p className="text-gray-600 text-xs">
                 © {new Date().getFullYear()} Mavestone Studio. All rights reserved.
             </p>
-            <button 
-                onClick={toggleAdmin}
+            <Link 
+                to="/login"
                 className="text-[10px] text-gray-800 hover:text-gray-600 transition-colors uppercase tracking-widest cursor-pointer"
             >
                 Admin Login
-            </button>
+            </Link>
         </div>
       </div>
     </footer>

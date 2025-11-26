@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../constants';
 import { MagneticButton } from './ui/MagneticButton';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Lock } from 'lucide-react';
+import { useContent } from '../context/ContentContext';
+import { useNavigate } from 'react-router-dom';
 
 export const Navbar: React.FC = () => {
   const [hidden, setHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { scrollY } = useScroll();
+  const { isAuthenticated, logout, openAdmin } = useContent();
+  const navigate = useNavigate();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
@@ -26,7 +30,6 @@ export const Navbar: React.FC = () => {
     e.preventDefault();
     const element = document.querySelector(href);
     if (element) {
-        // Offset for the fixed header (approx 100px)
         const offset = 100;
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = element.getBoundingClientRect().top;
@@ -37,7 +40,6 @@ export const Navbar: React.FC = () => {
             top: offsetPosition,
             behavior: 'smooth'
         });
-        
         setIsMobileMenuOpen(false);
     }
   };
@@ -73,9 +75,20 @@ export const Navbar: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <div className="hidden md:block">
-              <MagneticButton variant="primary" className="!py-3 !px-6 text-xs cursor-pointer">
-                Start a Project
-              </MagneticButton>
+              {isAuthenticated ? (
+                  <div className="flex items-center gap-2">
+                    <button onClick={openAdmin} className="text-xs font-bold text-white bg-white/20 px-3 py-2 rounded-full hover:bg-white/30 transition-colors">
+                        Admin
+                    </button>
+                    <button onClick={() => logout()} className="text-xs text-red-400 px-2 py-2 hover:text-white transition-colors">
+                        Logout
+                    </button>
+                  </div>
+              ) : (
+                <MagneticButton variant="primary" className="!py-3 !px-6 text-xs cursor-pointer">
+                    Start a Project
+                </MagneticButton>
+              )}
             </div>
             <button 
                 onClick={() => setIsMobileMenuOpen(true)}
@@ -114,9 +127,15 @@ export const Navbar: React.FC = () => {
             </a>
             ))}
               <div className="mt-8">
-                <MagneticButton variant="primary" onClick={() => setIsMobileMenuOpen(false)}>
-                  Start a Project
-                </MagneticButton>
+                {isAuthenticated ? (
+                    <MagneticButton variant="secondary" onClick={() => { logout(); setIsMobileMenuOpen(false); }}>
+                        Logout
+                    </MagneticButton>
+                ) : (
+                    <MagneticButton variant="primary" onClick={() => setIsMobileMenuOpen(false)}>
+                        Start a Project
+                    </MagneticButton>
+                )}
               </div>
         </div>
       </motion.div>

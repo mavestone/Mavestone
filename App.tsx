@@ -1,24 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { ContentProvider } from './context/ContentContext';
-import { AdminPanel } from './components/AdminPanel';
-import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
-import { LatestVideo } from './components/LatestVideo';
-import { Shorts } from './components/Shorts';
-import { Films } from './components/Films';
-import { Collaboration } from './components/Collaboration';
-import { Contact } from './components/Contact';
-import { Footer } from './components/Footer';
+import { Home } from './pages/Home';
+import { Login } from './pages/Login';
+import { Admin } from './pages/Admin';
 
 const AppContent: React.FC = () => {
   // 60fps Physics based cursor
-  // Initialize off-screen to prevent flash
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
   
-  // Smooth spring configuration
   const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
@@ -27,13 +20,11 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Direct updates to motion values for 60fps performance
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
       
       const target = e.target as HTMLElement;
       
-      // Extended check for interactive elements
       const isClickable = 
         target.tagName === 'BUTTON' || 
         target.tagName === 'A' || 
@@ -65,7 +56,6 @@ const AppContent: React.FC = () => {
                 translateX: "-50%",
                 translateY: "-50%",
                 backgroundColor: "white",
-                // Difference blend mode inverts colors: White cursor on black bg -> white. White cursor on white text -> black.
                 mixBlendMode: "difference", 
             }}
             animate={{
@@ -80,19 +70,11 @@ const AppContent: React.FC = () => {
             }}
         />
 
-        <Navbar />
-        
-        <main>
-            <Hero />
-            <LatestVideo />
-            <Shorts />
-            <Films />
-            <Collaboration />
-            <Contact />
-        </main>
-        
-        <Footer />
-        <AdminPanel />
+        <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<Admin />} />
+        </Routes>
     </div>
   );
 };

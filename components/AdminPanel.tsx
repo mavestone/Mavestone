@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, RefreshCw, AlertCircle, Camera, Loader2 } from 'lucide-react';
+import { X, Save, RefreshCw, AlertCircle, Camera, Loader2, LogOut, Database } from 'lucide-react';
 import { MagneticButton } from './ui/MagneticButton';
 
 export const AdminPanel: React.FC = () => {
@@ -12,56 +12,62 @@ export const AdminPanel: React.FC = () => {
     updateLatestVideo, 
     shorts, 
     updateShort,
-    resetContent 
+    saveChanges,
+    uploadImage,
+    logout,
+    seedDatabase,
+    isAuthenticated
   } = useContent();
 
-  const [processingImage, setProcessingImage] = React.useState(false);
+  const [processingImage, setProcessingImage] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Helper to extract ID from various YouTube URL formats
   const extractYouTubeId = (url: string) => {
     if (!url) return '';
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?v=)|(shorts\/))([^#&?]*).*/;
     const match = url.match(regExp);
-    // Safer check to prevent crashes if match is null or structure is unexpected
     const id = match?.[8]?.length === 11 ? match[8] : url;
     return id.trim();
   };
 
-  // Improved Image Uploader: Compresses images to < 800px width to fit in LocalStorage
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setProcessingImage(true);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width;
-          width = MAX_WIDTH;
+    try {
+        const publicUrl = await uploadImage(file);
+        if (publicUrl) {
+            callback(publicUrl);
+        } else {
+            alert("Upload failed. Ensure you are logged in.");
         }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        // Compress to JPEG 0.8 quality
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        callback(dataUrl);
+    } catch (err) {
+        console.error(err);
+        alert("Upload failed");
+    } finally {
         setProcessingImage(false);
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    }
   };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError('');
+    try {
+        await saveChanges();
+        alert("Changes saved to cloud successfully!");
+        toggleAdmin();
+    } catch (err) {
+        setSaveError("Failed to save. Check internet connection.");
+    } finally {
+        setIsSaving(false);
+    }
+  };
+
+  // Only show if authorized
+  if (!isAuthenticated && isAdminOpen) return null;
 
   return (
     <AnimatePresence>
@@ -92,13 +98,11 @@ export const AdminPanel: React.FC = () => {
                 </h2>
                 <div className="flex items-center gap-2">
                     <button 
-                        onClick={() => {
-                            if(window.confirm('Reset all content to default?')) resetContent();
-                        }}
-                        className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                        title="Reset to Defaults"
+                        onClick={logout}
+                        className="p-2 rounded-full hover:bg-white/10 text-red-400 hover:text-red-300 transition-colors"
+                        title="Logout"
                     >
-                        <RefreshCw size={18} />
+                        <LogOut size={18} />
                     </button>
                     <button 
                         onClick={toggleAdmin}
@@ -113,8 +117,8 @@ export const AdminPanel: React.FC = () => {
               <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg flex gap-3">
                 <AlertCircle className="text-yellow-500 w-5 h-5 flex-shrink-0" />
                 <div className="text-xs text-yellow-200/80">
-                    <strong className="text-yellow-500 block mb-1">Seeing "Error 153" or "Unavailable"?</strong>
-                    This means the video owner has disabled embedding. Please use videos that allow playback on 3rd party sites.
+                    <strong className="text-yellow-500 block mb-1">Seeing "Error 153"?</strong>
+                    Use videos that allow embedding (no movie trailers or restricted music videos).
                 </div>
               </div>
 
@@ -140,7 +144,6 @@ export const AdminPanel: React.FC = () => {
                       onChange={(e) => updateLatestVideo({ videoId: extractYouTubeId(e.target.value) })}
                       className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white font-mono focus:outline-none focus:border-white/30"
                     />
-                    <p className="text-[10px] text-gray-600 mt-1">Accepts: youtube.com/watch, youtu.be, or ID</p>
                   </div>
                    <div>
                     <label className="block text-xs text-gray-500 mb-1">Thumbnail Image</label>
@@ -199,7 +202,6 @@ export const AdminPanel: React.FC = () => {
                                     <input 
                                         type="text" 
                                         value={short.videoId}
-                                        placeholder="Paste link..."
                                         onChange={(e) => updateShort(short.id, { videoId: extractYouTubeId(e.target.value) })}
                                         className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm font-mono text-white focus:outline-none focus:border-white/30"
                                     />
@@ -230,14 +232,21 @@ export const AdminPanel: React.FC = () => {
                 </div>
               </section>
 
-              <div className="pt-4 pb-12">
-                <MagneticButton variant="primary" className="w-full" onClick={toggleAdmin}>
-                    <Save size={16} />
-                    <span>Save Changes</span>
+              <div className="pt-4 pb-12 space-y-3">
+                {saveError && <p className="text-red-400 text-xs text-center">{saveError}</p>}
+                
+                <MagneticButton variant="primary" className="w-full" onClick={handleSave}>
+                    {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={16} />}
+                    <span>{isSaving ? 'Saving to Cloud...' : 'Save Changes'}</span>
                 </MagneticButton>
-                <p className="text-center text-xs text-gray-600 mt-4">
-                    Changes are saved locally to your browser.
-                </p>
+
+                <button 
+                    onClick={seedDatabase}
+                    className="w-full py-3 flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-white transition-colors border border-white/5 rounded-full hover:bg-white/5"
+                >
+                    <Database size={12} />
+                    <span>Populate Default Data (Seed DB)</span>
+                </button>
               </div>
             </div>
           </motion.div>
