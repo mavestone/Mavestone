@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, AlertCircle, Camera, Loader2, LogOut, Database } from 'lucide-react';
+import { X, Save, AlertCircle, Camera, Loader2, LogOut, Database, Eye, EyeOff } from 'lucide-react';
 import { MagneticButton } from './ui/MagneticButton';
 import { supabase } from '../lib/supabase';
 
@@ -264,7 +264,14 @@ export const AdminPanel: React.FC = () => {
                         <div key={short.id} className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3">
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-xs font-mono text-gray-500">#{idx + 1}</span>
-                                <span className="text-xs text-green-400">{short.views} views</span>
+                                {/* Toggle View Visibility */}
+                                <button 
+                                    onClick={() => updateShort(short.id, { showViews: !short.showViews })}
+                                    className={`flex items-center gap-1.5 text-[10px] px-2 py-1 rounded border transition-colors ${short.showViews !== false ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-gray-700 bg-gray-800 text-gray-400'}`}
+                                >
+                                    {short.showViews !== false ? <Eye size={10} /> : <EyeOff size={10} />}
+                                    {short.showViews !== false ? 'Views On' : 'Views Off'}
+                                </button>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -277,14 +284,24 @@ export const AdminPanel: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] text-gray-500 mb-1">YouTube ID</label>
+                                    <label className="block text-[10px] text-gray-500 mb-1">Views Count</label>
                                     <input 
                                         type="text" 
-                                        value={short.videoId}
-                                        onChange={(e) => updateShort(short.id, { videoId: extractYouTubeId(e.target.value) })}
-                                        className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm font-mono text-white focus:outline-none focus:border-white/30"
+                                        value={short.views}
+                                        onChange={(e) => updateShort(short.id, { views: e.target.value })}
+                                        className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-white/30"
+                                        placeholder="e.g. 1.2M"
                                     />
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] text-gray-500 mb-1">YouTube ID</label>
+                                <input 
+                                    type="text" 
+                                    value={short.videoId}
+                                    onChange={(e) => updateShort(short.id, { videoId: extractYouTubeId(e.target.value) })}
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm font-mono text-white focus:outline-none focus:border-white/30"
+                                />
                             </div>
                              <div>
                                 <label className="block text-[10px] text-gray-500 mb-1">Thumbnail</label>

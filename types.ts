@@ -13,6 +13,7 @@ export interface Short {
   views: string;
   image: string;
   videoId: string;
+  showViews?: boolean;
 }
 
 export interface LatestVideoData {

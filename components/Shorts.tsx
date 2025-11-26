@@ -142,9 +142,11 @@ export const Shorts: React.FC = () => {
                                 <h3 className="text-lg font-bold text-white leading-tight">{short.title}</h3>
                                 <p className="text-xs text-gray-400 mt-1">Short Film</p>
                             </div>
-                            <span className="text-xs font-mono text-white/60 bg-white/10 px-2 py-1 rounded-md backdrop-blur-sm">
-                                {short.views}
-                            </span>
+                            {(short.showViews ?? true) && (
+                                <span className="text-xs font-mono text-white/60 bg-white/10 px-2 py-1 rounded-md backdrop-blur-sm">
+                                    {short.views}
+                                </span>
+                            )}
                         </div>
                     </div>
                  </div>

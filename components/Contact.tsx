@@ -20,8 +20,8 @@ export const Contact: React.FC = () => {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div className="flex flex-col justify-between">
                 <div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Let's build something legendary.</h2>
-                    <p className="text-gray-400 mb-8">Tell us what you’re building. We’ll help bring it to life.</p>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Let's create something legendary.</h2>
+                    <p className="text-gray-400 mb-8">Tell us your creative vision, lets bring it to life!</p>
                     
                     <div className="flex gap-4 mb-8">
                         <a 
@@ -47,7 +47,7 @@ export const Contact: React.FC = () => {
                     <div className="space-y-6">
                         <div>
                             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Email</h4>
-                            <p className="text-gray-400">hello@mavestone.studio</p>
+                            <a href="mailto:hello@mavestone.com" className="text-gray-400 hover:text-white transition-colors">hello@mavestone.com</a>
                         </div>
                         <div>
                             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Studio</h4>

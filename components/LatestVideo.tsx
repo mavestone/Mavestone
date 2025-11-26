@@ -4,6 +4,7 @@ import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
 import { Play } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export const LatestVideo: React.FC = () => {
   const { latestVideo } = useContent();
@@ -87,14 +88,14 @@ export const LatestVideo: React.FC = () => {
   return (
     <SectionWrapper id="work">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 text-left">
-        <div>
+        <div className="items-start text-left">
            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-2">Latest Film</h2>
            <p className="text-gray-400">A glimpse into our newest story.</p>
         </div>
         <div className="hidden md:block">
-            <button className="text-sm uppercase tracking-widest text-white/60 hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">
+            <Link to="/projects" className="text-sm uppercase tracking-widest text-white/60 hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">
                 View All Projects
-            </button>
+            </Link>
         </div>
       </div>
 

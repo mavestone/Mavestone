@@ -5,12 +5,15 @@ import { NAV_ITEMS } from '../constants';
 import { MagneticButton } from './ui/MagneticButton';
 import { Menu, X } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const Navbar: React.FC = () => {
   const [hidden, setHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { scrollY } = useScroll();
   const { isAuthenticated, logout, openAdmin } = useContent();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
@@ -27,19 +30,30 @@ export const Navbar: React.FC = () => {
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>, href: string) => {
     e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-        const offset = 100;
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = element.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
+    
+    const scrollToElement = () => {
+        const element = document.querySelector(href);
+        if (element) {
+            const offset = 100;
+            const bodyRect = document.body.getBoundingClientRect().top;
+            const elementRect = element.getBoundingClientRect().top;
+            const elementPosition = elementRect - bodyRect;
+            const offsetPosition = elementPosition - offset;
 
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
-        setIsMobileMenuOpen(false);
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+            setIsMobileMenuOpen(false);
+        }
+    };
+
+    if (location.pathname !== '/') {
+        navigate('/');
+        // Wait for navigation to complete before scrolling
+        setTimeout(scrollToElement, 100);
+    } else {
+        scrollToElement();
     }
   };
 
@@ -58,7 +72,7 @@ export const Navbar: React.FC = () => {
         className="fixed top-0 left-0 right-0 z-[60] flex justify-center pt-6 px-6 pointer-events-none"
       >
         <div className="flex items-center justify-between w-full max-w-6xl p-2 pl-6 pr-2 bg-charcoal/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl pointer-events-auto">
-          <a href="#" className="text-xl font-bold tracking-tighter text-white z-10 cursor-pointer" onClick={(e) => { e.preventDefault(); window.scrollTo({top: 0, behavior: 'smooth'}); }}>
+          <a href="#" className="text-xl font-bold tracking-tighter text-white z-10 cursor-pointer" onClick={(e) => { e.preventDefault(); if(location.pathname !== '/') { navigate('/'); window.scrollTo({top:0}); } else { window.scrollTo({top: 0, behavior: 'smooth'}); } }}>
             Mavestone<span className="text-white/40">.</span>
           </a>
 

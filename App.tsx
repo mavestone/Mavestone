@@ -6,6 +6,7 @@ import { ContentProvider } from './context/ContentContext';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
+import { Projects } from './pages/Projects';
 
 const AppContent: React.FC = () => {
   // 60fps Physics based cursor
@@ -74,6 +75,7 @@ const AppContent: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/projects" element={<Projects />} />
         </Routes>
     </div>
   );

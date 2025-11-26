@@ -34,28 +34,32 @@ export const SHORTS: Short[] = [
     title: "Sintel", 
     views: "5.4M", 
     image: PLACEHOLDER_IMAGE, 
-    videoId: "eRsGyueVLvQ" 
+    videoId: "eRsGyueVLvQ",
+    showViews: true
   },
   { 
     id: '2', 
     title: "Coffee Run", 
     views: "850K", 
     image: PLACEHOLDER_IMAGE, 
-    videoId: "YeUX1l56l7k" 
+    videoId: "YeUX1l56l7k",
+    showViews: true
   },
   { 
     id: '3', 
     title: "Spring", 
     views: "2.1M", 
     image: PLACEHOLDER_IMAGE, 
-    videoId: "WhWc3b3KhnY" 
+    videoId: "WhWc3b3KhnY",
+    showViews: true
   },
   { 
     id: '4', 
     title: "Cosmos Laundromat", 
     views: "1.2M", 
     image: PLACEHOLDER_IMAGE, 
-    videoId: "Y-rmzh0PI3c" 
+    videoId: "Y-rmzh0PI3c",
+    showViews: true
   },
 ];
 
