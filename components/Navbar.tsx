@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../constants';
 import { MagneticButton } from './ui/MagneticButton';
-import { Menu, X, Lock } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
-import { useNavigate } from 'react-router-dom';
 
 export const Navbar: React.FC = () => {
   const [hidden, setHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { scrollY } = useScroll();
   const { isAuthenticated, logout, openAdmin } = useContent();
-  const navigate = useNavigate();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;

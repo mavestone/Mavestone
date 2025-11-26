@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
-import { MagneticButton } from '../components/ui/MagneticButton';
 import { Loader2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
