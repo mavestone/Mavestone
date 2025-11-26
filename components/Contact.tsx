@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { MagneticButton } from './ui/MagneticButton';
-import { Send, Linkedin, Phone } from 'lucide-react';
+import { Send, Linkedin } from 'lucide-react';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>

@@ -43,6 +43,9 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  // Filter out "In Production" from the top navigation
+  const visibleNavItems = NAV_ITEMS.filter(item => item.label !== 'In Production');
+
   return (
     <>
       <motion.nav
@@ -60,7 +63,7 @@ export const Navbar: React.FC = () => {
           </a>
 
           <div className="hidden md:flex items-center gap-8">
-            {NAV_ITEMS.map((item) => (
+            {visibleNavItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
@@ -115,7 +118,7 @@ export const Navbar: React.FC = () => {
             <X size={24} />
         </button>
         <div className="flex flex-col gap-8 text-center">
-            {NAV_ITEMS.map((item) => (
+            {visibleNavItems.map((item) => (
             <a
                 key={item.label}
                 href={item.href}
