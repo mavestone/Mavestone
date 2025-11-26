@@ -4,10 +4,10 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { useContent } from '../context/ContentContext';
 import { motion } from 'framer-motion';
-import { Play, Info, ArrowRight } from 'lucide-react';
+import { Play, Info, ArrowRight, Clapperboard } from 'lucide-react';
 
 export const Projects: React.FC = () => {
-  const { films, shorts, latestVideo } = useContent();
+  const { films, shorts, latestVideo, inProduction } = useContent();
   
   // Use the first film as the featured hero
   const featured = films[0] || { 
@@ -116,6 +116,43 @@ export const Projects: React.FC = () => {
                     </div>
                 </div>
              </motion.div>
+        </div>
+
+        {/* Coming Soon Section */}
+        <div className="space-y-6">
+            <h3 className="text-2xl font-light tracking-wide text-white/90 px-2 flex items-center gap-3">
+                <Clapperboard size={20} className="text-gray-400" />
+                Coming Soon
+            </h3>
+            
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl isolate"
+            >
+                 <img 
+                    src={inProduction.image} 
+                    alt={inProduction.title} 
+                    className="w-full h-full object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-1000" 
+                />
+                <div className="absolute inset-0 bg-black/50" />
+                
+                {/* Center Content */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="glass-panel p-10 md:p-16 rounded-[2rem] border border-white/10 backdrop-blur-xl text-center max-w-3xl mx-4">
+                        <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                            {inProduction.status}
+                        </div>
+                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight text-glow">
+                            {inProduction.title}
+                        </h2>
+                        <p className="text-lg md:text-xl text-gray-300 font-light leading-relaxed">
+                            {inProduction.description}
+                        </p>
+                    </div>
+                </div>
+            </motion.div>
         </div>
 
         {/* Short Stories (Vertical Cards) */}

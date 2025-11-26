@@ -10,7 +10,6 @@ import { Contact } from '../components/Contact';
 import { Footer } from '../components/Footer';
 import { AdminPanel } from '../components/AdminPanel';
 import { ScrollIndicator } from '../components/ui/ScrollIndicator';
-import { InProduction } from '../components/InProduction';
 
 export const Home: React.FC = () => {
   return (
@@ -19,7 +18,6 @@ export const Home: React.FC = () => {
         <Navbar />
         <main>
             <Hero />
-            <InProduction />
             <LatestVideo />
             <Shorts />
             <Films />
