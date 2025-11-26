@@ -22,6 +22,26 @@ export const Navbar: React.FC = () => {
     }
   });
 
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const element = document.querySelector(href);
+    if (element) {
+        // Offset for the fixed header (approx 100px)
+        const offset = 100;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+        
+        setIsMobileMenuOpen(false);
+    }
+  };
+
   return (
     <>
       <motion.nav
@@ -34,7 +54,7 @@ export const Navbar: React.FC = () => {
         className="fixed top-0 left-0 right-0 z-[60] flex justify-center pt-6 px-6 pointer-events-none"
       >
         <div className="flex items-center justify-between w-full max-w-6xl p-2 pl-6 pr-2 bg-charcoal/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl pointer-events-auto">
-          <a href="#" className="text-xl font-bold tracking-tighter text-white z-10 cursor-pointer">
+          <a href="#" className="text-xl font-bold tracking-tighter text-white z-10 cursor-pointer" onClick={(e) => { e.preventDefault(); window.scrollTo({top: 0, behavior: 'smooth'}); }}>
             Mavestone<span className="text-white/40">.</span>
           </a>
 
@@ -43,6 +63,7 @@ export const Navbar: React.FC = () => {
               <a
                 key={item.label}
                 href={item.href}
+                onClick={(e) => handleScroll(e, item.href)}
                 className="text-sm text-gray-400 hover:text-white transition-colors duration-300 cursor-pointer"
               >
                 {item.label}
@@ -86,7 +107,7 @@ export const Navbar: React.FC = () => {
             <a
                 key={item.label}
                 href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => handleScroll(e, item.href)}
                 className="text-4xl font-light text-white hover:text-gray-400 transition-colors cursor-pointer"
             >
                 {item.label}

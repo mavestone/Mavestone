@@ -9,7 +9,7 @@ export const Films: React.FC = () => {
   const { films } = useContent();
 
   return (
-    <SectionWrapper className="bg-charcoal">
+    <SectionWrapper id="films" className="bg-charcoal">
       <div className="flex flex-col mb-16">
         <h2 className="text-4xl md:text-6xl font-bold tracking-tighter text-white mb-6">Selected Works</h2>
         <div className="h-[1px] w-full bg-white/10"></div>
