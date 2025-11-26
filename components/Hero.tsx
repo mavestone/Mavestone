@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { MagneticButton } from './ui/MagneticButton';
@@ -73,8 +74,9 @@ export const Hero: React.FC = () => {
 
   return (
     <div 
+        id="hero"
         ref={ref} 
-        className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black"
+        className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black snap-start"
         onMouseMove={handleMouseMove}
     >
       {/* Stars Background */}

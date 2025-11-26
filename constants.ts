@@ -2,10 +2,11 @@
 import { Film, Short, NavItem, InProductionData } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Work', href: '#work' },
+  { label: 'Home', href: '#hero' },
   { label: 'In Production', href: '#in-production' },
-  { label: 'Films', href: '#films' },
+  { label: 'Work', href: '#work' },
   { label: 'Shorts', href: '#shorts' },
+  { label: 'Films', href: '#films' },
   { label: 'About', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ];
