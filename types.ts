@@ -40,6 +40,15 @@ export interface SiteContent {
   data: any;
 }
 
+export interface Message {
+  id: string;
+  created_at: string;
+  name: string;
+  email: string;
+  message: string;
+  read: boolean;
+}
+
 // Global types for YouTube API
 declare global {
   interface Window {

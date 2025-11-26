@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { MagneticButton } from './ui/MagneticButton';
-import { Send, Linkedin } from 'lucide-react';
+import { Send, Linkedin, CheckCircle, Loader2 } from 'lucide-react';
+import { useContent } from '../context/ContentContext';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -11,6 +12,34 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 export const Contact: React.FC = () => {
+  const { sendMessage } = useContent();
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) {
+        setError("Please fill in all fields.");
+        return;
+    }
+    
+    setError('');
+    setLoading(true);
+
+    const { success } = await sendMessage(formData.name, formData.email, formData.message);
+
+    if (success) {
+        setSuccess(true);
+        setFormData({ name: '', email: '', message: '' });
+        setTimeout(() => setSuccess(false), 5000); // Reset success after 5s
+    } else {
+        setError("Failed to send message. Please try again.");
+    }
+    setLoading(false);
+  };
+
   return (
     <SectionWrapper id="contact" className="mb-24">
       <div className="w-full max-w-5xl mx-auto bg-soft-black/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 md:p-16 overflow-hidden relative">
@@ -49,47 +78,63 @@ export const Contact: React.FC = () => {
                             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Email</h4>
                             <a href="mailto:hello@mavestone.com" className="text-gray-400 hover:text-white transition-colors">hello@mavestone.com</a>
                         </div>
-                        <div>
-                            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Studio</h4>
-                            <p className="text-gray-400">Los Angeles, CA</p>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Name</label>
-                    <input 
-                        type="text" 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                        placeholder="John Doe"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Email</label>
-                    <input 
-                        type="email" 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                        placeholder="john@example.com"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Message</label>
-                    <textarea 
-                        rows={4}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all resize-none"
-                        placeholder="Tell us about your project..."
-                    ></textarea>
-                </div>
+            <div className="relative">
+                {success ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-green-500/30 text-center p-8 animate-in fade-in duration-500">
+                        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                            <CheckCircle size={32} className="text-green-400" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Message Sent!</h3>
+                        <p className="text-gray-300">Thanks for reaching out. We'll be in touch shortly.</p>
+                    </div>
+                ) : (
+                    <form className="space-y-6" onSubmit={handleSubmit}>
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Name</label>
+                            <input 
+                                type="text" 
+                                value={formData.name}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
+                                placeholder="John Doe"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Email</label>
+                            <input 
+                                type="email" 
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
+                                placeholder="john@example.com"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Message</label>
+                            <textarea 
+                                rows={4}
+                                value={formData.message}
+                                onChange={(e) => setFormData({...formData, message: e.target.value})}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all resize-none"
+                                placeholder="Tell us about your project..."
+                            ></textarea>
+                        </div>
+                        
+                        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
-                <div className="pt-4">
-                    <MagneticButton variant="primary" className="w-full">
-                        <span>Send Project</span>
-                        <Send size={16} />
-                    </MagneticButton>
-                </div>
-            </form>
+                        <div className="pt-4">
+                            <MagneticButton variant="primary" className="w-full">
+                                {loading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
+                                <span>{loading ? 'Sending...' : 'Send Project'}</span>
+                            </MagneticButton>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
       </div>
     </SectionWrapper>

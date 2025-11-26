@@ -2,13 +2,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData } from '../types';
+import { Film, Short, LatestVideoData, InProductionData, Message } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
   inProduction: InProductionData;
   shorts: Short[];
   films: Film[];
+  messages: Message[];
   isAdminOpen: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -23,6 +24,9 @@ interface ContentContextType {
   login: (email: string, pass: string) => Promise<{ error: any }>;
   logout: () => Promise<void>;
   seedDatabase: () => Promise<void>;
+  sendMessage: (name: string, email: string, message: string) => Promise<{ success: boolean; error?: any }>;
+  fetchMessages: () => Promise<void>;
+  markMessageRead: (id: string) => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -37,6 +41,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   // 1. Check Auth & Fetch Data on Mount
   useEffect(() => {
@@ -189,12 +194,76 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       window.location.reload();
   };
 
+  const sendMessage = async (name: string, email: string, message: string) => {
+    if (!supabase) return { success: false, error: 'Database not connected' };
+
+    try {
+        // 1. Save to Supabase DB
+        const { error } = await supabase.from('messages').insert([
+            { name, email, message }
+        ]);
+        
+        if (error) throw error;
+
+        // 2. Optional: Call Resend API (Client-side calls are often blocked by CORS, but we can try)
+        // Ideally this should be done via a Supabase Edge Function
+        try {
+            await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer re_217mCENA_87RgBqVHKQthV4BQ7HQjCLud`
+                },
+                body: JSON.stringify({
+                    from: 'onboarding@resend.dev',
+                    to: 'hello@mavestone.com',
+                    subject: `New Lead: ${name}`,
+                    html: `<p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Message:</strong><br/>${message}</p>`
+                })
+            });
+        } catch (resendError) {
+            console.warn("Resend API call failed (expected on client-side due to CORS). Message saved to DB.", resendError);
+        }
+
+        return { success: true };
+    } catch (e) {
+        console.error("Error sending message:", e);
+        return { success: false, error: e };
+    }
+  };
+
+  const fetchMessages = async () => {
+      if (!supabase || !isAuthenticated) return;
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (!error && data) {
+          setMessages(data);
+      }
+  };
+
+  const markMessageRead = async (id: string) => {
+      if (!supabase || !isAuthenticated) return;
+      
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('id', id);
+
+      if (!error) {
+          setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+      }
+  };
+
   return (
     <ContentContext.Provider value={{
       latestVideo,
       inProduction,
       shorts,
       films,
+      messages,
       isAdminOpen,
       isAuthenticated,
       isLoading,
@@ -208,7 +277,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       uploadImage,
       login,
       logout,
-      seedDatabase
+      seedDatabase,
+      sendMessage,
+      fetchMessages,
+      markMessageRead
     }}>
       {children}
     </ContentContext.Provider>

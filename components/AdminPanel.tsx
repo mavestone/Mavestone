@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, AlertCircle, Camera, Loader2, LogOut, Database, Eye, EyeOff, Layout, Clapperboard, Settings } from 'lucide-react';
+import { X, Save, AlertCircle, Camera, Loader2, LogOut, Database, Eye, EyeOff, Layout, Clapperboard, Settings, Mail, RefreshCcw } from 'lucide-react';
 import { MagneticButton } from './ui/MagneticButton';
 import { supabase } from '../lib/supabase';
 
@@ -20,13 +20,23 @@ export const AdminPanel: React.FC = () => {
     uploadImage,
     logout,
     seedDatabase,
-    isAuthenticated
+    isAuthenticated,
+    messages,
+    fetchMessages,
+    markMessageRead
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'settings'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'messages' | 'settings'>('home');
   const [processingImage, setProcessingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // Fetch messages when tab is opened
+  useEffect(() => {
+      if (activeTab === 'messages' && isAuthenticated) {
+          fetchMessages();
+      }
+  }, [activeTab, isAuthenticated]);
 
   // Helper to extract ID from various YouTube URL formats
   const extractYouTubeId = (url: string) => {
@@ -117,22 +127,28 @@ export const AdminPanel: React.FC = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-white/5">
+            <div className="flex border-b border-white/5 overflow-x-auto">
                 <button 
                     onClick={() => setActiveTab('home')}
-                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 ${activeTab === 'home' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-4 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'home' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
                 >
                     <Layout size={14} /> Home
                 </button>
                 <button 
                     onClick={() => setActiveTab('projects')}
-                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 ${activeTab === 'projects' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-4 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'projects' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
                 >
                     <Clapperboard size={14} /> Projects
                 </button>
                 <button 
+                    onClick={() => setActiveTab('messages')}
+                    className={`flex-1 py-4 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'messages' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
+                >
+                    <Mail size={14} /> Inbox
+                </button>
+                <button 
                     onClick={() => setActiveTab('settings')}
-                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-4 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1 md:gap-2 ${activeTab === 'settings' ? 'bg-white/5 text-white border-b-2 border-white' : 'text-gray-500 hover:text-gray-300'}`}
                 >
                     <Settings size={14} /> Settings
                 </button>
@@ -341,6 +357,47 @@ export const AdminPanel: React.FC = () => {
                 </div>
               )}
 
+              {/* MESSAGES TAB */}
+              {activeTab === 'messages' && (
+                  <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-green-400">Inbox</h3>
+                        <button onClick={fetchMessages} className="text-xs text-gray-500 hover:text-white flex items-center gap-1">
+                            <RefreshCcw size={12} /> Refresh
+                        </button>
+                      </div>
+
+                      {messages.length === 0 ? (
+                          <div className="text-center py-12 text-gray-500 text-sm">No messages yet.</div>
+                      ) : (
+                          <div className="space-y-3">
+                              {messages.map((msg) => (
+                                  <div 
+                                    key={msg.id} 
+                                    className={`p-4 rounded-xl border transition-colors ${msg.read ? 'bg-white/5 border-white/5 opacity-70' : 'bg-white/10 border-white/20'}`}
+                                  >
+                                      <div className="flex justify-between items-start mb-2">
+                                          <h4 className="font-bold text-white text-sm">{msg.name}</h4>
+                                          <span className="text-[10px] text-gray-400">{new Date(msg.created_at).toLocaleDateString()}</span>
+                                      </div>
+                                      <div className="text-xs text-gray-400 mb-2">{msg.email}</div>
+                                      <p className="text-sm text-gray-300 bg-black/30 p-2 rounded-lg mb-2">{msg.message}</p>
+                                      
+                                      {!msg.read && (
+                                          <button 
+                                            onClick={() => markMessageRead(msg.id)}
+                                            className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                                          >
+                                              <Eye size={10} /> Mark as Read
+                                          </button>
+                                      )}
+                                  </div>
+                              ))}
+                          </div>
+                      )}
+                  </div>
+              )}
+
               {/* SETTINGS TAB */}
               {activeTab === 'settings' && (
                 <div className="space-y-4">
@@ -365,10 +422,12 @@ export const AdminPanel: React.FC = () => {
               <div className="pt-8 space-y-3 pb-8">
                 {saveError && <p className="text-red-400 text-xs text-center">{saveError}</p>}
                 
-                <MagneticButton variant="primary" className="w-full" onClick={handleSave}>
-                    {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={16} />}
-                    <span>{isSaving ? 'Saving to Cloud...' : 'Save Changes'}</span>
-                </MagneticButton>
+                {activeTab !== 'messages' && (
+                    <MagneticButton variant="primary" className="w-full" onClick={handleSave}>
+                        {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={16} />}
+                        <span>{isSaving ? 'Saving to Cloud...' : 'Save Changes'}</span>
+                    </MagneticButton>
+                )}
               </div>
             </div>
         </motion.div>
