@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, RefreshCw, AlertCircle, Camera, Loader2, LogOut, Database } from 'lucide-react';
+import { X, Save, AlertCircle, Camera, Loader2, LogOut, Database } from 'lucide-react';
 import { MagneticButton } from './ui/MagneticButton';
+import { supabase } from '../lib/supabase';
 
 export const AdminPanel: React.FC = () => {
   const { 
@@ -35,6 +36,11 @@ export const AdminPanel: React.FC = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    if (!supabase) {
+        alert("Supabase not connected. Add API keys to .env to upload images.");
+        return;
+    }
 
     setProcessingImage(true);
     try {
@@ -53,6 +59,11 @@ export const AdminPanel: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!supabase) {
+        alert("Supabase not connected. Add API keys to .env to save changes.");
+        return;
+    }
+
     setIsSaving(true);
     setSaveError('');
     try {
@@ -112,6 +123,16 @@ export const AdminPanel: React.FC = () => {
                     </button>
                 </div>
               </div>
+
+              {!supabase && (
+                 <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-lg flex gap-3">
+                    <AlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
+                    <div className="text-xs text-red-200/80">
+                        <strong className="text-red-500 block mb-1">Database Disconnected</strong>
+                        You are in preview mode. Updates will not save. Add .env file to connect to Supabase.
+                    </div>
+                 </div>
+              )}
 
               {/* Alert for Error 153 */}
               <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg flex gap-3">

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { LATEST_VIDEO, SHORTS, FILMS } from '../constants';
@@ -30,7 +29,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Content State
+  // Content State - Initialize with defaults so UI is never empty
   const [latestVideo, setLatestVideo] = useState<LatestVideoData>(LATEST_VIDEO);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
@@ -38,33 +37,35 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // 1. Check Auth & Fetch Data on Mount
   useEffect(() => {
     const init = async () => {
-      // Check active session
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
+      // If supabase client failed to initialize, use static content and stop loading
+      if (!supabase) {
+        console.warn("Supabase client not initialized. Using static content.");
+        setIsLoading(false);
+        return;
+      }
 
-      // Fetch Content
       try {
+        // Check active session
+        const { data: { session }, error: authError } = await supabase.auth.getSession();
+        if (!authError && session) {
+            setIsAuthenticated(!!session);
+        }
+
+        // Fetch Content
         const { data, error } = await supabase.from('site_content').select('*');
         
-        if (data && data.length > 0) {
+        if (!error && data && data.length > 0) {
           data.forEach(row => {
             if (row.key === 'latest_video') setLatestVideo(row.data);
             if (row.key === 'shorts') setShorts(row.data);
             if (row.key === 'films') setFilms(row.data);
           });
         } else {
-            // Fallback to local storage if DB is empty or connection fails temporarily
-            // This ensures site works even if keys are missing in dev
-             const savedVideo = localStorage.getItem('mavestone_latest_video');
-             const savedShorts = localStorage.getItem('mavestone_shorts');
-             const savedFilms = localStorage.getItem('mavestone_films');
-             
-             if (savedVideo) setLatestVideo(JSON.parse(savedVideo));
-             if (savedShorts) setShorts(JSON.parse(savedShorts));
-             if (savedFilms) setFilms(JSON.parse(savedFilms));
+             console.log("Using default content (DB empty or fetch error)");
         }
       } catch (e) {
-        console.error("Error fetching content:", e);
+        console.error("Error initializing content:", e);
+        // On error, we just keep the default state (LATEST_VIDEO etc)
       } finally {
         setIsLoading(false);
       }
@@ -73,11 +74,17 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     init();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
+    let subscription: any = null;
+    if (supabase) {
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsAuthenticated(!!session);
+        });
+        subscription = data.subscription;
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+        if (subscription) subscription.unsubscribe();
+    };
   }, []);
 
   // 2. Actions
@@ -97,6 +104,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const saveChanges = async () => {
+    if (!supabase) {
+        alert("Cannot save: Supabase not connected.");
+        return;
+    }
     if (!isAuthenticated) return;
     
     const updates = [
@@ -114,36 +125,50 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
+    if (!supabase) {
+        alert("Cannot upload: Supabase not connected.");
+        return null;
+    }
     if (!isAuthenticated) return null;
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `${fileName}`;
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('media')
-      .upload(filePath, file);
+        const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file);
 
-    if (uploadError) {
-      console.error('Error uploading image:', uploadError);
-      return null;
+        if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        return null;
+        }
+
+        const { data } = supabase.storage.from('media').getPublicUrl(filePath);
+        return data.publicUrl;
+    } catch (e) {
+        console.error("Upload exception:", e);
+        return null;
     }
-
-    const { data } = supabase.storage.from('media').getPublicUrl(filePath);
-    return data.publicUrl;
   };
 
   const login = async (email: string, pass: string) => {
+    if (!supabase) return { error: { message: "Supabase not configured" } };
     return await supabase.auth.signInWithPassword({ email, password: pass });
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
     setIsAdminOpen(false);
+    setIsAuthenticated(false);
   };
 
   const seedDatabase = async () => {
-      // Emergency function to populate DB with defaults
+      if (!supabase) {
+          alert("Supabase not connected.");
+          return;
+      }
       const updates = [
         { key: 'latest_video', data: LATEST_VIDEO },
         { key: 'shorts', data: SHORTS },
