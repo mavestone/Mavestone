@@ -1,0 +1,248 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useContent } from '../context/ContentContext';
+import { X, Save, RefreshCw, AlertCircle, Camera, Loader2 } from 'lucide-react';
+import { MagneticButton } from './ui/MagneticButton';
+
+export const AdminPanel: React.FC = () => {
+  const { 
+    isAdminOpen, 
+    toggleAdmin, 
+    latestVideo, 
+    updateLatestVideo, 
+    shorts, 
+    updateShort,
+    resetContent 
+  } = useContent();
+
+  const [processingImage, setProcessingImage] = React.useState(false);
+
+  // Helper to extract ID from various YouTube URL formats
+  const extractYouTubeId = (url: string) => {
+    if (!url) return '';
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?v=)|(shorts\/))([^#&?]*).*/;
+    const match = url.match(regExp);
+    // Safer check to prevent crashes if match is null or structure is unexpected
+    const id = match?.[8]?.length === 11 ? match[8] : url;
+    return id.trim();
+  };
+
+  // Improved Image Uploader: Compresses images to < 800px width to fit in LocalStorage
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setProcessingImage(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Compress to JPEG 0.8 quality
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        callback(dataUrl);
+        setProcessingImage(false);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <AnimatePresence>
+      {isAdminOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={toggleAdmin}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+          />
+
+          {/* Side Panel */}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 h-full w-full max-w-md bg-[#0A0A0A] border-l border-white/10 z-[100] shadow-2xl overflow-y-auto"
+          >
+            <div className="p-6 md:p-8 space-y-8">
+              <div className="flex items-center justify-between sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-xl py-4 -mt-4 -mx-8 px-8 border-b border-white/5 z-10">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    Content Manager
+                    {processingImage && <Loader2 className="animate-spin w-4 h-4 text-gray-400" />}
+                </h2>
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => {
+                            if(window.confirm('Reset all content to default?')) resetContent();
+                        }}
+                        className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                        title="Reset to Defaults"
+                    >
+                        <RefreshCw size={18} />
+                    </button>
+                    <button 
+                        onClick={toggleAdmin}
+                        className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+                </div>
+              </div>
+
+              {/* Alert for Error 153 */}
+              <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg flex gap-3">
+                <AlertCircle className="text-yellow-500 w-5 h-5 flex-shrink-0" />
+                <div className="text-xs text-yellow-200/80">
+                    <strong className="text-yellow-500 block mb-1">Seeing "Error 153" or "Unavailable"?</strong>
+                    This means the video owner has disabled embedding. Please use videos that allow playback on 3rd party sites.
+                </div>
+              </div>
+
+              {/* Latest Video Section */}
+              <section className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-blue-400">Featured Video</h3>
+                <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Title</label>
+                    <input 
+                      type="text" 
+                      value={latestVideo.title}
+                      onChange={(e) => updateLatestVideo({ title: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">YouTube Link or ID</label>
+                    <input 
+                      type="text" 
+                      value={latestVideo.videoId}
+                      placeholder="Paste full YouTube URL here..."
+                      onChange={(e) => updateLatestVideo({ videoId: extractYouTubeId(e.target.value) })}
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white font-mono focus:outline-none focus:border-white/30"
+                    />
+                    <p className="text-[10px] text-gray-600 mt-1">Accepts: youtube.com/watch, youtu.be, or ID</p>
+                  </div>
+                   <div>
+                    <label className="block text-xs text-gray-500 mb-1">Thumbnail Image</label>
+                    <div className="relative">
+                        <input 
+                          type="text" 
+                          value={latestVideo.image}
+                          onChange={(e) => updateLatestVideo({ image: e.target.value })}
+                          className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-xs text-gray-300 focus:outline-none focus:border-white/30 pr-10"
+                        />
+                        <label className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/10 hover:bg-white/20 rounded-md cursor-pointer transition-colors" title="Upload Image">
+                            <Camera size={14} className="text-white" />
+                            <input 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*"
+                                onChange={(e) => handleImageUpload(e, (url) => updateLatestVideo({ image: url }))}
+                            />
+                        </label>
+                    </div>
+                  </div>
+                   <div>
+                    <label className="block text-xs text-gray-500 mb-1">Description</label>
+                    <textarea 
+                      rows={3}
+                      value={latestVideo.description}
+                      onChange={(e) => updateLatestVideo({ description: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Shorts Section */}
+              <section className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-purple-400">Shorts</h3>
+                <div className="space-y-4">
+                    {shorts.map((short, idx) => (
+                        <div key={short.id} className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-mono text-gray-500">#{idx + 1}</span>
+                                <span className="text-xs text-green-400">{short.views} views</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[10px] text-gray-500 mb-1">Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={short.title}
+                                        onChange={(e) => updateShort(short.id, { title: e.target.value })}
+                                        className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-white/30"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] text-gray-500 mb-1">YouTube ID</label>
+                                    <input 
+                                        type="text" 
+                                        value={short.videoId}
+                                        placeholder="Paste link..."
+                                        onChange={(e) => updateShort(short.id, { videoId: extractYouTubeId(e.target.value) })}
+                                        className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm font-mono text-white focus:outline-none focus:border-white/30"
+                                    />
+                                </div>
+                            </div>
+                             <div>
+                                <label className="block text-[10px] text-gray-500 mb-1">Thumbnail</label>
+                                <div className="relative">
+                                    <input 
+                                      type="text" 
+                                      value={short.image}
+                                      onChange={(e) => updateShort(short.id, { image: e.target.value })}
+                                      className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-gray-300 focus:outline-none focus:border-white/30 pr-10"
+                                    />
+                                    <label className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-white/10 hover:bg-white/20 rounded-md cursor-pointer transition-colors">
+                                        <Camera size={12} className="text-white" />
+                                        <input 
+                                            type="file" 
+                                            className="hidden" 
+                                            accept="image/*"
+                                            onChange={(e) => handleImageUpload(e, (url) => updateShort(short.id, { image: url }))}
+                                        />
+                                    </label>
+                                </div>
+                              </div>
+                        </div>
+                    ))}
+                </div>
+              </section>
+
+              <div className="pt-4 pb-12">
+                <MagneticButton variant="primary" className="w-full" onClick={toggleAdmin}>
+                    <Save size={16} />
+                    <span>Save Changes</span>
+                </MagneticButton>
+                <p className="text-center text-xs text-gray-600 mt-4">
+                    Changes are saved locally to your browser.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
