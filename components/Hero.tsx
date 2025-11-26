@@ -91,14 +91,14 @@ export const Hero: React.FC = () => {
         </div>
       </motion.div>
 
-      <div className="relative z-10 container px-6 mx-auto flex flex-col items-start text-left md:items-center md:text-center">
+      <div className="relative z-10 container px-6 mx-auto flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-4xl"
         >
-            <div className="mb-6 flex justify-start md:justify-center w-full">
+            <div className="mb-6 flex justify-center w-full">
                 <span className="px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs font-medium text-gray-300 uppercase tracking-widest">
                     Creative Studio
                 </span>
@@ -113,7 +113,7 @@ export const Hero: React.FC = () => {
             We blend cinematic visuals with strategic storytelling to build brands that leave a legacy.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-start md:justify-center gap-4 w-full">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
             <MagneticButton variant="primary">
               View Work
             </MagneticButton>
