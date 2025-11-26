@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { MagneticButton } from './ui/MagneticButton';
@@ -29,7 +30,7 @@ export const Collaboration: React.FC = () => {
       </div>
 
       {/* Why Mavestone Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-24">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
         {features.map((feature, i) => (
             <motion.div
                 key={i}
