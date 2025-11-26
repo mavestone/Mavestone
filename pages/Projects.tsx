@@ -5,7 +5,6 @@ import { Footer } from '../components/Footer';
 import { useContent } from '../context/ContentContext';
 import { motion } from 'framer-motion';
 import { Play, Info, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export const Projects: React.FC = () => {
   const { films, shorts, latestVideo } = useContent();
