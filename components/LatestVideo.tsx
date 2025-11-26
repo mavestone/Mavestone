@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
@@ -85,7 +86,7 @@ export const LatestVideo: React.FC = () => {
 
   return (
     <SectionWrapper id="work">
-      <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 text-left">
         <div>
            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-2">Latest Film</h2>
            <p className="text-gray-400">A glimpse into our newest story.</p>
@@ -118,7 +119,7 @@ export const LatestVideo: React.FC = () => {
                     </motion.div>
                 </div>
                 
-                <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
+                <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-black/90 to-transparent pointer-events-none text-left">
                     <h3 className="text-2xl md:text-4xl font-bold text-white mb-2">{latestVideo.title}</h3>
                     <p className="text-gray-300 max-w-lg text-sm md:text-base">{latestVideo.description}</p>
                 </div>

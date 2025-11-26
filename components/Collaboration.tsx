@@ -16,7 +16,7 @@ export const Collaboration: React.FC = () => {
     <SectionWrapper id="about">
       {/* Collaboration Text */}
       <div className="py-24 border-b border-white/10">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl text-left">
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-medium text-white leading-tight mb-8">
                 We collaborate with brands, founders and creators who want to tell <span className="text-gray-500">real stories</span>.
             </h2>

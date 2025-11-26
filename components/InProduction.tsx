@@ -9,7 +9,7 @@ export const InProduction: React.FC = () => {
 
   return (
     <SectionWrapper id="in-production" className="bg-soft-black/30">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 text-left">
             <div>
                 <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-2">In Production</h2>
                 <p className="text-gray-400">Currently in the works.</p>
@@ -38,7 +38,7 @@ export const InProduction: React.FC = () => {
             </motion.div>
 
             {/* Text Box Underneath */}
-            <div className="max-w-2xl">
+            <div className="max-w-2xl text-left">
                 <h3 className="text-3xl font-bold text-white mb-4">{inProduction.title}</h3>
                 <p className="text-gray-400 leading-relaxed text-lg font-light">
                     {inProduction.description}

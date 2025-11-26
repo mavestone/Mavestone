@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
@@ -98,7 +99,7 @@ export const Shorts: React.FC = () => {
 
   return (
     <SectionWrapper id="shorts" className="bg-soft-black/50">
-      <div className="mb-16 text-center max-w-2xl mx-auto">
+      <div className="mb-16 text-left md:text-center max-w-2xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-4">Short Stories. Big Impact.</h2>
         <p className="text-gray-400">Designed for now. Built to last.</p>
       </div>

@@ -6,10 +6,15 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-snap-type: y mandatory; /* Enable vertical snapping */
   }
   body {
     @apply bg-[#050505] text-[#F5F5F7] overflow-x-hidden;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      scroll-snap-type: y mandatory; /* Enable vertical snapping only on desktop */
+    }
   }
 }
 
