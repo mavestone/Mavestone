@@ -1,6 +1,6 @@
 
 import React, { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Play, Info, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Info } from 'lucide-react';
 
 interface ProjectCarouselProps {
   title: string;

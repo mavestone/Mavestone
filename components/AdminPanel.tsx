@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, AlertCircle, Camera, Loader2, LogOut, Database, Eye, EyeOff, Layout, Clapperboard, Settings, Mail, RefreshCcw, Plus, Trash2 } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Settings, Mail, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { MagneticButton } from './ui/MagneticButton';
 import { supabase } from '../lib/supabase';
 
@@ -14,8 +14,8 @@ export const AdminPanel: React.FC = () => {
     shorts, updateShort, addShort, deleteShort,
     films, updateFilm, addFilm, deleteFilm,
     projectConfig, updateProjectConfig,
-    saveChanges, uploadImage, logout, seedDatabase,
-    isAuthenticated, messages, fetchMessages, markMessageRead
+    saveChanges, uploadImage,
+    isAuthenticated, fetchMessages
   } = useContent();
 
   const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'messages' | 'settings'>('home');
@@ -25,7 +25,7 @@ export const AdminPanel: React.FC = () => {
 
   useEffect(() => {
       if (activeTab === 'messages' && isAuthenticated) fetchMessages();
-  }, [activeTab, isAuthenticated]);
+  }, [activeTab, isAuthenticated, fetchMessages]);
 
   const extractYouTubeId = (url: string) => {
     if (!url) return '';
