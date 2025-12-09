@@ -148,8 +148,15 @@ export const AdminPanel: React.FC = () => {
                         <h3 className="text-sm font-bold uppercase tracking-widest text-red-400">Page Hero Config</h3>
                         <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
                              <div>
-                                <label className="block text-xs text-gray-500 mb-1">Hero Label (e.g. Original)</label>
+                                <label className="block text-xs text-gray-500 mb-1">Hero Label (e.g. Original) - Fallback Text</label>
                                 <input type="text" value={projectConfig?.label || 'Original'} onChange={(e) => updateProjectConfig({ label: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none" />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-1">Hero Logo Image (Replaces Text)</label>
+                                <div className="relative">
+                                    <input type="text" value={projectConfig?.logoImage || ''} onChange={(e) => updateProjectConfig({ logoImage: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-xs text-gray-300 focus:outline-none pr-10" />
+                                    <label className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/10 hover:bg-white/20 rounded-md cursor-pointer"><Camera size={14} className="text-white" /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateProjectConfig({ logoImage: url }))} /></label>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs text-gray-500 mb-1">Autoplay Video ID</label>

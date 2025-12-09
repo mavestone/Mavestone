@@ -44,6 +44,7 @@ export interface ProjectHeroConfig {
   heroVideoId: string;
   label: string; // e.g. "Original"
   featuredFilmId: string; // The ID of the film to show details for
+  logoImage?: string; // URL for the 'N Series' style logo
 }
 
 export interface NavItem {

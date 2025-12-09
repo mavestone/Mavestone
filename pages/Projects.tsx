@@ -25,6 +25,7 @@ export const Projects: React.FC = () => {
   };
 
   const heroVideoId = projectConfig?.heroVideoId || featured.videoId || "jfopjfSYLcM";
+  const logoImage = projectConfig?.logoImage;
 
   // Handle Detail Modal
   const openDetails = (item: any) => {
@@ -174,9 +175,17 @@ export const Projects: React.FC = () => {
                 >
                     {/* Glass Panel Container */}
                     <div className="glass-panel p-6 md:p-10 rounded-2xl border border-white/10 backdrop-blur-md bg-black/20 shadow-2xl">
-                        <div className="flex items-center gap-2 mb-4">
-                            <span className="text-red-600 font-bold text-4xl md:text-5xl tracking-tighter">M</span>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400">{projectConfig?.label || "ORIGINAL"}</span>
+                        
+                        {/* Logo or Text Label */}
+                        <div className="mb-4">
+                            {logoImage ? (
+                                <img src={logoImage} alt="Original Series" className="h-6 md:h-8 object-contain" />
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-red-600 font-bold text-4xl md:text-5xl tracking-tighter">M</span>
+                                    <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400">{projectConfig?.label || "ORIGINAL"}</span>
+                                </div>
+                            )}
                         </div>
                         
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-none tracking-tight">
@@ -235,11 +244,11 @@ export const Projects: React.FC = () => {
          />
 
          {/* Row 3: Coming Soon (Reverted to Floating Glass Panel Style) */}
-         <div className="px-6 md:px-12 py-4 w-full">
+         <div className="pl-6 md:pl-12 w-full">
              <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
                  Coming Soon
              </h2>
-             <div className="w-full relative aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10 shadow-2xl cursor-default bg-black/50">
+             <div className="w-full relative aspect-[21/9] rounded-l-2xl overflow-hidden group border-y border-l border-white/10 shadow-2xl cursor-default bg-black/50">
                 <img 
                     src={inProduction.image} 
                     alt={inProduction.title}
@@ -259,7 +268,7 @@ export const Projects: React.FC = () => {
                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                  
                  <div 
-                    className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out will-change-transform transform-gpu"
+                    className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-[opacity,transform] duration-500 ease-out will-change-[opacity,transform] transform-gpu"
                  >
                      <div className="glass-panel p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40">
                          <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">{inProduction.title}</h3>

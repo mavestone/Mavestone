@@ -12,10 +12,14 @@ export const NAV_ITEMS: NavItem[] = [
 // Unified cinematic placeholder for clean editing start
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop";
 
+// Generated SVG Data URI for 'M ORIGINAL' Logo placeholder
+const DEFAULT_LOGO_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100' fill='none'%3E%3Ctext x='10' y='80' font-family='sans-serif' font-weight='900' font-size='80' fill='%23E50914'%3EM%3C/text%3E%3Ctext x='90' y='75' font-family='sans-serif' font-weight='700' font-size='24' letter-spacing='8' fill='%23FFFFFF'%3EORIGINAL%3C/text%3E%3C/svg%3E";
+
 export const PROJECT_PAGE_CONFIG: ProjectHeroConfig = {
   heroVideoId: "jfopjfSYLcM",
   label: "Original",
-  featuredFilmId: "1" // Default to Vantage Point
+  featuredFilmId: "1", // Default to Vantage Point
+  logoImage: DEFAULT_LOGO_IMAGE // Use the SVG placeholder so user sees image replacement immediately
 };
 
 export const LATEST_VIDEO = {
