@@ -4,37 +4,52 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { useContent } from '../context/ContentContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Info, ArrowRight, Clapperboard, X } from 'lucide-react';
+import { Play, Info, X } from 'lucide-react';
+import { ProjectCarousel } from '../components/ui/ProjectCarousel';
 
 export const Projects: React.FC = () => {
   const { films, shorts, latestVideo, inProduction } = useContent();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [activeItem, setActiveItem] = useState<any>(null); // For details modal
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false); // For fullscreen player
   
-  // Use the first film as the featured hero, ensure videoId exists
+  // Use the first film as the featured hero
   const featured = films[0] || { 
-      title: "Cinematic Excellence", 
+      title: "Mavestone", 
       tagline: "Stories that move people", 
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
       category: "Featured Film",
-      videoId: "jfopjfSYLcM" // Default placeholder ID if needed
+      description: "We blend cinematic visuals with strategic storytelling to build brands that leave a legacy. Every frame feels intentional.",
+      videoId: "jfopjfSYLcM"
   };
 
   const heroVideoId = featured.videoId || "jfopjfSYLcM";
 
+  // Handle Detail Modal
+  const openDetails = (item: any) => {
+      setActiveItem(item);
+      setIsModalOpen(true);
+  };
+
+  const openPlayer = (item: any) => {
+    setActiveItem(item);
+    setIsVideoPlayerOpen(true);
+  };
+
   // Prevent scrolling when modal is open
   useEffect(() => {
-      if (isModalOpen) document.body.style.overflow = 'hidden';
+      if (isModalOpen || isVideoPlayerOpen) document.body.style.overflow = 'hidden';
       else document.body.style.overflow = 'unset';
-  }, [isModalOpen]);
+  }, [isModalOpen, isVideoPlayerOpen]);
 
   return (
-    <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-white/20 overflow-x-hidden">
+    <div className="bg-[#141414] min-h-screen text-white font-sans selection:bg-white/20 overflow-x-hidden">
       <Navbar />
       
-      {/* Full Screen Video Modal */}
+      {/* Full Screen Video Player Modal */}
       <AnimatePresence>
-        {isModalOpen && (
+        {isVideoPlayerOpen && (
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -42,7 +57,7 @@ export const Projects: React.FC = () => {
                 className="fixed inset-0 z-[200] bg-black flex items-center justify-center"
             >
                 <button 
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={() => setIsVideoPlayerOpen(false)}
                     className="absolute top-8 right-8 z-[210] p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors cursor-pointer"
                 >
                     <X size={24} />
@@ -51,7 +66,7 @@ export const Projects: React.FC = () => {
                      <iframe 
                         width="100%" 
                         height="100%" 
-                        src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&rel=0&modestbranding=1`} 
+                        src={`https://www.youtube.com/embed/${activeItem?.videoId || heroVideoId}?autoplay=1&rel=0&modestbranding=1`} 
                         title="YouTube video player" 
                         frameBorder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -62,242 +77,171 @@ export const Projects: React.FC = () => {
             </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* Ambient Background Glow */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none">
-          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/10 blur-[120px] rounded-full" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-900/10 blur-[120px] rounded-full" />
-      </div>
 
-      {/* Glass Hero Section */}
-      <div className="relative h-[90vh] w-full flex items-center justify-center px-6 md:px-12 pt-20 overflow-hidden">
-        {/* Background Video Layer */}
-        <div className="absolute inset-0 z-0">
-             {/* Fallback Image */}
-            <img 
-                src={featured.image} 
-                alt={featured.title} 
-                className={`w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-60'}`}
-            />
-            {/* Background Video Loop */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <iframe
-                    className="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 opacity-40 pointer-events-none grayscale contrast-125"
-                    src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroVideoId}&playsinline=1&rel=0`}
-                    title="Background Video"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    onLoad={() => setVideoLoaded(true)}
-                />
-            </div>
-
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/80 via-transparent to-transparent" />
-        </div>
-
-        {/* Floating Glass Hero Card */}
-        <motion.div 
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 w-full max-w-7xl mx-auto"
-        >
-            <div className="glass-panel p-8 md:p-12 rounded-[2rem] max-w-2xl backdrop-blur-[40px] border border-white/10 relative overflow-hidden group">
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                
-                <div className="flex items-center gap-3 mb-6">
-                    <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] uppercase tracking-widest font-medium backdrop-blur-md">
-                        {featured.category}
-                    </span>
-                    <span className="w-12 h-[1px] bg-white/30" />
-                </div>
-
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-glow text-white">
-                    {featured.title}
-                </h1>
-                
-                <p className="text-xl md:text-2xl text-gray-300 font-light italic mb-10 leading-relaxed">
-                    "{featured.tagline}"
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4">
-                    <button 
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] cursor-pointer"
-                    >
-                        <Play fill="currentColor" size={20} />
-                        <span>Play Film</span>
-                    </button>
-                    <button className="flex items-center gap-3 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full font-medium hover:bg-white/10 transition-colors backdrop-blur-md cursor-pointer">
-                        <Info size={20} />
-                        <span>Details</span>
-                    </button>
-                </div>
-            </div>
-        </motion.div>
-      </div>
-
-      {/* Content Sections */}
-      <div className="relative z-20 -mt-24 pb-32 space-y-24 px-6 md:px-12 max-w-[1920px] mx-auto">
-        
-        {/* Latest Release */}
-        <div className="space-y-6">
-             <div className="flex items-center justify-between px-2">
-                 <h3 className="text-2xl font-light tracking-wide text-white/90">New Release</h3>
-             </div>
-             
-             <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="group relative w-full aspect-[21/9] md:aspect-[2.39/1] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl"
-             >
-                <img 
-                    src={latestVideo.image} 
-                    alt={latestVideo.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                />
-                
-                {/* Glass Overlay on Hover */}
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
-
-                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
-                    <div className="glass-panel inline-block px-8 py-6 rounded-2xl backdrop-blur-xl border border-white/10 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                        <h4 className="font-bold text-3xl mb-2">{latestVideo.title}</h4>
-                        <p className="text-gray-300 font-light max-w-md line-clamp-2">{latestVideo.description}</p>
-                        <div className="mt-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
-                            <span>Watch Now</span>
-                            <ArrowRight size={16} />
-                        </div>
-                    </div>
-                </div>
-             </motion.div>
-        </div>
-
-        {/* Coming Soon Section */}
-        <div className="space-y-6">
-            <h3 className="text-2xl font-light tracking-wide text-white/90 px-2 flex items-center gap-3">
-                <Clapperboard size={20} className="text-gray-400" />
-                Coming Soon
-            </h3>
-            
+      {/* Info Details Modal (Lightbox) */}
+      <AnimatePresence>
+        {isModalOpen && activeItem && (
             <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="group relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl isolate"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-12 overflow-y-auto"
+                onClick={() => setIsModalOpen(false)}
             >
-                 <img 
-                    src={inProduction.image} 
-                    alt={inProduction.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                />
-                
-                {/* Gradient for text readability only at bottom */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                
-                {/* Bottom Left Content (Pop up on hover) */}
-                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex items-end">
-                    <div className="glass-panel inline-block p-6 md:p-8 rounded-2xl border border-white/10 backdrop-blur-xl text-left max-w-xl transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                        <div className="inline-block px-3 py-1 mb-3 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                            {inProduction.status}
+                <motion.div 
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 50, opacity: 0 }}
+                    className="relative w-full max-w-4xl bg-[#181818] rounded-2xl overflow-hidden shadow-2xl"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button 
+                        onClick={() => setIsModalOpen(false)}
+                        className="absolute top-4 right-4 z-20 p-2 bg-[#181818] rounded-full text-white hover:bg-white/20 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+
+                    {/* Modal Hero */}
+                    <div className="relative w-full aspect-video">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#181818] to-transparent z-10" />
+                        <img src={activeItem.image} alt={activeItem.title} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-0 left-0 p-8 z-20">
+                            <h2 className="text-4xl font-bold mb-2">{activeItem.title}</h2>
+                            <div className="flex items-center gap-3 text-sm font-bold text-gray-400 mb-4">
+                                {activeItem.category && <span className="text-green-400">98% Match</span>}
+                                <span>{activeItem.category || "Project"}</span>
+                                {activeItem.status && <span className="px-2 py-0.5 border border-gray-500 rounded text-[10px]">{activeItem.status}</span>}
+                            </div>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => { setIsModalOpen(false); openPlayer(activeItem); }}
+                                    className="px-8 py-2 bg-white text-black font-bold rounded hover:bg-gray-200 transition-colors flex items-center gap-2"
+                                >
+                                    <Play size={18} fill="currentColor" /> Play
+                                </button>
+                            </div>
                         </div>
-                        <h2 className="text-2xl md:text-4xl font-bold text-white mb-3 tracking-tight text-glow">
-                            {inProduction.title}
-                        </h2>
-                        <p className="text-sm md:text-base text-gray-300 font-light leading-relaxed line-clamp-3">
-                            {inProduction.description}
-                        </p>
                     </div>
-                </div>
+
+                    {/* Modal Details */}
+                    <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="md:col-span-2 space-y-4">
+                            <div className="flex items-center gap-2 text-sm text-green-400 font-bold">
+                                <span>New Release</span>
+                                <span className="text-gray-400 font-normal">2024</span>
+                            </div>
+                            <p className="text-gray-300 leading-relaxed text-lg">
+                                {activeItem.description || activeItem.tagline || "No description available for this project."}
+                            </p>
+                        </div>
+                        <div className="space-y-4 text-sm text-gray-400">
+                             <div>
+                                <span className="text-gray-500">Genres:</span> <span className="text-white">Cinematic, Commercial, Storytelling</span>
+                             </div>
+                             <div>
+                                <span className="text-gray-500">Maturity Rating:</span> <span className="border border-gray-500 px-1 text-xs text-white">TV-14</span>
+                             </div>
+                        </div>
+                    </div>
+                </motion.div>
             </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* HERO SECTION */}
+      <div className="relative w-full h-[85vh] overflow-hidden">
+        {/* Background Video */}
+        <div className="absolute inset-0 pointer-events-none">
+             <iframe
+                className="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 opacity-60 grayscale-[20%]"
+                src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroVideoId}&playsinline=1&rel=0`}
+                title="Hero Background"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                onLoad={() => setVideoLoaded(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
         </div>
 
-        {/* Short Stories (Vertical Cards) */}
-        <div className="space-y-6">
-            <h3 className="text-2xl font-light tracking-wide text-white/90 px-2">Short Stories</h3>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                {shorts.map((short, i) => (
-                    <motion.div 
-                        key={short.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        viewport={{ once: true }}
-                        className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer"
-                    >
-                        {/* Background Image */}
-                        <img 
-                            src={short.image} 
-                            alt={short.title} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                        />
-                        
-                        {/* Full Card Glass Overlay */}
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
-
-                        {/* Floating Content */}
-                        <div className="absolute inset-x-4 bottom-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                            <div className="glass-panel p-4 rounded-xl border border-white/10 backdrop-blur-md bg-white/5 group-hover:bg-white/10 transition-colors">
-                                <h4 className="font-bold text-white text-lg leading-tight mb-1">{short.title}</h4>
-                                <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-300">
-                                    <span>Short Film</span>
-                                    {short.showViews !== false && (
-                                        <span className="flex items-center gap-1">
-                                            <span className="w-1 h-1 rounded-full bg-green-500" />
-                                            {short.views}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
+        {/* Hero Content - Left Aligned Glass Panel */}
+        <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center px-6 md:px-12 z-10">
+            <div className="max-w-2xl mt-16 md:mt-0">
+                <motion.div 
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                >
+                    {/* Glass Panel Container */}
+                    <div className="glass-panel p-6 md:p-10 rounded-2xl border border-white/10 backdrop-blur-md bg-black/20 shadow-2xl">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="text-red-600 font-bold text-4xl md:text-5xl tracking-tighter">M</span>
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400">Original</span>
                         </div>
-                    </motion.div>
-                ))}
+                        
+                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-none tracking-tight">
+                            {featured.title}
+                        </h1>
+
+                        <div className="flex items-center gap-4 text-sm font-bold text-gray-300 mb-6">
+                            <span className="text-green-400">98% Match</span>
+                            <span className="text-gray-400">{featured.category}</span>
+                            <span className="border border-gray-500 px-1 text-xs">4K</span>
+                        </div>
+
+                        <p className="text-base md:text-lg text-white drop-shadow-md mb-8 line-clamp-3 font-medium">
+                            {featured.description || featured.tagline}
+                        </p>
+
+                        <div className="flex items-center gap-4">
+                            <button 
+                                onClick={() => openPlayer(featured)}
+                                className="px-6 md:px-8 py-2 md:py-3 bg-white text-black text-lg font-bold rounded hover:bg-white/90 transition-colors flex items-center gap-2"
+                            >
+                                <Play fill="currentColor" size={24} /> Play
+                            </button>
+                            <button 
+                                onClick={() => openDetails(featured)}
+                                className="px-6 md:px-8 py-2 md:py-3 bg-[rgba(109,109,110,0.7)] text-white text-lg font-bold rounded hover:bg-[rgba(109,109,110,0.4)] transition-colors flex items-center gap-2 backdrop-blur-sm"
+                            >
+                                <Info size={24} /> More Info
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         </div>
+      </div>
 
-        {/* Feature Films (Horizontal Cards) */}
-        <div className="space-y-6">
-            <h3 className="text-2xl font-light tracking-wide text-white/90 px-2">Selected Works</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {films.map((film, i) => (
-                    <motion.div 
-                        key={film.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        viewport={{ once: true }}
-                        className="group relative aspect-video rounded-2xl overflow-hidden cursor-pointer shadow-lg"
-                    >
-                        <img 
-                            src={film.image} 
-                            alt={film.title} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                        />
-                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors duration-500" />
-                        
-                        {/* Center Play Icon */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                                <Play fill="currentColor" className="ml-1 text-white" />
-                            </div>
-                        </div>
+      {/* CAROUSEL ROWS */}
+      <div className="relative z-20 -mt-24 md:-mt-32 pb-24 space-y-8 overflow-hidden">
+         {/* Row 1: Selected Works (Feature Films) */}
+         <ProjectCarousel 
+            title="Selected Works" 
+            items={films} 
+            type="film" 
+            onPlay={openPlayer}
+            onMoreInfo={openDetails}
+         />
 
-                        {/* Bottom Info */}
-                        <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/90 to-transparent">
-                            <h4 className="text-xl font-bold text-white">{film.title}</h4>
-                            <p className="text-sm text-gray-400 font-light">{film.category}</p>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-        </div>
+         {/* Row 2: Short Stories */}
+         <ProjectCarousel 
+            title="Short Stories" 
+            items={shorts} 
+            type="short" 
+            onPlay={openPlayer}
+            onMoreInfo={openDetails}
+         />
 
+         {/* Row 3: Coming Soon */}
+         <ProjectCarousel 
+            title="Coming Soon" 
+            items={[inProduction]} // Wrap single item in array
+            type="coming-soon" 
+            onPlay={openPlayer}
+            onMoreInfo={openDetails}
+         />
       </div>
 
       <Footer />
