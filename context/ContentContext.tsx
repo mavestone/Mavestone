@@ -1,8 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData, Message } from '../types';
+import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION, PROJECT_PAGE_CONFIG } from '../constants';
+import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
@@ -10,6 +10,7 @@ interface ContentContextType {
   shorts: Short[];
   films: Film[];
   messages: Message[];
+  projectConfig: ProjectHeroConfig;
   isAdminOpen: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -19,7 +20,12 @@ interface ContentContextType {
   updateLatestVideo: (data: Partial<LatestVideoData>) => void;
   updateInProduction: (data: Partial<InProductionData>) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
+  addShort: () => void;
+  deleteShort: (id: string) => void;
   updateFilm: (id: string, data: Partial<Film>) => void;
+  addFilm: () => void;
+  deleteFilm: (id: string) => void;
+  updateProjectConfig: (data: Partial<ProjectHeroConfig>) => void;
   saveChanges: () => Promise<void>;
   uploadImage: (file: File) => Promise<string | null>;
   login: (email: string, pass: string) => Promise<{ error: any }>;
@@ -37,17 +43,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Content State - Initialize with defaults so UI is never empty
+  // Content State
   const [latestVideo, setLatestVideo] = useState<LatestVideoData>(LATEST_VIDEO);
   const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
+  const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // 1. Check Auth & Fetch Data on Mount
   useEffect(() => {
     const init = async () => {
-      // If supabase client failed to initialize, use static content and stop loading
       if (!supabase) {
         console.warn("Supabase client not initialized. Using static content.");
         setIsLoading(false);
@@ -55,13 +60,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       try {
-        // Check active session
         const { data: { session }, error: authError } = await supabase.auth.getSession();
         if (!authError && session) {
             setIsAuthenticated(!!session);
         }
 
-        // Fetch Content
         const { data, error } = await supabase.from('site_content').select('*');
         
         if (!error && data && data.length > 0) {
@@ -70,13 +73,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (row.key === 'in_production') setInProduction(row.data);
             if (row.key === 'shorts') setShorts(row.data);
             if (row.key === 'films') setFilms(row.data);
+            if (row.key === 'project_config') setProjectConfig(row.data);
           });
-        } else {
-             console.log("Using default content (DB empty or fetch error)");
         }
       } catch (e) {
         console.error("Error initializing content:", e);
-        // On error, we just keep the default state (LATEST_VIDEO etc)
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +85,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     init();
 
-    // Listen for auth changes
     let subscription: any = null;
     if (supabase) {
         const { data } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -98,7 +98,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  // 2. Actions
   const toggleAdmin = () => setIsAdminOpen(prev => !prev);
   const openAdmin = () => setIsAdminOpen(true);
   const closeAdmin = () => setIsAdminOpen(false);
@@ -115,8 +114,49 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setShorts(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   };
 
+  const addShort = () => {
+    const newShort: Short = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: "New Short Film",
+      views: "0",
+      image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
+      videoId: "",
+      showViews: true,
+      category: "Short"
+    };
+    setShorts(prev => [...prev, newShort]);
+  };
+
+  const deleteShort = (id: string) => {
+    setShorts(prev => prev.filter(item => item.id !== id));
+  };
+
   const updateFilm = (id: string, data: Partial<Film>) => {
     setFilms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+  };
+
+  const addFilm = () => {
+    const newFilm: Film = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: "New Project",
+      category: "Film",
+      tagline: "New tagline",
+      image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
+      videoId: "",
+      description: "Description goes here...",
+      match: "90% Match",
+      year: new Date().getFullYear().toString(),
+      maturityRating: "TV-14"
+    };
+    setFilms(prev => [...prev, newFilm]);
+  };
+
+  const deleteFilm = (id: string) => {
+    setFilms(prev => prev.filter(item => item.id !== id));
+  };
+
+  const updateProjectConfig = (data: Partial<ProjectHeroConfig>) => {
+    setProjectConfig(prev => ({ ...prev, ...data }));
   };
 
   const saveChanges = async () => {
@@ -130,7 +170,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'latest_video', data: latestVideo },
       { key: 'in_production', data: inProduction },
       { key: 'shorts', data: shorts },
-      { key: 'films', data: films }
+      { key: 'films', data: films },
+      { key: 'project_config', data: projectConfig }
     ];
 
     const { error } = await supabase.from('site_content').upsert(updates);
@@ -142,11 +183,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
-    if (!supabase) {
-        alert("Cannot upload: Supabase not connected.");
-        return null;
-    }
-    if (!isAuthenticated) return null;
+    if (!supabase || !isAuthenticated) return null;
 
     try {
         const fileExt = file.name.split('.').pop();
@@ -157,15 +194,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .from('media')
         .upload(filePath, file);
 
-        if (uploadError) {
-        console.error('Error uploading image:', uploadError);
-        return null;
-        }
+        if (uploadError) return null;
 
         const { data } = supabase.storage.from('media').getPublicUrl(filePath);
         return data.publicUrl;
     } catch (e) {
-        console.error("Upload exception:", e);
         return null;
     }
   };
@@ -190,7 +223,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         { key: 'latest_video', data: LATEST_VIDEO },
         { key: 'in_production', data: IN_PRODUCTION },
         { key: 'shorts', data: SHORTS },
-        { key: 'films', data: FILMS }
+        { key: 'films', data: FILMS },
+        { key: 'project_config', data: PROJECT_PAGE_CONFIG }
       ];
       await supabase.from('site_content').upsert(updates);
       window.location.reload();
@@ -198,72 +232,36 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const sendMessage = async (name: string, email: string, message: string) => {
     if (!supabase) return { success: false, error: 'Database not connected' };
-
     try {
-        // 1. Save to Supabase DB
-        // The Database Trigger (setup in SQL) will automatically send the email via Resend
-        const { error } = await supabase.from('messages').insert([
-            { name, email, message }
-        ]);
-        
+        const { error } = await supabase.from('messages').insert([{ name, email, message }]);
         if (error) throw error;
         return { success: true };
     } catch (e) {
-        console.error("Error sending message:", e);
         return { success: false, error: e };
     }
   };
 
   const fetchMessages = async () => {
       if (!supabase || !isAuthenticated) return;
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (!error && data) {
-          setMessages(data);
-      }
+      const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+      if (!error && data) setMessages(data);
   };
 
   const markMessageRead = async (id: string) => {
       if (!supabase || !isAuthenticated) return;
-      
-      const { error } = await supabase
-        .from('messages')
-        .update({ read: true })
-        .eq('id', id);
-
-      if (!error) {
-          setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
-      }
+      const { error } = await supabase.from('messages').update({ read: true }).eq('id', id);
+      if (!error) setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
   };
 
   return (
     <ContentContext.Provider value={{
-      latestVideo,
-      inProduction,
-      shorts,
-      films,
-      messages,
-      isAdminOpen,
-      isAuthenticated,
-      isLoading,
-      toggleAdmin,
-      openAdmin,
-      closeAdmin,
-      updateLatestVideo,
-      updateInProduction,
-      updateShort,
-      updateFilm,
-      saveChanges,
-      uploadImage,
-      login,
-      logout,
-      seedDatabase,
-      sendMessage,
-      fetchMessages,
-      markMessageRead
+      latestVideo, inProduction, shorts, films, messages, projectConfig,
+      isAdminOpen, isAuthenticated, isLoading,
+      toggleAdmin, openAdmin, closeAdmin,
+      updateLatestVideo, updateInProduction, updateShort, addShort, deleteShort,
+      updateFilm, addFilm, deleteFilm, updateProjectConfig,
+      saveChanges, uploadImage, login, logout, seedDatabase,
+      sendMessage, fetchMessages, markMessageRead
     }}>
       {children}
     </ContentContext.Provider>

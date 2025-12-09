@@ -8,22 +8,23 @@ import { Play, Info, X } from 'lucide-react';
 import { ProjectCarousel } from '../components/ui/ProjectCarousel';
 
 export const Projects: React.FC = () => {
-  const { films, shorts, inProduction } = useContent();
+  const { films, shorts, inProduction, projectConfig } = useContent();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeItem, setActiveItem] = useState<any>(null); // For details modal
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false); // For fullscreen player
   
-  // Use the first film as the featured hero
-  const featured = films[0] || { 
+  // Use config to find featured film, fallback to first in list
+  const featuredId = projectConfig?.featuredFilmId;
+  const featured = films.find(f => f.id === featuredId) || films[0] || { 
       title: "Mavestone", 
       tagline: "Stories that move people", 
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
       category: "Featured Film",
-      description: "We blend cinematic visuals with strategic storytelling to build brands that leave a legacy. Every frame feels intentional.",
+      description: "We blend cinematic visuals with strategic storytelling to build brands that leave a legacy.",
       videoId: "jfopjfSYLcM"
   };
 
-  const heroVideoId = featured.videoId || "jfopjfSYLcM";
+  const heroVideoId = projectConfig?.heroVideoId || featured.videoId || "jfopjfSYLcM";
 
   // Handle Detail Modal
   const openDetails = (item: any) => {
@@ -36,7 +37,6 @@ export const Projects: React.FC = () => {
     setIsVideoPlayerOpen(true);
   };
 
-  // Prevent scrolling when modal is open
   useEffect(() => {
       if (isModalOpen || isVideoPlayerOpen) document.body.style.overflow = 'hidden';
       else document.body.style.overflow = 'unset';
@@ -108,9 +108,10 @@ export const Projects: React.FC = () => {
                         <div className="absolute bottom-0 left-0 p-8 z-20">
                             <h2 className="text-4xl font-bold mb-2">{activeItem.title}</h2>
                             <div className="flex items-center gap-3 text-sm font-bold text-gray-400 mb-4">
-                                {activeItem.category && <span className="text-green-400">98% Match</span>}
+                                {activeItem.match && <span className="text-green-400">{activeItem.match}</span>}
                                 <span>{activeItem.category || "Project"}</span>
-                                {activeItem.status && <span className="px-2 py-0.5 border border-gray-500 rounded text-[10px]">{activeItem.status}</span>}
+                                {activeItem.year && <span>{activeItem.year}</span>}
+                                {activeItem.maturityRating && <span className="px-2 py-0.5 border border-gray-500 rounded text-[10px]">{activeItem.maturityRating}</span>}
                             </div>
                             <div className="flex gap-3">
                                 <button 
@@ -128,7 +129,7 @@ export const Projects: React.FC = () => {
                         <div className="md:col-span-2 space-y-4">
                             <div className="flex items-center gap-2 text-sm text-green-400 font-bold">
                                 <span>New Release</span>
-                                <span className="text-gray-400 font-normal">2024</span>
+                                {activeItem.year && <span className="text-gray-400 font-normal">{activeItem.year}</span>}
                             </div>
                             <p className="text-gray-300 leading-relaxed text-lg">
                                 {activeItem.description || activeItem.tagline || "No description available for this project."}
@@ -175,7 +176,7 @@ export const Projects: React.FC = () => {
                     <div className="glass-panel p-6 md:p-10 rounded-2xl border border-white/10 backdrop-blur-md bg-black/20 shadow-2xl">
                         <div className="flex items-center gap-2 mb-4">
                             <span className="text-red-600 font-bold text-4xl md:text-5xl tracking-tighter">M</span>
-                            <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400">Original</span>
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-gray-400">{projectConfig?.label || "ORIGINAL"}</span>
                         </div>
                         
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-none tracking-tight">
@@ -183,9 +184,10 @@ export const Projects: React.FC = () => {
                         </h1>
 
                         <div className="flex items-center gap-4 text-sm font-bold text-gray-300 mb-6">
-                            <span className="text-green-400">98% Match</span>
-                            <span className="text-gray-400">{featured.category}</span>
-                            <span className="border border-gray-500 px-1 text-xs">4K</span>
+                            <span className="text-green-400">{featured.match || "98% Match"}</span>
+                            <span className="text-gray-400">{featured.year || "2024"}</span>
+                            <span className="border border-gray-500 px-1 text-xs">{featured.maturityRating || "TV-14"}</span>
+                            <span className="text-gray-400">{featured.duration || "4K"}</span>
                         </div>
 
                         <p className="text-base md:text-lg text-white drop-shadow-md mb-8 line-clamp-3 font-medium">
@@ -195,13 +197,13 @@ export const Projects: React.FC = () => {
                         <div className="flex items-center gap-4">
                             <button 
                                 onClick={() => openPlayer(featured)}
-                                className="px-6 md:px-8 py-2 md:py-3 bg-white text-black text-lg font-bold rounded hover:bg-white/90 transition-colors flex items-center gap-2"
+                                className="px-6 md:px-8 py-3 bg-white text-black text-lg font-bold rounded-full hover:bg-white/90 transition-colors flex items-center gap-2"
                             >
                                 <Play fill="currentColor" size={24} /> Play
                             </button>
                             <button 
                                 onClick={() => openDetails(featured)}
-                                className="px-6 md:px-8 py-2 md:py-3 bg-[rgba(109,109,110,0.7)] text-white text-lg font-bold rounded hover:bg-[rgba(109,109,110,0.4)] transition-colors flex items-center gap-2 backdrop-blur-sm"
+                                className="px-6 md:px-8 py-3 bg-[rgba(109,109,110,0.7)] text-white text-lg font-bold rounded-full hover:bg-[rgba(109,109,110,0.4)] transition-colors flex items-center gap-2 backdrop-blur-sm"
                             >
                                 <Info size={24} /> More Info
                             </button>
@@ -232,40 +234,34 @@ export const Projects: React.FC = () => {
             onMoreInfo={openDetails}
          />
 
-         {/* Row 3: Coming Soon (Static Cinematic Card) */}
+         {/* Row 3: Coming Soon (Reverted to Floating Glass Panel Style) */}
          <div className="px-6 md:px-12 py-4">
              <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
                  Coming Soon
              </h2>
-             <div className="w-full relative aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10">
+             <div className="w-full relative aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10 shadow-2xl">
                 <img 
                     src={inProduction.image} 
                     alt={inProduction.title}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
                 />
                 
-                {/* Floating Content Box - Bottom Left */}
-                <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-lg z-20">
-                    {/* Default State: Title only */}
-                     <div className="transition-all duration-300 transform translate-y-8 group-hover:translate-y-0">
-                        {inProduction.status && (
-                            <span className="inline-block px-2 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest rounded mb-3 backdrop-blur-md shadow-lg">
-                                {inProduction.status}
-                            </span>
-                        )}
-                        <h3 className="text-3xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">{inProduction.title}</h3>
-                        
-                        {/* Hidden Description (Reveals on Hover) */}
-                        <div className="h-0 overflow-hidden group-hover:h-auto opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
-                             <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light drop-shadow-md bg-black/40 p-4 rounded-xl backdrop-blur-sm border border-white/10">
-                                {inProduction.description}
-                            </p>
-                        </div>
+                {/* Floating Bottom Glass Panel - Reverted Style */}
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                 
+                 <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20">
+                     <div className="glass-panel p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40">
+                         {inProduction.status && (
+                             <span className="inline-block px-2 py-0.5 bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-widest rounded mb-3 shadow-lg">
+                                 {inProduction.status}
+                             </span>
+                         )}
+                         <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">{inProduction.title}</h3>
+                         <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light">
+                             {inProduction.description}
+                         </p>
                      </div>
-                </div>
-                
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                 </div>
              </div>
          </div>
       </div>

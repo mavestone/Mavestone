@@ -7,6 +7,11 @@ export interface Film {
   image: string;
   videoId?: string;
   description?: string;
+  // New Metadata
+  year?: string;
+  match?: string;
+  maturityRating?: string;
+  duration?: string;
 }
 
 export interface Short {
@@ -16,6 +21,9 @@ export interface Short {
   image: string;
   videoId: string;
   showViews?: boolean;
+  // New Metadata
+  year?: string;
+  category?: string;
 }
 
 export interface LatestVideoData {
@@ -30,6 +38,12 @@ export interface InProductionData {
   description: string;
   status: string;
   image: string;
+}
+
+export interface ProjectHeroConfig {
+  heroVideoId: string;
+  label: string; // e.g. "Original"
+  featuredFilmId: string; // The ID of the film to show details for
 }
 
 export interface NavItem {

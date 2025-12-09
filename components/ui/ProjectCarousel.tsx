@@ -35,13 +35,13 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
   };
 
   return (
-    <div className="space-y-2 py-4 group/row relative z-20">
+    <div className="space-y-2 py-4 group/row relative z-20 w-full overflow-hidden">
       <h2 className="text-xl md:text-2xl font-semibold text-white px-6 md:px-12 group-hover/row:text-white transition-colors duration-300 shadow-black drop-shadow-md mb-2">
           {title}
       </h2>
 
-      <div className="group relative">
-        {/* Left Arrow - Rounded Glass Circle */}
+      <div className="group relative w-full">
+        {/* Left Arrow */}
         <div 
             className={`absolute top-1/2 -translate-y-1/2 left-4 z-40 w-12 h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md hover:bg-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 shadow-xl ${!isMoved ? 'hidden' : 'opacity-0 group-hover:opacity-100'}`}
             onClick={() => handleClick('left')}
@@ -49,10 +49,10 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
             <ChevronLeft className="w-6 h-6 text-white" />
         </div>
 
-        {/* Scroll Container */}
+        {/* Scroll Container - Edge to Edge (No Right Padding) */}
         <div 
             ref={rowRef}
-            className="flex items-center gap-4 overflow-x-scroll scrollbar-hide px-6 md:px-12 py-8 scroll-smooth"
+            className="flex items-center gap-4 overflow-x-scroll scrollbar-hide pl-6 md:pl-12 pr-0 py-8 scroll-smooth w-full"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item) => (
@@ -68,26 +68,32 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
                         className="w-full h-full object-cover"
                     />
                     
-                    {/* Hover Content - Glassmorphism */}
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col justify-between p-5 border-[3px] border-white/10 rounded-2xl">
-                        
-                        {/* Header (Hidden for Shorts to clear view) */}
-                        {type !== 'short' && (
-                            <div className="flex justify-between items-start">
-                                <h3 className="text-base font-bold text-white line-clamp-2 drop-shadow-lg">{item.title}</h3>
-                            </div>
-                        )}
-
-                        {/* Controls */}
-                        {type === 'short' ? (
-                            /* Shorts: Centered Large Play Button */
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow-2xl scale-0 group-hover/card:scale-100 transition-transform duration-300 delay-75">
-                                    <Play size={32} fill="currentColor" className="ml-1" />
+                    {/* TYPE: SHORT (Bottom Floating Glass Panel Style) */}
+                    {type === 'short' ? (
+                       <>
+                           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+                           <div className="absolute inset-x-2 bottom-4 translate-y-2 group-hover/card:translate-y-0 transition-transform duration-500">
+                                <div className="glass-panel p-3 rounded-xl border border-white/10 backdrop-blur-md bg-white/5 group-hover/card:bg-white/10 transition-colors">
+                                    <h4 className="font-bold text-white text-sm leading-tight mb-1">{item.title}</h4>
+                                    <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-300">
+                                        <span>{item.category || "Short Film"}</span>
+                                        {item.showViews !== false && (
+                                            <span className="flex items-center gap-1">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                {item.views}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        ) : (
-                            /* Standard Films: Bottom Controls */
+                       </>
+                    ) : (
+                        /* TYPE: FILM (Full Overlay Style) */
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col justify-between p-5 border-[3px] border-white/10 rounded-2xl">
+                             <div className="flex justify-between items-start">
+                                <h3 className="text-base font-bold text-white line-clamp-2 drop-shadow-lg">{item.title}</h3>
+                            </div>
+                            
                             <div className="space-y-3 mt-auto">
                                 <div className="flex items-center gap-3">
                                     <button 
@@ -95,9 +101,6 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
                                         className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 hover:scale-110 transition-all shadow-lg shadow-white/10"
                                     >
                                         <Play size={16} fill="currentColor" />
-                                    </button>
-                                    <button className="w-10 h-10 rounded-full border-2 border-gray-400 text-white flex items-center justify-center hover:border-white hover:bg-white/10 transition-colors">
-                                        <Plus size={18} />
                                     </button>
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); onMoreInfo && onMoreInfo(item); }}
@@ -107,26 +110,20 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-[11px] text-gray-200 font-medium">
-                                    {item.category && <span className="bg-white/10 px-2 py-0.5 rounded backdrop-blur-sm">{item.category}</span>}
+                                <div className="flex items-center gap-2 text-[10px] text-gray-200 font-medium flex-wrap">
+                                    <span className="text-green-400 font-bold">{item.match || "90% Match"}</span>
+                                    {item.maturityRating && <span className="border border-gray-500 px-1">{item.maturityRating}</span>}
+                                    {item.duration && <span>{item.duration}</span>}
                                 </div>
                             </div>
-                        )}
-                        
-                        {/* Footer Info for Shorts */}
-                        {type === 'short' && (
-                            <div className="mt-auto relative z-10">
-                                <h3 className="text-lg font-bold text-white drop-shadow-lg mb-1">{item.title}</h3>
-                                {item.views && <span className="text-green-400 font-bold text-xs">{item.views} views</span>}
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
           ))}
         </div>
 
-        {/* Right Arrow - Rounded Glass Circle */}
+        {/* Right Arrow */}
         <div 
             className="absolute top-1/2 -translate-y-1/2 right-4 z-40 w-12 h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md hover:bg-white/20 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl"
             onClick={() => handleClick('right')}
