@@ -43,7 +43,7 @@ export const Projects: React.FC = () => {
   }, [isModalOpen, isVideoPlayerOpen]);
 
   return (
-    <div className="bg-[#141414] min-h-screen text-white font-sans selection:bg-white/20 overflow-x-hidden">
+    <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-white/20 overflow-x-hidden">
       <Navbar />
       
       {/* Full Screen Video Player Modal */}
@@ -160,8 +160,8 @@ export const Projects: React.FC = () => {
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
         </div>
 
         {/* Hero Content - Left Aligned Glass Panel */}
@@ -215,7 +215,7 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* CAROUSEL ROWS */}
-      <div className="relative z-20 -mt-24 md:-mt-32 pb-24 space-y-12 overflow-hidden">
+      <div className="relative z-20 -mt-24 md:-mt-32 pb-24 space-y-12 w-full overflow-hidden">
          {/* Row 1: Selected Works (Feature Films) */}
          <ProjectCarousel 
             title="Selected Works" 
@@ -235,21 +235,23 @@ export const Projects: React.FC = () => {
          />
 
          {/* Row 3: Coming Soon (Reverted to Floating Glass Panel Style) */}
-         <div className="px-6 md:px-12 py-4">
+         <div className="px-6 md:px-12 py-4 w-full">
              <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
                  Coming Soon
              </h2>
-             <div className="w-full relative aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10 shadow-2xl cursor-default">
+             <div className="w-full relative aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10 shadow-2xl cursor-default bg-black/50">
                 <img 
                     src={inProduction.image} 
                     alt={inProduction.title}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000" 
                 />
                 
                 {/* Floating Bottom Glass Panel - Slide Up on Hover */}
                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                  
-                 <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-700 ease-out">
+                 <div 
+                    className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out will-change-transform"
+                 >
                      <div className="glass-panel p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40">
                          {inProduction.status && (
                              <span className="inline-block px-2 py-0.5 bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-widest rounded mb-3 shadow-lg">

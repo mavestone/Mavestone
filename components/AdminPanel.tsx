@@ -15,7 +15,7 @@ export const AdminPanel: React.FC = () => {
     films, updateFilm, addFilm, deleteFilm,
     projectConfig, updateProjectConfig,
     saveChanges, uploadImage,
-    isAuthenticated, fetchMessages
+    isAuthenticated, fetchMessages, messages, markMessageRead
   } = useContent();
 
   const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'messages' | 'settings'>('home');
@@ -156,7 +156,7 @@ export const AdminPanel: React.FC = () => {
                                 <input type="text" value={projectConfig?.heroVideoId || ''} onChange={(e) => updateProjectConfig({ heroVideoId: extractYouTubeId(e.target.value) })} className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm font-mono text-white focus:outline-none" />
                             </div>
                             <div>
-                                <label className="block text-xs text-gray-500 mb-1">Featured Film (by ID)</label>
+                                <label className="block text-xs text-gray-500 mb-1">Featured Film Details (Source)</label>
                                 <select 
                                     value={projectConfig?.featuredFilmId || ''} 
                                     onChange={(e) => updateProjectConfig({ featuredFilmId: e.target.value })}
@@ -219,7 +219,7 @@ export const AdminPanel: React.FC = () => {
                                         <label className="block text-[10px] text-gray-500 mb-1">Description (More Info)</label>
                                         <textarea rows={2} value={film.description || ''} onChange={(e) => updateFilm(film.id, { description: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none" />
                                     </div>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <label className="block text-[10px] text-gray-500 mb-1">Match %</label>
                                             <input type="text" value={film.match || ''} placeholder="98% Match" onChange={(e) => updateFilm(film.id, { match: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
@@ -231,6 +231,10 @@ export const AdminPanel: React.FC = () => {
                                         <div>
                                             <label className="block text-[10px] text-gray-500 mb-1">Year</label>
                                             <input type="text" value={film.year || ''} placeholder="2024" onChange={(e) => updateFilm(film.id, { year: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
+                                        </div>
+                                         <div>
+                                            <label className="block text-[10px] text-gray-500 mb-1">Duration/Quality</label>
+                                            <input type="text" value={film.duration || ''} placeholder="4K / 1h 30m" onChange={(e) => updateFilm(film.id, { duration: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
                                         </div>
                                     </div>
                                     <div>
@@ -287,6 +291,57 @@ export const AdminPanel: React.FC = () => {
                         </div>
                     </section>
                 </div>
+              )}
+
+              {/* MESSAGES TAB */}
+              {activeTab === 'messages' && (
+                  <div className="space-y-6">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-green-400">Inbox</h3>
+                        <button onClick={fetchMessages} className="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-white">Refresh</button>
+                      </div>
+                      {messages.length === 0 ? (
+                          <div className="text-center text-gray-500 py-12">No messages yet.</div>
+                      ) : (
+                          <div className="space-y-4">
+                              {messages.map((msg) => (
+                                  <div key={msg.id} className={`p-4 rounded-xl border transition-all ${msg.read ? 'bg-white/5 border-white/5 opacity-70' : 'bg-white/10 border-green-500/30'}`}>
+                                      <div className="flex justify-between items-start mb-2">
+                                          <div>
+                                              <h4 className="text-white font-bold text-sm">{msg.name}</h4>
+                                              <a href={`mailto:${msg.email}`} className="text-xs text-blue-400 hover:underline">{msg.email}</a>
+                                          </div>
+                                          <div className="flex flex-col items-end gap-2">
+                                            <span className="text-[10px] text-gray-500">{new Date(msg.created_at).toLocaleDateString()}</span>
+                                            {!msg.read && (
+                                                <button onClick={() => markMessageRead(msg.id)} className="text-[10px] text-green-400 border border-green-500/30 px-2 py-0.5 rounded hover:bg-green-500/10">Mark Read</button>
+                                            )}
+                                          </div>
+                                      </div>
+                                      <div className="bg-black/30 p-3 rounded-lg text-sm text-gray-300 leading-relaxed">
+                                          {msg.message}
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      )}
+                  </div>
+              )}
+
+              {/* SETTINGS TAB */}
+              {activeTab === 'settings' && (
+                  <div className="space-y-6">
+                       <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Application Settings</h3>
+                       <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
+                            <p className="text-xs text-gray-500">Database Connection: <span className={supabase ? "text-green-400" : "text-red-400"}>{supabase ? "Connected" : "Offline / Mode"}</span></p>
+                            <div className="pt-4 border-t border-white/10">
+                                <p className="text-xs text-gray-500 mb-4">Reset Content to Default (Careful!)</p>
+                                <button className="w-full py-2 bg-red-900/20 text-red-400 border border-red-900/50 rounded hover:bg-red-900/40 text-xs font-bold" onClick={() => { if(confirm("Reset all content to default?")) useContent().seedDatabase() }}>
+                                    Seed Database Defaults
+                                </button>
+                            </div>
+                       </div>
+                  </div>
               )}
             </div>
             
