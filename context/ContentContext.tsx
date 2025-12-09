@@ -15,6 +15,7 @@ interface ContentContextType {
   isLoading: boolean;
   toggleAdmin: () => void;
   openAdmin: () => void;
+  closeAdmin: () => void;
   updateLatestVideo: (data: Partial<LatestVideoData>) => void;
   updateInProduction: (data: Partial<InProductionData>) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
@@ -100,6 +101,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // 2. Actions
   const toggleAdmin = () => setIsAdminOpen(prev => !prev);
   const openAdmin = () => setIsAdminOpen(true);
+  const closeAdmin = () => setIsAdminOpen(false);
 
   const updateLatestVideo = (data: Partial<LatestVideoData>) => {
     setLatestVideo(prev => ({ ...prev, ...data }));
@@ -249,6 +251,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isLoading,
       toggleAdmin,
       openAdmin,
+      closeAdmin,
       updateLatestVideo,
       updateInProduction,
       updateShort,

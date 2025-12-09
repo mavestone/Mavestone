@@ -9,13 +9,15 @@ import { supabase } from '../lib/supabase';
 export const AdminPanel: React.FC = () => {
   const { 
     isAdminOpen, 
-    toggleAdmin, 
+    closeAdmin, 
     latestVideo, 
     updateLatestVideo, 
     inProduction,
     updateInProduction,
     shorts, 
     updateShort,
+    films,
+    updateFilm,
     saveChanges,
     uploadImage,
     logout,
@@ -118,7 +120,7 @@ export const AdminPanel: React.FC = () => {
                         {isSaving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
                     </button>
                     <button 
-                        onClick={toggleAdmin}
+                        onClick={closeAdmin}
                         className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
                     >
                         <X size={20} />
@@ -352,6 +354,79 @@ export const AdminPanel: React.FC = () => {
                             className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-white/30"
                             />
                         </div>
+                        </div>
+                    </section>
+
+                    {/* Selected Works (Films) */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-teal-400">Selected Works (Feature Films)</h3>
+                        <div className="space-y-4">
+                            {films.map((film, idx) => (
+                                <div key={film.id} className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs font-mono text-gray-500">#{idx + 1}</span>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] text-gray-500 mb-1">Title</label>
+                                        <input 
+                                            type="text" 
+                                            value={film.title}
+                                            onChange={(e) => updateFilm(film.id, { title: e.target.value })}
+                                            className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-white/30"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] text-gray-500 mb-1">Tagline</label>
+                                        <input 
+                                            type="text" 
+                                            value={film.tagline}
+                                            onChange={(e) => updateFilm(film.id, { tagline: e.target.value })}
+                                            className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-white/30"
+                                        />
+                                    </div>
+                                     <div className="grid grid-cols-2 gap-3">
+                                         <div>
+                                            <label className="block text-[10px] text-gray-500 mb-1">Category</label>
+                                            <input 
+                                                type="text" 
+                                                value={film.category}
+                                                onChange={(e) => updateFilm(film.id, { category: e.target.value })}
+                                                className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-white/30"
+                                            />
+                                         </div>
+                                         <div>
+                                            <label className="block text-[10px] text-gray-500 mb-1">YouTube ID (for Hero)</label>
+                                            <input 
+                                                type="text" 
+                                                value={film.videoId || ''}
+                                                placeholder="Video ID"
+                                                onChange={(e) => updateFilm(film.id, { videoId: extractYouTubeId(e.target.value) })}
+                                                className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm font-mono text-white focus:outline-none focus:border-white/30"
+                                            />
+                                         </div>
+                                     </div>
+                                    <div>
+                                        <label className="block text-[10px] text-gray-500 mb-1">Image</label>
+                                        <div className="relative">
+                                            <input 
+                                            type="text" 
+                                            value={film.image}
+                                            onChange={(e) => updateFilm(film.id, { image: e.target.value })}
+                                            className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-gray-300 focus:outline-none focus:border-white/30 pr-10"
+                                            />
+                                            <label className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-white/10 hover:bg-white/20 rounded-md cursor-pointer transition-colors">
+                                                <Camera size={12} className="text-white" />
+                                                <input 
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    accept="image/*"
+                                                    onChange={(e) => handleImageUpload(e, (url) => updateFilm(film.id, { image: url }))}
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </section>
                 </div>

@@ -11,7 +11,7 @@ export const Projects: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   
-  // Use the first film as the featured hero
+  // Use the first film as the featured hero, ensure videoId exists
   const featured = films[0] || { 
       title: "Cinematic Excellence", 
       tagline: "Stories that move people", 
@@ -19,6 +19,8 @@ export const Projects: React.FC = () => {
       category: "Featured Film",
       videoId: "jfopjfSYLcM" // Default placeholder ID if needed
   };
+
+  const heroVideoId = featured.videoId || "jfopjfSYLcM";
 
   // Prevent scrolling when modal is open
   useEffect(() => {
@@ -49,7 +51,7 @@ export const Projects: React.FC = () => {
                      <iframe 
                         width="100%" 
                         height="100%" 
-                        src={`https://www.youtube.com/embed/jfopjfSYLcM?autoplay=1&rel=0&modestbranding=1`} 
+                        src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&rel=0&modestbranding=1`} 
                         title="YouTube video player" 
                         frameBorder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -81,7 +83,7 @@ export const Projects: React.FC = () => {
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <iframe
                     className="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 opacity-40 pointer-events-none grayscale contrast-125"
-                    src={`https://www.youtube.com/embed/jfopjfSYLcM?autoplay=1&mute=1&controls=0&loop=1&playlist=jfopjfSYLcM&playsinline=1&rel=0`}
+                    src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroVideoId}&playsinline=1&rel=0`}
                     title="Background Video"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

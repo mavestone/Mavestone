@@ -68,6 +68,7 @@ export const FILMS: Film[] = [
     category: "Documentary",
     tagline: "Perspective shifts everything.",
     image: PLACEHOLDER_IMAGE,
+    videoId: "jfopjfSYLcM"
   },
   {
     id: '2',
@@ -75,6 +76,7 @@ export const FILMS: Film[] = [
     category: "Commercial",
     tagline: "Performance at its peak.",
     image: PLACEHOLDER_IMAGE,
+    videoId: "jfopjfSYLcM"
   },
   {
     id: '3',
@@ -82,5 +84,6 @@ export const FILMS: Film[] = [
     category: "Short Film",
     tagline: "How far would you go?",
     image: PLACEHOLDER_IMAGE,
+    videoId: "jfopjfSYLcM"
   },
 ];
