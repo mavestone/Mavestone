@@ -134,9 +134,11 @@ export const Projects: React.FC = () => {
                  <img 
                     src={inProduction.image} 
                     alt={inProduction.title} 
-                    className="w-full h-full object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-1000" 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                 />
-                <div className="absolute inset-0 bg-black/50" />
+                
+                {/* Gradient for text readability only at bottom */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 
                 {/* Bottom Left Content (Pop up on hover) */}
                 <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex items-end">
