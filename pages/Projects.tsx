@@ -129,7 +129,7 @@ export const Projects: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl isolate"
+                className="group relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl isolate"
             >
                  <img 
                     src={inProduction.image} 
@@ -138,16 +138,16 @@ export const Projects: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-black/50" />
                 
-                {/* Center Content */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="glass-panel p-10 md:p-16 rounded-[2rem] border border-white/10 backdrop-blur-xl text-center max-w-3xl mx-4">
-                        <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                {/* Bottom Left Content (Pop up on hover) */}
+                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex items-end">
+                    <div className="glass-panel inline-block p-6 md:p-8 rounded-2xl border border-white/10 backdrop-blur-xl text-left max-w-xl transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        <div className="inline-block px-3 py-1 mb-3 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(239,68,68,0.2)]">
                             {inProduction.status}
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight text-glow">
+                        <h2 className="text-2xl md:text-4xl font-bold text-white mb-3 tracking-tight text-glow">
                             {inProduction.title}
                         </h2>
-                        <p className="text-lg md:text-xl text-gray-300 font-light leading-relaxed">
+                        <p className="text-sm md:text-base text-gray-300 font-light leading-relaxed line-clamp-3">
                             {inProduction.description}
                         </p>
                     </div>

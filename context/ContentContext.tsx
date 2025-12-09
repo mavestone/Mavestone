@@ -199,32 +199,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     try {
         // 1. Save to Supabase DB
+        // The Database Trigger (setup in SQL) will automatically send the email via Resend
         const { error } = await supabase.from('messages').insert([
             { name, email, message }
         ]);
         
         if (error) throw error;
-
-        // 2. Optional: Call Resend API (Client-side calls are often blocked by CORS, but we can try)
-        // Ideally this should be done via a Supabase Edge Function
-        try {
-            await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer re_217mCENA_87RgBqVHKQthV4BQ7HQjCLud`
-                },
-                body: JSON.stringify({
-                    from: 'onboarding@resend.dev',
-                    to: 'hello@mavestone.com',
-                    subject: `New Lead: ${name}`,
-                    html: `<p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Message:</strong><br/>${message}</p>`
-                })
-            });
-        } catch (resendError) {
-            console.warn("Resend API call failed (expected on client-side due to CORS). Message saved to DB.", resendError);
-        }
-
         return { success: true };
     } catch (e) {
         console.error("Error sending message:", e);
