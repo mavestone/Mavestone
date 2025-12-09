@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
 import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
 
 export const Shorts: React.FC = () => {
   const { shorts } = useContent();
@@ -18,24 +17,12 @@ export const Shorts: React.FC = () => {
     if (!urlOrId) return '';
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?v=)|(shorts\/))([^#&?]*).*/;
     const match = urlOrId.match(regExp);
-    // Safer check using optional chaining
     return match?.[8]?.length === 11 ? match[8] : urlOrId;
   };
-
-  // 1. Inject YouTube Script if missing
-  useEffect(() => {
-    if (!window.YT) {
-      const script = document.createElement("script");
-      script.src = "https://www.youtube.com/iframe_api";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
 
   useEffect(() => {
     let interval: any;
 
-    // Cleanup previous player if exists
     if (activePlayerRef.current) {
         try {
             activePlayerRef.current.destroy();
@@ -63,8 +50,7 @@ export const Shorts: React.FC = () => {
                         modestbranding: 1,
                         playsinline: 1,
                         loop: 1,
-                        playlist: videoId, // Required for loop
-                        // Origin removed to prevent Error 153
+                        playlist: videoId,
                     },
                     events: {
                         onReady: (e: any) => e.target.playVideo()
@@ -86,7 +72,6 @@ export const Shorts: React.FC = () => {
     };
   }, [playingId, shorts]);
 
-  // Global unmount cleanup
   useEffect(() => {
       return () => {
           if (activePlayerRef.current) {
@@ -115,38 +100,37 @@ export const Shorts: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1, duration: 0.6 }}
             viewport={{ once: true }}
-            className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-charcoal cursor-none isolate"
+            className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer isolate border border-white/5"
           >
              {!isPlaying ? (
                  <div 
-                    className="absolute inset-0 cursor-pointer"
+                    className="absolute inset-0 w-full h-full"
                     onClick={() => setPlayingId(short.id)}
                  >
+                    {/* Background Image */}
                     <img
                         src={short.image}
                         alt={short.title}
-                        className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-all duration-500 transform group-hover:scale-105"
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-110"
                     />
                     
+                    {/* Gradients */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
-                    
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                            <Play size={20} fill="currentColor" className="ml-1 text-white" />
-                        </div>
-                    </div>
 
-                    <div className="absolute bottom-0 left-0 p-6 w-full pointer-events-none">
-                        <div className="flex justify-between items-end">
-                            <div>
-                                <h3 className="text-lg font-bold text-white leading-tight">{short.title}</h3>
-                                <p className="text-xs text-gray-400 mt-1">Short Film</p>
+                    {/* Floating Glass Content */}
+                    <div className="absolute inset-x-4 bottom-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                        <div className="glass-panel p-4 rounded-xl border border-white/10 backdrop-blur-md bg-white/5 group-hover:bg-white/10 transition-colors">
+                            <h4 className="font-bold text-white text-lg leading-tight mb-1">{short.title}</h4>
+                            <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-300">
+                                <span>Short Film</span>
+                                {short.showViews !== false && (
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                        {short.views}
+                                    </span>
+                                )}
                             </div>
-                            {(short.showViews ?? true) && (
-                                <span className="text-xs font-mono text-white/60 bg-white/10 px-2 py-1 rounded-md backdrop-blur-sm">
-                                    {short.views}
-                                </span>
-                            )}
                         </div>
                     </div>
                  </div>

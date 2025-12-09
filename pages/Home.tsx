@@ -4,7 +4,6 @@ import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { LatestVideo } from '../components/LatestVideo';
 import { Shorts } from '../components/Shorts';
-import { Films } from '../components/Films';
 import { Collaboration } from '../components/Collaboration';
 import { Contact } from '../components/Contact';
 import { Footer } from '../components/Footer';
@@ -20,7 +19,6 @@ export const Home: React.FC = () => {
             <Hero />
             <LatestVideo />
             <Shorts />
-            <Films />
             <Collaboration />
             <Contact />
         </main>

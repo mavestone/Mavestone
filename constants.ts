@@ -5,7 +5,6 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '#hero' },
   { label: 'Work', href: '#work' },
   { label: 'Shorts', href: '#shorts' },
-  { label: 'Films', href: '#films' },
   { label: 'About', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ];

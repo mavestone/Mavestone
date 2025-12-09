@@ -1,25 +1,65 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { useContent } from '../context/ContentContext';
-import { motion } from 'framer-motion';
-import { Play, Info, ArrowRight, Clapperboard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Info, ArrowRight, Clapperboard, X } from 'lucide-react';
 
 export const Projects: React.FC = () => {
   const { films, shorts, latestVideo, inProduction } = useContent();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   
   // Use the first film as the featured hero
   const featured = films[0] || { 
       title: "Cinematic Excellence", 
       tagline: "Stories that move people", 
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
-      category: "Featured Film"
+      category: "Featured Film",
+      videoId: "jfopjfSYLcM" // Default placeholder ID if needed
   };
+
+  // Prevent scrolling when modal is open
+  useEffect(() => {
+      if (isModalOpen) document.body.style.overflow = 'hidden';
+      else document.body.style.overflow = 'unset';
+  }, [isModalOpen]);
 
   return (
     <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-white/20 overflow-x-hidden">
       <Navbar />
+      
+      {/* Full Screen Video Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[200] bg-black flex items-center justify-center"
+            >
+                <button 
+                    onClick={() => setIsModalOpen(false)}
+                    className="absolute top-8 right-8 z-[210] p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors cursor-pointer"
+                >
+                    <X size={24} />
+                </button>
+                <div className="w-full h-full max-w-7xl max-h-[90vh] aspect-video">
+                     <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src={`https://www.youtube.com/embed/jfopjfSYLcM?autoplay=1&rel=0&modestbranding=1`} 
+                        title="YouTube video player" 
+                        frameBorder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowFullScreen
+                        className="w-full h-full"
+                    ></iframe>
+                </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Ambient Background Glow */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none">
@@ -28,16 +68,29 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* Glass Hero Section */}
-      <div className="relative h-[90vh] w-full flex items-center justify-center px-6 md:px-12 pt-20">
-        {/* Background Image */}
+      <div className="relative h-[90vh] w-full flex items-center justify-center px-6 md:px-12 pt-20 overflow-hidden">
+        {/* Background Video Layer */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src={featured.image} 
-            alt={featured.title} 
-            className="w-full h-full object-cover opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/80 via-transparent to-transparent" />
+             {/* Fallback Image */}
+            <img 
+                src={featured.image} 
+                alt={featured.title} 
+                className={`w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-60'}`}
+            />
+            {/* Background Video Loop */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <iframe
+                    className="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 opacity-40 pointer-events-none grayscale contrast-125"
+                    src={`https://www.youtube.com/embed/jfopjfSYLcM?autoplay=1&mute=1&controls=0&loop=1&playlist=jfopjfSYLcM&playsinline=1&rel=0`}
+                    title="Background Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    onLoad={() => setVideoLoaded(true)}
+                />
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/80 via-transparent to-transparent" />
         </div>
 
         {/* Floating Glass Hero Card */}
@@ -67,11 +120,14 @@ export const Projects: React.FC = () => {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4">
-                    <button className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                    <button 
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] cursor-pointer"
+                    >
                         <Play fill="currentColor" size={20} />
                         <span>Play Film</span>
                     </button>
-                    <button className="flex items-center gap-3 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full font-medium hover:bg-white/10 transition-colors backdrop-blur-md">
+                    <button className="flex items-center gap-3 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full font-medium hover:bg-white/10 transition-colors backdrop-blur-md cursor-pointer">
                         <Info size={20} />
                         <span>Details</span>
                     </button>
