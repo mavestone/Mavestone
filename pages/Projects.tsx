@@ -8,9 +8,8 @@ import { Play, Info, X } from 'lucide-react';
 import { ProjectCarousel } from '../components/ui/ProjectCarousel';
 
 export const Projects: React.FC = () => {
-  const { films, shorts, latestVideo, inProduction } = useContent();
+  const { films, shorts, inProduction } = useContent();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [activeItem, setActiveItem] = useState<any>(null); // For details modal
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false); // For fullscreen player
   
@@ -159,7 +158,6 @@ export const Projects: React.FC = () => {
                 title="Hero Background"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                onLoad={() => setVideoLoaded(true)}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
@@ -215,7 +213,7 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* CAROUSEL ROWS */}
-      <div className="relative z-20 -mt-24 md:-mt-32 pb-24 space-y-8 overflow-hidden">
+      <div className="relative z-20 -mt-24 md:-mt-32 pb-24 space-y-12 overflow-hidden">
          {/* Row 1: Selected Works (Feature Films) */}
          <ProjectCarousel 
             title="Selected Works" 
@@ -234,14 +232,42 @@ export const Projects: React.FC = () => {
             onMoreInfo={openDetails}
          />
 
-         {/* Row 3: Coming Soon */}
-         <ProjectCarousel 
-            title="Coming Soon" 
-            items={[inProduction]} // Wrap single item in array
-            type="coming-soon" 
-            onPlay={openPlayer}
-            onMoreInfo={openDetails}
-         />
+         {/* Row 3: Coming Soon (Static Cinematic Card) */}
+         <div className="px-6 md:px-12 py-4">
+             <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
+                 Coming Soon
+             </h2>
+             <div className="w-full relative aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10">
+                <img 
+                    src={inProduction.image} 
+                    alt={inProduction.title}
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                />
+                
+                {/* Floating Content Box - Bottom Left */}
+                <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-lg z-20">
+                    {/* Default State: Title only */}
+                     <div className="transition-all duration-300 transform translate-y-8 group-hover:translate-y-0">
+                        {inProduction.status && (
+                            <span className="inline-block px-2 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest rounded mb-3 backdrop-blur-md shadow-lg">
+                                {inProduction.status}
+                            </span>
+                        )}
+                        <h3 className="text-3xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">{inProduction.title}</h3>
+                        
+                        {/* Hidden Description (Reveals on Hover) */}
+                        <div className="h-0 overflow-hidden group-hover:h-auto opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+                             <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light drop-shadow-md bg-black/40 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                {inProduction.description}
+                            </p>
+                        </div>
+                     </div>
+                </div>
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+             </div>
+         </div>
       </div>
 
       <Footer />

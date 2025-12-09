@@ -6,6 +6,7 @@ export interface Film {
   tagline: string;
   image: string;
   videoId?: string;
+  description?: string;
 }
 
 export interface Short {
