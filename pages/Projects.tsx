@@ -215,7 +215,7 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* CAROUSEL ROWS */}
-      <div className="relative z-20 -mt-24 md:-mt-32 pb-24 space-y-12 w-full overflow-hidden">
+      <div className="relative z-20 -mt-16 md:-mt-20 pb-24 space-y-12 w-full overflow-hidden">
          {/* Row 1: Selected Works (Feature Films) */}
          <ProjectCarousel 
             title="Selected Works" 
@@ -246,18 +246,22 @@ export const Projects: React.FC = () => {
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000" 
                 />
                 
+                {/* Status Tag - Always Visible Top Left */}
+                {inProduction.status && (
+                    <div className="absolute top-6 left-6 z-30">
+                        <span className="inline-block px-3 py-1 bg-red-600/90 text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-lg backdrop-blur-sm">
+                            {inProduction.status}
+                        </span>
+                    </div>
+                )}
+                
                 {/* Floating Bottom Glass Panel - Slide Up on Hover */}
                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                  
                  <div 
-                    className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out will-change-transform"
+                    className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out will-change-transform transform-gpu"
                  >
                      <div className="glass-panel p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40">
-                         {inProduction.status && (
-                             <span className="inline-block px-2 py-0.5 bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-widest rounded mb-3 shadow-lg">
-                                 {inProduction.status}
-                             </span>
-                         )}
                          <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">{inProduction.title}</h3>
                          <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light">
                              {inProduction.description}

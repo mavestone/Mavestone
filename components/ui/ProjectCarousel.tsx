@@ -35,7 +35,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
   };
 
   return (
-    <div className="space-y-2 py-4 group/row relative z-20 w-full overflow-hidden">
+    <div className="space-y-2 py-4 group/row relative z-20 w-full min-w-full overflow-hidden">
       <h2 className="text-xl md:text-2xl font-semibold text-white px-6 md:px-12 group-hover/row:text-white transition-colors duration-300 shadow-black drop-shadow-md mb-2">
           {title}
       </h2>
@@ -52,7 +52,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
         {/* Scroll Container - Edge to Edge (No Right Padding) */}
         <div 
             ref={rowRef}
-            className="flex items-center gap-4 overflow-x-scroll scrollbar-hide pl-6 md:pl-12 pr-0 py-8 scroll-smooth w-full"
+            className="flex items-center gap-4 overflow-x-scroll scrollbar-hide pl-6 md:pl-12 pr-0 py-8 scroll-smooth w-full min-w-full"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item) => (
