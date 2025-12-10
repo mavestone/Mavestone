@@ -179,7 +179,7 @@ export const Projects: React.FC = () => {
                         {/* Logo or Text Label */}
                         <div className="mb-4">
                             {logoImage ? (
-                                <img src={logoImage} alt="Original Series" className="h-6 md:h-8 object-contain" />
+                                <img src={logoImage} alt="Original Series" className="h-5 md:h-6 object-contain" />
                             ) : (
                                 <div className="flex items-center gap-2">
                                     <span className="text-red-600 font-bold text-4xl md:text-5xl tracking-tighter">M</span>
