@@ -24,7 +24,8 @@ export const Projects: React.FC = () => {
       videoId: "jfopjfSYLcM"
   };
 
-  const heroVideoId = projectConfig?.heroVideoId || featured.videoId || "jfopjfSYLcM";
+  // Ensure background video is from the featured project
+  const heroVideoId = featured.videoId || "jfopjfSYLcM";
   const logoImage = projectConfig?.logoImage;
 
   // Handle Detail Modal
@@ -151,11 +152,11 @@ export const Projects: React.FC = () => {
       </AnimatePresence>
 
       {/* HERO SECTION */}
-      <div className="relative w-full h-[85vh] overflow-hidden">
+      <div className="relative w-full h-[80vh] md:h-[85vh] overflow-hidden">
         {/* Background Video */}
         <div className="absolute inset-0 pointer-events-none">
              <iframe
-                className="absolute top-1/2 left-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 opacity-60 grayscale-[20%]"
+                className="absolute top-1/2 left-1/2 w-[400%] h-[150%] md:w-[150%] md:h-[150%] -translate-x-1/2 -translate-y-1/2 opacity-60 grayscale-[20%]"
                 src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroVideoId}&playsinline=1&rel=0`}
                 title="Hero Background"
                 frameBorder="0"
@@ -166,8 +167,8 @@ export const Projects: React.FC = () => {
         </div>
 
         {/* Hero Content - Left Aligned Glass Panel */}
-        <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center px-6 md:px-12 z-10">
-            <div className="max-w-2xl mt-16 md:mt-0">
+        <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center px-4 md:px-12 z-10">
+            <div className="max-w-2xl mt-16 md:mt-0 w-full">
                 <motion.div 
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -192,7 +193,7 @@ export const Projects: React.FC = () => {
                             {featured.title}
                         </h1>
 
-                        <div className="flex items-center gap-4 text-sm font-bold text-gray-300 mb-6">
+                        <div className="flex items-center gap-4 text-sm font-bold text-gray-300 mb-6 flex-wrap">
                             <span className="text-green-400">{featured.match || "98% Match"}</span>
                             <span className="text-gray-400">{featured.year || "2024"}</span>
                             <span className="border border-gray-500 px-1 text-xs">{featured.maturityRating || "TV-14"}</span>
@@ -203,7 +204,7 @@ export const Projects: React.FC = () => {
                             {featured.description || featured.tagline}
                         </p>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-4">
                             <button 
                                 onClick={() => openPlayer(featured)}
                                 className="px-6 md:px-8 py-3 bg-white text-black text-lg font-bold rounded-full hover:bg-white/90 transition-colors flex items-center gap-2"
@@ -224,7 +225,7 @@ export const Projects: React.FC = () => {
       </div>
 
       {/* CAROUSEL ROWS */}
-      <div className="relative z-20 -mt-16 md:-mt-20 pb-24 space-y-12 w-full overflow-hidden">
+      <div className="relative z-20 -mt-10 md:-mt-20 pb-24 space-y-12 w-full overflow-hidden">
          {/* Row 1: Selected Works (Feature Films) */}
          <ProjectCarousel 
             title="Selected Works" 
@@ -243,12 +244,12 @@ export const Projects: React.FC = () => {
             onMoreInfo={openDetails}
          />
 
-         {/* Row 3: Coming Soon */}
-         <div className="pl-6 md:pl-12 w-full">
+         {/* Row 3: Coming Soon - Responsive Adaptation */}
+         <div className="px-4 md:px-12 w-full">
              <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
                  Coming Soon
              </h2>
-             <div className="w-full relative aspect-[21/9] rounded-l-2xl overflow-hidden group border-y border-l border-white/10 shadow-2xl cursor-default bg-black/50">
+             <div className="w-full relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden group border border-white/10 shadow-2xl cursor-default bg-black/50">
                 <img 
                     src={inProduction.image} 
                     alt={inProduction.title}
@@ -268,8 +269,8 @@ export const Projects: React.FC = () => {
                 )}
                 
                 {/* Fixed Glass Card - Left Aligned (Matching Hero Style) - Hidden by default, visible on hover */}
-                 <div className="absolute top-1/2 left-6 md:left-12 -translate-y-1/2 max-w-xl z-20 w-full md:w-auto pr-6 md:pr-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
-                     <div className="glass-panel p-6 md:p-10 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl transition-colors duration-300">
+                 <div className="absolute top-1/2 left-4 md:left-12 -translate-y-1/2 max-w-sm md:max-w-xl z-20 w-[90%] md:w-auto pr-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
+                     <div className="glass-panel p-5 md:p-10 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl transition-colors duration-300">
                          <div className="text-red-500 font-bold tracking-widest text-xs uppercase mb-3">Next Release</div>
                          <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-none">{inProduction.title}</h3>
                          <div className="w-12 h-1 bg-white/20 mb-6 group-hover:w-20 group-hover:bg-white/50 transition-all duration-500"></div>
