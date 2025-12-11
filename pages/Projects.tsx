@@ -179,7 +179,7 @@ export const Projects: React.FC = () => {
                         {/* Logo or Text Label */}
                         <div className="mb-4">
                             {logoImage ? (
-                                <img src={logoImage} alt="Original Series" className="h-5 md:h-6 object-contain" />
+                                <img src={logoImage} alt="Original Series" className="h-6 md:h-8 object-contain" />
                             ) : (
                                 <div className="flex items-center gap-2">
                                     <span className="text-red-600 font-bold text-4xl md:text-5xl tracking-tighter">M</span>
@@ -243,7 +243,7 @@ export const Projects: React.FC = () => {
             onMoreInfo={openDetails}
          />
 
-         {/* Row 3: Coming Soon (Reverted to Floating Glass Panel Style) */}
+         {/* Row 3: Coming Soon */}
          <div className="pl-6 md:pl-12 w-full">
              <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
                  Coming Soon
@@ -252,27 +252,28 @@ export const Projects: React.FC = () => {
                 <img 
                     src={inProduction.image} 
                     alt={inProduction.title}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000" 
+                    className="w-full h-full object-cover transform group-hover:scale-105 group-hover:blur-sm transition-all duration-700" 
                 />
                 
-                {/* Status Tag - Always Visible Top Left */}
+                {/* Gradient Overlay - Hidden by default, visible on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
+
+                {/* Status Tag - Top Right */}
                 {inProduction.status && (
-                    <div className="absolute top-6 left-6 z-30">
-                        <span className="inline-block px-3 py-1 bg-red-600/90 text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-lg backdrop-blur-sm">
+                    <div className="absolute top-6 right-6 md:right-12 z-30">
+                         <span className="inline-block px-4 py-1.5 bg-white/10 text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-lg backdrop-blur-md border border-white/10 group-hover:bg-white group-hover:text-black transition-colors duration-300">
                             {inProduction.status}
                         </span>
                     </div>
                 )}
                 
-                {/* Floating Bottom Glass Panel - Slide Up on Hover */}
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                 
-                 <div 
-                    className="absolute bottom-8 left-8 md:bottom-12 md:left-12 max-w-xl z-20 opacity-0 group-hover:opacity-100 translate-y-8 group-hover:translate-y-0 transition-[opacity,transform] duration-500 ease-out will-change-[opacity,transform] transform-gpu"
-                 >
-                     <div className="glass-panel p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40">
-                         <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">{inProduction.title}</h3>
-                         <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light">
+                {/* Fixed Glass Card - Left Aligned (Matching Hero Style) - Hidden by default, visible on hover */}
+                 <div className="absolute top-1/2 left-6 md:left-12 -translate-y-1/2 max-w-xl z-20 w-full md:w-auto pr-6 md:pr-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
+                     <div className="glass-panel p-6 md:p-10 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl transition-colors duration-300">
+                         <div className="text-red-500 font-bold tracking-widest text-xs uppercase mb-3">Next Release</div>
+                         <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-none">{inProduction.title}</h3>
+                         <div className="w-12 h-1 bg-white/20 mb-6 group-hover:w-20 group-hover:bg-white/50 transition-all duration-500"></div>
+                         <p className="text-sm md:text-base text-gray-300 leading-relaxed font-light line-clamp-3 group-hover:text-white transition-colors duration-300">
                              {inProduction.description}
                          </p>
                      </div>

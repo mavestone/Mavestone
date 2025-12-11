@@ -59,8 +59,15 @@ export const Hero: React.FC = () => {
   const smoothY = useSpring(mouseY, { stiffness: 50, damping: 20 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    mouseX.set(e.clientX);
-    mouseY.set(e.clientY);
+    // Only update star position if NOT hovering over a button
+    // This allows the custom cursor on buttons to work without the background shifting distractingly
+    const target = e.target as HTMLElement;
+    const isInteractive = target.closest('button') || target.closest('a') || target.closest('[role="button"]');
+    
+    if (!isInteractive) {
+        mouseX.set(e.clientX);
+        mouseY.set(e.clientY);
+    }
   };
 
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -72,6 +79,40 @@ export const Hero: React.FC = () => {
     setStars(Array.from({ length: 40 }, (_, i) => i));
   }, []);
 
+  const titleVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.04,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  // Cinematic blur reveal
+  const letterVariants = {
+    hidden: { 
+        opacity: 0, 
+        y: 100, 
+        filter: 'blur(20px)',
+        scale: 1.1
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      scale: 1,
+      transition: { 
+          duration: 1.4, 
+          ease: [0.19, 1, 0.22, 1] // "Cinematic" easing curve
+      }
+    }
+  };
+
+  const line1 = "Stories That";
+  const line2 = "Move People";
+
   return (
     <div 
         id="hero"
@@ -82,7 +123,7 @@ export const Hero: React.FC = () => {
       {/* Stars Background */}
       <motion.div 
         style={{ y, opacity }}
-        className="absolute inset-0 z-0 overflow-hidden"
+        className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
       >
         <div className="absolute inset-0 w-full h-full max-w-6xl mx-auto opacity-70">
             {stars.map((i) => (
@@ -92,28 +133,56 @@ export const Hero: React.FC = () => {
       </motion.div>
 
       <div className="relative z-10 container px-6 mx-auto flex flex-col items-center text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-4xl"
-        >
-            <div className="mb-6 flex justify-center w-full">
-                <span className="px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs font-medium text-gray-300 uppercase tracking-widest">
+        <div className="max-w-5xl">
+            <motion.div 
+                initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 1, delay: 0.1 }}
+                className="mb-8 flex justify-center w-full"
+            >
+                <span className="px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-[10px] md:text-xs font-semibold text-gray-300 uppercase tracking-[0.2em]">
                     Creative Studio
                 </span>
-            </div>
-          <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-white mb-8 leading-[0.9]">
-            Stories That <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-gray-600">
-              Move People
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 font-light">
+            </motion.div>
+            
+            <motion.h1 
+                variants={titleVariants}
+                initial="hidden"
+                animate="visible"
+                className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-white mb-10 leading-[0.9]"
+            >
+                <span className="block mb-2 md:mb-4 overflow-hidden py-2 text-white">
+                    {line1.split("").map((char, i) => (
+                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">
+                            {char === " " ? "\u00A0" : char}
+                        </motion.span>
+                    ))}
+                </span>
+                {/* Fixed visibility by using white text instead of transparent gradient which can cause issues with inline-block animations */}
+                <span className="block overflow-hidden py-2 text-white">
+                    {line2.split("").map((char, i) => (
+                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">
+                            {char === " " ? "\u00A0" : char}
+                        </motion.span>
+                    ))}
+                </span>
+            </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+            className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 font-light leading-relaxed"
+          >
             We blend cinematic visuals with strategic storytelling to build brands that leave a legacy.
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 1 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full"
+          >
             <MagneticButton variant="primary">
               View Work
             </MagneticButton>
@@ -121,14 +190,14 @@ export const Hero: React.FC = () => {
                 <Play size={16} fill="currentColor" />
                 <span className="ml-1">Watch Reel</span>
             </MagneticButton>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
+        transition={{ delay: 2, duration: 1 }}
         className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30"
       >
         <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>

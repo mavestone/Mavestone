@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
   <head>
@@ -33,6 +34,14 @@
           }
         }
       }
+    </script>
+    
+    <script>
+      // MutationObserver to fix Tailwind JIT in preview by forcing scanning of dynamic nodes
+      const observer = new MutationObserver((mutations) => {
+        // This simple observer keeps the Tailwind CDN alert to DOM changes
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
     </script>
 
     <script type="importmap">

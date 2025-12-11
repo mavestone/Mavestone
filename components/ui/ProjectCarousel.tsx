@@ -88,8 +88,8 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
                             </div>
                        </>
                     ) : (
-                        /* TYPE: FILM (Full Overlay Style) */
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col justify-between p-5 border-[3px] border-white/10 rounded-2xl">
+                        /* TYPE: FILM (Full Overlay Style with Glass) */
+                        <div className="absolute inset-0 glass-panel bg-black/40 backdrop-blur-xl opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col justify-between p-5 rounded-2xl">
                              <div className="flex justify-between items-start">
                                 <h3 className="text-base font-bold text-white line-clamp-2 drop-shadow-lg">{item.title}</h3>
                             </div>
