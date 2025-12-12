@@ -7,7 +7,6 @@ import { Shorts } from '../components/Shorts';
 import { Collaboration } from '../components/Collaboration';
 import { Contact } from '../components/Contact';
 import { Footer } from '../components/Footer';
-import { AdminPanel } from '../components/AdminPanel';
 import { ScrollIndicator } from '../components/ui/ScrollIndicator';
 
 export const Home: React.FC = () => {
@@ -23,7 +22,6 @@ export const Home: React.FC = () => {
             <Contact />
         </main>
         <Footer />
-        <AdminPanel />
     </>
   );
 };

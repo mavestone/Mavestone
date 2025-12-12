@@ -5,6 +5,7 @@ import { useContent } from '../context/ContentContext';
 import { X, Save, Camera, Loader2, Layout, Clapperboard, Settings, Mail, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { MagneticButton } from './ui/MagneticButton';
 import { supabase } from '../lib/supabase';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const AdminPanel: React.FC = () => {
   const { 
@@ -22,6 +23,9 @@ export const AdminPanel: React.FC = () => {
   const [processingImage, setProcessingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
       if (activeTab === 'messages' && isAuthenticated) fetchMessages();
@@ -64,6 +68,14 @@ export const AdminPanel: React.FC = () => {
         setIsSaving(false);
     }
   };
+  
+  const handleClose = () => {
+      closeAdmin();
+      // If we are currently on the admin route, return to home to ensure "Back to site" feeling
+      if (location.pathname === '/admin') {
+          navigate('/');
+      }
+  };
 
   if (!isAuthenticated && isAdminOpen) return null;
 
@@ -87,7 +99,7 @@ export const AdminPanel: React.FC = () => {
                      <button onClick={handleSave} className="p-2 rounded-full hover:bg-white/10 text-green-400 transition-colors">
                         {isSaving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
                     </button>
-                    <button onClick={closeAdmin} className="p-2 rounded-full hover:bg-white/10 text-white transition-colors">
+                    <button onClick={handleClose} className="p-2 rounded-full hover:bg-white/10 text-white transition-colors">
                         <X size={20} />
                     </button>
                 </div>

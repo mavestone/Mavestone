@@ -31,6 +31,15 @@ export const Navbar: React.FC = () => {
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>, href: string) => {
     e.preventDefault();
     
+    // Handle Route Links (e.g. /projects)
+    if (href.startsWith('/')) {
+        navigate(href);
+        setIsMobileMenuOpen(false);
+        window.scrollTo(0, 0);
+        return;
+    }
+
+    // Handle Hash Links
     const scrollToElement = () => {
         const element = document.querySelector(href);
         if (element) {
@@ -44,7 +53,6 @@ export const Navbar: React.FC = () => {
                 top: offsetPosition,
                 behavior: 'smooth'
             });
-            setIsMobileMenuOpen(false);
         }
     };
 
@@ -55,6 +63,7 @@ export const Navbar: React.FC = () => {
     } else {
         scrollToElement();
     }
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -119,7 +128,7 @@ export const Navbar: React.FC = () => {
         initial={{ opacity: 0, pointerEvents: "none" }}
         animate={{ opacity: isMobileMenuOpen ? 1 : 0, pointerEvents: isMobileMenuOpen ? "auto" : "none" }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center"
+        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center cursor-none"
       >
           <button 
             onClick={() => setIsMobileMenuOpen(false)}

@@ -4,6 +4,7 @@ import { Film, Short, NavItem, InProductionData, ProjectHeroConfig } from './typ
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '#hero' },
   { label: 'Work', href: '#work' },
+  { label: 'Portfolio', href: '/projects' },
   { label: 'Shorts', href: '#shorts' },
   { label: 'About', href: '#about' },
   { label: 'Contact', href: '#contact' },

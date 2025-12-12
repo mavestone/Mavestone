@@ -6,6 +6,7 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
 import { Projects } from './pages/Projects';
+import { AdminPanel } from './components/AdminPanel';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const CustomCursor: React.FC = () => {
@@ -132,6 +133,9 @@ const AppContent: React.FC = () => {
             <Route path="/admin" element={<Admin />} />
             <Route path="/projects" element={<Projects />} />
         </Routes>
+        
+        {/* Global Admin Panel Overlay */}
+        <AdminPanel />
     </div>
   );
 };
