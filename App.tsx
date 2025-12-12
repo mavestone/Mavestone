@@ -44,13 +44,13 @@ const AppContent: React.FC = () => {
   }, [cursorX, cursorY]);
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-none">
+    <div className="bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto lg:cursor-none">
         {/* Grain Overlay */}
         <div className="grain-overlay"></div>
 
-        {/* Custom Physics Cursor */}
+        {/* Custom Physics Cursor - Only visible on Large Screens (Desktop) */}
         <motion.div 
-            className="fixed top-0 left-0 rounded-full pointer-events-none z-[9999] hidden md:block backdrop-blur-[1px]"
+            className="fixed top-0 left-0 rounded-full pointer-events-none z-[9999] hidden lg:block backdrop-blur-[1px]"
             style={{ 
                 x: cursorXSpring,
                 y: cursorYSpring,

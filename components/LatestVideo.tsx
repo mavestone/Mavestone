@@ -87,13 +87,13 @@ export const LatestVideo: React.FC = () => {
 
   return (
     <SectionWrapper id="work">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 text-left">
-        <div className="items-start text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 text-left w-full relative z-10">
+        <div className="items-start text-left max-w-xl">
            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-2">Latest Film</h2>
            <p className="text-gray-400">A glimpse into our newest story.</p>
         </div>
-        <div className="hidden md:block">
-            <Link to="/projects" className="text-sm uppercase tracking-widest text-white/60 hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">
+        <div className="mt-8 md:mt-0 flex-shrink-0">
+            <Link to="/projects" className="inline-block text-xs md:text-sm font-bold uppercase tracking-widest text-white hover:text-gray-300 transition-colors border-b border-white/30 hover:border-white pb-1">
                 View All Projects
             </Link>
         </div>
