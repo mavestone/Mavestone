@@ -6,7 +6,7 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
 import { Projects } from './pages/Projects';
-import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const CustomCursor: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);

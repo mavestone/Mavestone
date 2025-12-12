@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
 import { Play, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export const LatestVideo: React.FC = () => {
