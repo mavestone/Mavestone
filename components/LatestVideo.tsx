@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
-import { Play } from 'lucide-react';
+import { Play, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -93,8 +93,12 @@ export const LatestVideo: React.FC = () => {
            <p className="text-gray-400">A glimpse into our newest story.</p>
         </div>
         <div className="mt-8 md:mt-0 flex-shrink-0">
-            <Link to="/projects" className="inline-block text-xs md:text-sm font-bold uppercase tracking-widest text-white hover:text-gray-300 transition-colors border-b border-white/30 hover:border-white pb-1">
-                View All Projects
+            <Link 
+                to="/projects" 
+                className="group flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+            >
+                <span>View All Projects</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </Link>
         </div>
       </div>
@@ -103,26 +107,31 @@ export const LatestVideo: React.FC = () => {
         {!isPlaying ? (
             /* THUMBNAIL STATE */
             <div 
-                className="relative w-full h-full cursor-pointer group"
+                className="relative w-full h-full cursor-pointer group overflow-hidden"
                 onClick={() => setIsPlaying(true)}
             >
+                {/* Image scales on hover */}
                 <img 
                     src={latestVideo.image} 
                     alt={latestVideo.title} 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-all duration-500"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <motion.div 
-                        whileHover={{ scale: 1.1 }}
-                        className="w-20 h-20 md:w-24 md:h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-black transition-all duration-300"
-                    >
-                        <Play className="ml-1 w-8 h-8 md:w-10 md:h-10 fill-current" />
-                    </motion.div>
-                </div>
                 
-                <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-black/90 to-transparent pointer-events-none text-left">
-                    <h3 className="text-2xl md:text-4xl font-bold text-white mb-2">{latestVideo.title}</h3>
-                    <p className="text-gray-300 max-w-lg text-sm md:text-base">{latestVideo.description}</p>
+                {/* Overlay Container: Hidden by default, fades in on hover */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center">
+                    
+                    {/* Play Button - Pops in */}
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.3)] transform scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 ease-out delay-100 hover:scale-110">
+                        <Play className="ml-1 w-8 h-8 md:w-10 md:h-10 fill-current" />
+                    </div>
+
+                    {/* Glass Text Box - Slides up */}
+                    <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-auto md:max-w-xl transform translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-200">
+                         <div className="glass-panel p-6 md:p-8 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/60 text-left shadow-2xl">
+                            <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">{latestVideo.title}</h3>
+                            <p className="text-gray-200 text-sm md:text-base leading-relaxed font-light line-clamp-3">{latestVideo.description}</p>
+                         </div>
+                    </div>
                 </div>
             </div>
         ) : (

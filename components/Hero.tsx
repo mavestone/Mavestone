@@ -1,82 +1,236 @@
 
-import React, { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import React, { useRef, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { MagneticButton } from './ui/MagneticButton';
 import { Play } from 'lucide-react';
 
-// Star Component
-const Star: React.FC<{ mouseX: any; mouseY: any }> = ({ mouseX, mouseY }) => {
-    // Random initial positions and sizes
-    const randomTop = Math.random() * 100;
-    const randomLeft = Math.random() * 100;
-    const size = Math.random() * 2 + 1;
-    const duration = Math.random() * 2 + 1.5;
-    const delay = Math.random() * 2;
-    
-    // Parallax factor (some move faster than others)
-    const factor = Math.random() * 30 + 10; 
-    
-    const x = useTransform(mouseX, [0, window.innerWidth], [factor, -factor]);
-    const y = useTransform(mouseY, [0, window.innerHeight], [factor, -factor]);
-
-    return (
-        <motion.div
-            style={{ 
-                top: `${randomTop}%`, 
-                left: `${randomLeft}%`,
-                x,
-                y
-            }}
-            className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ 
-                opacity: [0.2, 0.8, 0.2], 
-                scale: [1, 1.2, 1] 
-            }}
-            transition={{
-                duration: duration,
-                repeat: Infinity,
-                delay: delay,
-                ease: "easeInOut"
-            }}
-        >
-            <div style={{ width: size, height: size }} />
-        </motion.div>
-    );
-};
-
 export const Hero: React.FC = () => {
-  const ref = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: containerRef,
     offset: ["start start", "end start"],
   });
-
-  // Mouse tracking for star parallax
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const smoothX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const smoothY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    // Only update star position if NOT hovering over a button
-    // This allows the custom cursor on buttons to work without the background shifting distractingly
-    const target = e.target as HTMLElement;
-    const isInteractive = target.closest('button') || target.closest('a') || target.closest('[role="button"]');
-    
-    if (!isInteractive) {
-        mouseX.set(e.clientX);
-        mouseY.set(e.clientY);
-    }
-  };
 
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  // Generate a fixed set of stars
-  const [stars, setStars] = useState<number[]>([]);
+  // Canvas Galaxy Animation
   useEffect(() => {
-    setStars(Array.from({ length: 40 }, (_, i) => i));
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    
+    // Handle High DPI
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    let particles: Particle[] = [];
+    let animationFrameId: number;
+    
+    // Mouse state
+    const mouse = { x: -1000, y: -1000 };
+
+    // Configuration
+    // Reduced particle count for cleaner look
+    const PARTICLE_COUNT = width > 768 ? 1600 : 800; 
+    const MOUSE_RADIUS = 60; // Interaction radius
+    const FRICTION = 0.96; // High friction = slippery drift
+    const EASE = 0.002; // Very low ease = very lazy/slow return (no snap)
+    const BASE_DRIFT_SPEED = 0.15; // Slow, cinematic drift
+
+    class Particle {
+      x: number;
+      y: number;
+      originX: number;
+      originY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      hue: number;
+      baseAlpha: number;
+      activeAlpha: number;
+      twinkleSpeed: number;
+      twinklePhase: number;
+      z: number; // Depth factor
+
+      constructor(initialX?: number, initialY?: number, initialZ?: number) {
+        this.x = initialX ?? Math.random() * width;
+        this.y = initialY ?? Math.random() * height;
+        this.originX = this.x;
+        this.originY = this.y;
+        this.vx = 0;
+        this.vy = 0;
+        this.z = initialZ ?? Math.random() * 1.5 + 0.5; // Depth 0.5 to 2.0
+        this.size = Math.random() * 1.2 + 0.5;
+        
+        this.baseAlpha = Math.random() * 0.4 + 0.3; 
+        this.activeAlpha = this.baseAlpha;
+        this.twinkleSpeed = Math.random() * 0.04 + 0.01; 
+        this.twinklePhase = Math.random() * Math.PI * 2;
+        
+        this.hue = 190 + (this.x / width) * 120; 
+      }
+
+      update() {
+        // 0. Radial Drift (Warp Effect)
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const driftSpeed = BASE_DRIFT_SPEED * this.z;
+        
+        const dxCenter = this.originX - centerX;
+        const dyCenter = this.originY - centerY;
+        const distCenter = Math.sqrt(dxCenter*dxCenter + dyCenter*dyCenter);
+        
+        if (distCenter > 1) {
+            this.originX += (dxCenter / distCenter) * driftSpeed;
+            this.originY += (dyCenter / distCenter) * driftSpeed;
+        } else {
+             this.originX += (Math.random() - 0.5) * 2;
+             this.originY += (Math.random() - 0.5) * 2;
+        }
+
+        // Respawn logic - WIDER EXPANSION POINT
+        // 400px padding ensures they don't pop out visibly
+        if (this.originX < -100 || this.originX > width + 100 || this.originY < -100 || this.originY > height + 100) {
+            const angle = Math.random() * Math.PI * 2;
+            // Greater expansion point: Spawn from a larger ring
+            const minRadius = 150;
+            const maxRadius = 600;
+            const spawnRadius = minRadius + Math.random() * (maxRadius - minRadius);
+            
+            this.originX = centerX + Math.cos(angle) * spawnRadius;
+            this.originY = centerY + Math.sin(angle) * spawnRadius;
+            
+            this.x = this.originX;
+            this.y = this.originY;
+            this.vx = 0;
+            this.vy = 0;
+            this.activeAlpha = 0; 
+        }
+
+        // 1. Mouse Interaction
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < MOUSE_RADIUS) {
+            const force = (MOUSE_RADIUS - distance) / MOUSE_RADIUS;
+            const angle = Math.atan2(dy, dx);
+            const pushStrength = 1.5 * this.z; 
+            
+            this.vx -= Math.cos(angle) * force * pushStrength;
+            this.vy -= Math.sin(angle) * force * pushStrength;
+            this.activeAlpha = 1;
+        }
+
+        // 2. Spring Back (Slacker)
+        const dxHome = this.originX - this.x;
+        const dyHome = this.originY - this.y;
+        
+        this.vx += dxHome * EASE;
+        this.vy += dyHome * EASE;
+
+        // 3. Physics
+        this.vx *= FRICTION;
+        this.vy *= FRICTION;
+        
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // 4. Twinkle
+        this.twinklePhase += this.twinkleSpeed;
+        const twinkleVal = Math.sin(this.twinklePhase);
+        let targetAlpha = this.baseAlpha + twinkleVal * 0.4; 
+        
+        // Edge fading
+        const distFromCenter = Math.sqrt(Math.pow(this.x - width/2, 2) + Math.pow(this.y - height/2, 2));
+        const maxDist = Math.max(width, height) * 0.6;
+        
+        const edgeFade = Math.max(0, Math.min(1, (maxDist - distFromCenter) / 100));
+        // Fade in from center void
+        const centerFade = Math.min(1, (distFromCenter - 100) / 200);
+        
+        targetAlpha *= edgeFade;
+        targetAlpha *= centerFade;
+
+        this.activeAlpha += (targetAlpha - this.activeAlpha) * 0.1;
+        
+        if (this.activeAlpha < 0) this.activeAlpha = 0;
+        if (this.activeAlpha > 1) this.activeAlpha = 1;
+      }
+
+      draw() {
+        if (this.activeAlpha < 0.01) return;
+        ctx!.fillStyle = `hsla(${this.hue}, 80%, 75%, ${this.activeAlpha})`;
+        ctx!.beginPath();
+        ctx!.rect(this.x, this.y, this.size, this.size);
+        ctx!.fill();
+      }
+    }
+
+    const init = () => {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new Particle());
+        }
+    };
+
+    const animate = () => {
+        ctx.clearRect(0, 0, width, height);
+        
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+        }
+        
+        animationFrameId = requestAnimationFrame(animate);
+    };
+
+    init();
+    animate();
+
+    const handleResize = () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        init();
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    };
+
+    const handleMouseLeave = () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    }
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseout', handleMouseLeave);
+
+    return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseout', handleMouseLeave);
+        cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   const titleVariants = {
@@ -90,7 +244,6 @@ export const Hero: React.FC = () => {
     }
   };
 
-  // Cinematic blur reveal
   const letterVariants = {
     hidden: { 
         opacity: 0, 
@@ -105,7 +258,7 @@ export const Hero: React.FC = () => {
       scale: 1,
       transition: { 
           duration: 1.4, 
-          ease: [0.19, 1, 0.22, 1] // "Cinematic" easing curve
+          ease: [0.19, 1, 0.22, 1] 
       }
     }
   };
@@ -116,24 +269,26 @@ export const Hero: React.FC = () => {
   return (
     <div 
         id="hero"
-        ref={ref} 
+        ref={containerRef} 
         className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black snap-start"
-        onMouseMove={handleMouseMove}
     >
-      {/* Stars Background */}
+      {/* Light Ray - Top Right */}
+      <div className="absolute top-0 right-0 w-[500px] h-[600px] bg-gradient-to-bl from-blue-500/20 via-blue-900/5 to-transparent blur-[80px] pointer-events-none opacity-60 z-10" />
+
+      {/* Canvas Galaxy Background */}
       <motion.div 
         style={{ y, opacity }}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
       >
-        <div className="absolute inset-0 w-full h-full max-w-6xl mx-auto opacity-70">
-            {stars.map((i) => (
-                <Star key={i} mouseX={smoothX} mouseY={smoothY} />
-            ))}
-        </div>
+        <canvas 
+            ref={canvasRef}
+            className="w-full h-full block"
+        />
       </motion.div>
 
-      <div className="relative z-10 container px-6 mx-auto flex flex-col items-center text-center">
-        <div className="max-w-5xl">
+      {/* Hero Content */}
+      <div className="relative z-10 container px-6 mx-auto flex flex-col items-center text-center pointer-events-none">
+        <div className="max-w-5xl pointer-events-auto">
             <motion.div 
                 initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -158,7 +313,6 @@ export const Hero: React.FC = () => {
                         </motion.span>
                     ))}
                 </span>
-                {/* Fixed visibility by using white text instead of transparent gradient which can cause issues with inline-block animations */}
                 <span className="block overflow-hidden py-2 text-white">
                     {line2.split("").map((char, i) => (
                         <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">
@@ -198,7 +352,7 @@ export const Hero: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 pointer-events-none"
       >
         <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
         <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
