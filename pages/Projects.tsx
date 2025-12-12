@@ -110,10 +110,10 @@ export const Projects: React.FC = () => {
                         <div className="absolute bottom-0 left-0 p-8 z-20">
                             <h2 className="text-4xl font-bold mb-2">{activeItem.title}</h2>
                             <div className="flex items-center gap-3 text-sm font-bold text-gray-400 mb-4">
-                                {activeItem.match && <span className="text-green-400">{activeItem.match}</span>}
+                                {activeItem.location && <span className="text-gray-300 font-medium">{activeItem.location}</span>}
+                                {activeItem.filmType && <span className="text-gray-400 border border-white/20 px-1 rounded text-[10px] uppercase tracking-wider">{activeItem.filmType}</span>}
                                 <span>{activeItem.category || "Project"}</span>
                                 {activeItem.year && <span>{activeItem.year}</span>}
-                                {activeItem.maturityRating && <span className="px-2 py-0.5 border border-gray-500 rounded text-[10px]">{activeItem.maturityRating}</span>}
                             </div>
                             <div className="flex gap-3">
                                 <button 
@@ -129,21 +129,25 @@ export const Projects: React.FC = () => {
                     {/* Modal Details */}
                     <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="md:col-span-2 space-y-4">
-                            <div className="flex items-center gap-2 text-sm text-green-400 font-bold">
+                            <div className="flex items-center gap-2 text-sm text-gray-300 font-bold">
                                 <span>New Release</span>
-                                {activeItem.year && <span className="text-gray-400 font-normal">{activeItem.year}</span>}
+                                {activeItem.year && <span className="text-gray-500 font-normal">{activeItem.year}</span>}
                             </div>
                             <p className="text-gray-300 leading-relaxed text-lg">
                                 {activeItem.description || activeItem.tagline || "No description available for this project."}
                             </p>
                         </div>
                         <div className="space-y-4 text-sm text-gray-400">
-                             <div>
-                                <span className="text-gray-500">Genres:</span> <span className="text-white">Cinematic, Commercial, Storytelling</span>
-                             </div>
-                             <div>
-                                <span className="text-gray-500">Maturity Rating:</span> <span className="border border-gray-500 px-1 text-xs text-white">TV-14</span>
-                             </div>
+                             {activeItem.genres && (
+                                 <div>
+                                    <span className="text-gray-500">Genres:</span> <span className="text-white">{activeItem.genres}</span>
+                                 </div>
+                             )}
+                             {activeItem.filmType && (
+                                 <div>
+                                    <span className="text-gray-500">Type:</span> <span className="text-white">{activeItem.filmType}</span>
+                                 </div>
+                             )}
                         </div>
                     </div>
                 </motion.div>
@@ -194,9 +198,9 @@ export const Projects: React.FC = () => {
                         </h1>
 
                         <div className="flex items-center gap-4 text-sm font-bold text-gray-300 mb-6 flex-wrap">
-                            <span className="text-green-400">{featured.match || "98% Match"}</span>
+                            {featured.location && <span className="text-gray-300 font-medium">{featured.location}</span>}
                             <span className="text-gray-400">{featured.year || "2024"}</span>
-                            <span className="border border-gray-500 px-1 text-xs">{featured.maturityRating || "TV-14"}</span>
+                            {featured.filmType && <span className="border border-gray-500 px-1 text-xs">{featured.filmType}</span>}
                             <span className="text-gray-400">{featured.duration || "4K"}</span>
                         </div>
 

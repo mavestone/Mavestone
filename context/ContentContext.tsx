@@ -144,9 +144,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
       videoId: "",
       description: "Description goes here...",
-      match: "90% Match",
+      location: "Location",
       year: new Date().getFullYear().toString(),
-      maturityRating: "TV-14"
+      filmType: "Feature",
+      genres: "Genre",
+      duration: "0m"
     };
     setFilms(prev => [...prev, newFilm]);
   };

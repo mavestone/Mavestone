@@ -226,14 +226,18 @@ export const AdminPanel: React.FC = () => {
                                         <label className="block text-[10px] text-gray-500 mb-1">Description (More Info)</label>
                                         <textarea rows={2} value={film.description || ''} onChange={(e) => updateFilm(film.id, { description: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none" />
                                     </div>
+                                    <div>
+                                        <label className="block text-[10px] text-gray-500 mb-1">Genres</label>
+                                        <input type="text" value={film.genres || ''} placeholder="Action, Drama" onChange={(e) => updateFilm(film.id, { genres: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none" />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-1">Match %</label>
-                                            <input type="text" value={film.match || ''} placeholder="98% Match" onChange={(e) => updateFilm(film.id, { match: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
+                                            <label className="block text-[10px] text-gray-500 mb-1">Location</label>
+                                            <input type="text" value={film.location || ''} placeholder="New York, USA" onChange={(e) => updateFilm(film.id, { location: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-1">Rating</label>
-                                            <input type="text" value={film.maturityRating || ''} placeholder="TV-14" onChange={(e) => updateFilm(film.id, { maturityRating: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
+                                            <label className="block text-[10px] text-gray-500 mb-1">Type</label>
+                                            <input type="text" value={film.filmType || ''} placeholder="Feature" onChange={(e) => updateFilm(film.id, { filmType: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none" />
                                         </div>
                                         <div>
                                             <label className="block text-[10px] text-gray-500 mb-1">Year</label>

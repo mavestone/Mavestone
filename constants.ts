@@ -89,9 +89,10 @@ export const FILMS: Film[] = [
     videoId: "jfopjfSYLcM",
     description: "A deep dive into the human condition seen from the edge of the world. This documentary challenges how we see our environment and ourselves.",
     year: "2024",
-    match: "98% Match",
-    maturityRating: "TV-14",
-    duration: "1h 45m"
+    location: "Tokyo, Japan",
+    filmType: "Feature",
+    duration: "1h 45m",
+    genres: "Documentary, Travel, Society"
   },
   {
     id: '2',
@@ -102,9 +103,10 @@ export const FILMS: Film[] = [
     videoId: "jfopjfSYLcM",
     description: "High-octane commercial work for leading automotive brands. Speed, precision, and cinematic excellence.",
     year: "2023",
-    match: "95% Match",
-    maturityRating: "TV-PG",
-    duration: "2m 30s"
+    location: "Munich, Germany",
+    filmType: "Spot",
+    duration: "2m 30s",
+    genres: "Automotive, Action"
   },
   {
     id: '3',
@@ -115,8 +117,9 @@ export const FILMS: Film[] = [
     videoId: "jfopjfSYLcM",
     description: "A narrative short film about exploration and the cost of discovery set against the backdrop of the deep ocean.",
     year: "2023",
-    match: "92% Match",
-    maturityRating: "TV-14",
-    duration: "15m"
+    location: "Pacific Ocean",
+    filmType: "Short",
+    duration: "15m",
+    genres: "Drama, Sci-Fi"
   },
 ];

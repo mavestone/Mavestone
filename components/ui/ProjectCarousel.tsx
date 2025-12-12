@@ -111,8 +111,8 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({ title, items, 
                                 </div>
 
                                 <div className="flex items-center gap-2 text-[10px] text-gray-200 font-medium flex-wrap">
-                                    <span className="text-green-400 font-bold">{item.match || "90% Match"}</span>
-                                    {item.maturityRating && <span className="border border-gray-500 px-1">{item.maturityRating}</span>}
+                                    {item.location && <span className="text-gray-300 font-bold">{item.location}</span>}
+                                    {item.filmType && <span className="border border-white/30 px-1">{item.filmType}</span>}
                                     {item.duration && <span>{item.duration}</span>}
                                 </div>
                             </div>

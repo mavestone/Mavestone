@@ -9,9 +9,10 @@ export interface Film {
   description?: string;
   // New Metadata
   year?: string;
-  match?: string;
-  maturityRating?: string;
+  location?: string;
+  filmType?: string;
   duration?: string;
+  genres?: string;
 }
 
 export interface Short {
