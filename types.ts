@@ -7,12 +7,12 @@ export interface Film {
   image: string;
   videoId?: string;
   description?: string;
-  // New Metadata
   year?: string;
   location?: string;
   filmType?: string;
   duration?: string;
   genres?: string;
+  externalSource?: 'youtube' | 'instagram' | 'manual';
 }
 
 export interface Short {
@@ -20,11 +20,16 @@ export interface Short {
   title: string;
   views: string;
   image: string;
-  videoId: string;
+  videoId: string; // Used for YouTube ID or Instagram Permalink/Embed URL
   showViews?: boolean;
-  // New Metadata
   year?: string;
   category?: string;
+  externalSource?: 'youtube' | 'instagram' | 'manual';
+}
+
+export interface SyncSettings {
+  youtubeChannelId: string;
+  youtubeApiKey: string;
 }
 
 export interface LatestVideoData {
@@ -43,19 +48,14 @@ export interface InProductionData {
 
 export interface ProjectHeroConfig {
   heroVideoId: string;
-  label: string; // e.g. "Original"
-  featuredFilmId: string; // The ID of the film to show details for
-  logoImage?: string; // URL for the 'N Series' style logo
+  label: string;
+  featuredFilmId: string;
+  logoImage?: string;
 }
 
 export interface NavItem {
   label: string;
   href: string;
-}
-
-export interface SiteContent {
-  key: string;
-  data: any;
 }
 
 export interface Message {
@@ -67,7 +67,6 @@ export interface Message {
   read: boolean;
 }
 
-// Global types for YouTube API
 declare global {
   interface Window {
     YT: any;

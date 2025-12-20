@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
 import { motion } from 'framer-motion';
+import { Instagram, Play } from 'lucide-react';
 
 export const Shorts: React.FC = () => {
   const { shorts } = useContent();
@@ -18,6 +19,14 @@ export const Shorts: React.FC = () => {
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?v=)|(shorts\/))([^#&?]*).*/;
     const match = urlOrId.match(regExp);
     return match?.[8]?.length === 11 ? match[8] : urlOrId;
+  };
+
+  const handleClick = (short: any) => {
+      if (short.externalSource === 'instagram' || short.videoId.includes('instagram.com')) {
+          window.open(short.videoId, '_blank');
+          return;
+      }
+      setPlayingId(short.id);
   };
 
   useEffect(() => {
@@ -86,12 +95,13 @@ export const Shorts: React.FC = () => {
     <SectionWrapper id="shorts" className="bg-soft-black/50">
       <div className="mb-16 text-left md:text-center max-w-2xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-4">Short Stories. Big Impact.</h2>
-        <p className="text-gray-400">Designed for now. Built to last.</p>
+        <p className="text-gray-400">Cinematic vertical narratives designed for the mobile era.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {shorts.map((short, index) => {
            const isPlaying = playingId === short.id;
+           const isInstagram = short.externalSource === 'instagram' || short.videoId.includes('instagram.com');
 
            return (
           <motion.div
@@ -101,12 +111,10 @@ export const Shorts: React.FC = () => {
             transition={{ delay: index * 0.1, duration: 0.6 }}
             viewport={{ once: true }}
             className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer isolate border border-white/5"
+            onClick={() => handleClick(short)}
           >
              {!isPlaying ? (
-                 <div 
-                    className="absolute inset-0 w-full h-full"
-                    onClick={() => setPlayingId(short.id)}
-                 >
+                 <div className="absolute inset-0 w-full h-full">
                     {/* Background Image */}
                     <img
                         src={short.image}
@@ -114,6 +122,13 @@ export const Shorts: React.FC = () => {
                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-110"
                     />
                     
+                    {/* Play/External Icon Center */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                            {isInstagram ? <Instagram size={24} className="text-white" /> : <Play size={24} className="text-white fill-current ml-1" />}
+                        </div>
+                    </div>
+
                     {/* Gradients */}
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
@@ -121,10 +136,13 @@ export const Shorts: React.FC = () => {
                     {/* Floating Glass Content */}
                     <div className="absolute inset-x-4 bottom-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
                         <div className="glass-panel p-4 rounded-xl border border-white/10 backdrop-blur-md bg-white/5 group-hover:bg-white/10 transition-colors">
-                            <h4 className="font-bold text-white text-lg leading-tight mb-1">{short.title}</h4>
-                            <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-300">
-                                <span>Short Film</span>
-                                {short.showViews !== false && (
+                            <div className="flex items-center gap-2 mb-1">
+                                {isInstagram ? <Instagram size={10} className="text-purple-400" /> : <Play size={10} className="text-red-500 fill-current" />}
+                                <h4 className="font-bold text-white text-sm leading-tight truncate">{short.title}</h4>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-400">
+                                <span>{isInstagram ? "Instagram Reel" : "YouTube Short"}</span>
+                                {short.showViews !== false && short.views !== "Synced" && (
                                     <span className="flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                                         {short.views}
