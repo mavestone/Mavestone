@@ -8,7 +8,7 @@ import { Quote, ArrowRight } from 'lucide-react';
 
 export const Collaboration: React.FC = () => {
   const { aboutData } = useContent();
-  const { title, subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
+  const { subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
   
   // Create a quadrupled array to ensure smooth infinite looping on large screens
   const marqueeItems = [...testimonials, ...testimonials, ...testimonials, ...testimonials];

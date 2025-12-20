@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, ChevronUp, ChevronDown, User } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 
