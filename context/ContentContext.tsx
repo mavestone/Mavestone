@@ -43,12 +43,21 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
+// Helper to parse YouTube ISO 8601 duration to seconds
+const parseYouTubeDuration = (duration: string): number => {
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] || '0');
+  const minutes = parseInt(match[2] || '0');
+  const seconds = parseInt(match[3] || '0');
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Content State
   const [latestVideo, setLatestVideo] = useState<LatestVideoData>(LATEST_VIDEO);
   const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
@@ -57,7 +66,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [messages, setMessages] = useState<Message[]>([]);
   const [syncSettings, setSyncSettings] = useState<SyncSettings>({
     youtubeChannelId: 'UCf_CST5v2V7eJ6XqS9T5A-A',
-    youtubeApiKey: 'AIzaSyAVGpCJjg9ZVy_rfFE8zk9CM4DPziWt_VM', // Hardcoded as per user request
+    youtubeApiKey: 'AIzaSyAVGpCJjg9ZVy_rfFE8zk9CM4DPziWt_VM',
   });
 
   useEffect(() => {
@@ -67,11 +76,9 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setIsLoading(false);
         return;
       }
-
       try {
         const { data: { session } } = await client.auth.getSession();
         setIsAuthenticated(!!session);
-
         const { data, error } = await client.from('site_content').select('*');
         if (!error && data) {
           data.forEach(row => {
@@ -84,22 +91,17 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           });
         }
       } catch (e) {
-        console.error("Error initializing content:", e);
+        console.error("Initialization error:", e);
       } finally {
         setIsLoading(false);
       }
     };
-
     init();
-
     const client = supabase;
     const { data: { subscription } } = client ? client.auth.onAuthStateChange((_event, session) => {
         setIsAuthenticated(!!session);
     }) : { data: { subscription: null } };
-
-    return () => {
-        subscription?.unsubscribe();
-    };
+    return () => { subscription?.unsubscribe(); };
   }, []);
 
   const toggleAdmin = () => setIsAdminOpen(prev => !prev);
@@ -121,17 +123,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
       videoId: "",
       showViews: true,
-      category: "Reel",
+      category: "Short",
       externalSource: 'manual'
     }]);
   };
 
-  const bulkAddShorts = (newShorts: Short[]) => {
-    setShorts(prev => [...prev, ...newShorts]);
-  };
-
+  const bulkAddShorts = (newShorts: Short[]) => setShorts(prev => [...prev, ...newShorts]);
   const deleteShort = (id: string) => setShorts(prev => prev.filter(item => item.id !== id));
-
   const addFilm = () => {
     setFilms(prev => [...prev, {
       id: Math.random().toString(36).substr(2, 9),
@@ -140,13 +138,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       tagline: "Tagline",
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
       videoId: "",
-      location: "Location",
-      filmType: "Feature",
-      genres: "Documentary",
-      year: "2024"
     }]);
   };
-
   const deleteFilm = (id: string) => setFilms(prev => prev.filter(item => item.id !== id));
 
   const saveChanges = async () => {
@@ -165,50 +158,52 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const syncFromYouTube = async () => {
-    if (!syncSettings.youtubeApiKey || !syncSettings.youtubeChannelId) {
-      throw new Error("Missing YouTube API Key or Channel ID in Settings.");
-    }
-    
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${syncSettings.youtubeApiKey}&channelId=${syncSettings.youtubeChannelId}&part=snippet,id&order=date&maxResults=1&type=video`;
-    
+    const { youtubeApiKey: key, youtubeChannelId: channelId } = syncSettings;
+    if (!key || !channelId) throw new Error("Missing YouTube Configuration.");
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=1&type=video`;
     const res = await fetch(url);
     const data = await res.json();
-    
-    if (data.items && data.items.length > 0) {
+    if (data.items?.length) {
       const item = data.items[0];
       setLatestVideo({
         title: item.snippet.title,
         description: item.snippet.description,
-        image: item.snippet.thumbnails.high.url,
+        image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
         videoId: item.id.videoId
       });
-    } else {
-      throw new Error("No videos found on this channel.");
     }
   };
 
   const syncShortsFromYouTube = async () => {
-    if (!syncSettings.youtubeApiKey || !syncSettings.youtubeChannelId) {
-        throw new Error("Missing YouTube API Key or Channel ID in Settings.");
-    }
+    const { youtubeApiKey: key, youtubeChannelId: channelId } = syncSettings;
+    if (!key || !channelId) throw new Error("Missing YouTube Configuration.");
     
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${syncSettings.youtubeApiKey}&channelId=${syncSettings.youtubeChannelId}&part=snippet,id&order=date&maxResults=10&type=video`;
+    // Step 1: Search for videos
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=50&type=video`;
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    if (!searchData.items) return;
+
+    const videoIds = searchData.items.map((i: any) => i.id.videoId).join(',');
     
-    const res = await fetch(url);
-    const data = await res.json();
-    
-    if (data.items) {
-      const newShorts: Short[] = data.items.map((item: any) => ({
-        id: item.id.videoId,
-        title: item.snippet.title,
-        views: "Synced",
-        image: item.snippet.thumbnails.high.url,
-        videoId: item.id.videoId,
-        showViews: false,
-        category: "Shorts",
-        externalSource: 'youtube'
-      }));
-      setShorts(newShorts);
+    // Step 2: Get details for duration and full metadata
+    const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?key=${key}&id=${videoIds}&part=snippet,contentDetails,statistics`;
+    const detailsRes = await fetch(detailsUrl);
+    const detailsData = await detailsRes.json();
+
+    if (detailsData.items) {
+      const filteredShorts: Short[] = detailsData.items
+        .filter((item: any) => parseYouTubeDuration(item.contentDetails.duration) <= 60)
+        .map((item: any) => ({
+          id: item.id,
+          title: item.snippet.title,
+          views: `${(parseInt(item.statistics.viewCount) / 1000).toFixed(0)}K`,
+          image: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url,
+          videoId: item.id,
+          showViews: true,
+          externalSource: 'youtube'
+        }));
+      setShorts(filteredShorts);
     }
   };
 
@@ -280,7 +275,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updateLatestVideo, updateInProduction, updateShort, addShort, bulkAddShorts, deleteShort,
       updateFilm, addFilm, deleteFilm, updateProjectConfig, updateSyncSettings,
       saveChanges, uploadImage, login, logout, seedDatabase,
-      sendMessage, fetchMessages, markMessageRead, syncFromYouTube, syncShortsFromYouTube, syncFromInstagram: async () => {}
+      sendMessage, fetchMessages, markMessageRead, syncFromYouTube, syncShortsFromYouTube
     }}>
       {children}
     </ContentContext.Provider>

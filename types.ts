@@ -12,7 +12,6 @@ export interface Film {
   filmType?: string;
   duration?: string;
   genres?: string;
-  externalSource?: 'youtube' | 'manual';
 }
 
 export interface Short {
