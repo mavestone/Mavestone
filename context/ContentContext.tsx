@@ -37,6 +37,7 @@ interface ContentContextType {
   fetchMessages: () => Promise<void>;
   markMessageRead: (id: string) => Promise<void>;
   syncFromYouTube: () => Promise<void>;
+  syncFromInstagram: () => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -112,7 +113,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addShort = () => {
     setShorts(prev => [...prev, {
       id: Math.random().toString(36).substr(2, 9),
-      title: "New Short",
+      title: "New Story",
       views: "0",
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
       videoId: "",
