@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, ChevronUp, ChevronDown, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -13,13 +13,14 @@ export const AdminPanel: React.FC = () => {
     inProduction, updateInProduction,
     shorts, setShorts, updateShort, addShort, deleteShort,
     films, updateFilm, addFilm, deleteFilm,
+    aboutData, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     projectConfig, updateProjectConfig,
     saveChanges, uploadImage,
     isAuthenticated, fetchMessages, messages, markMessageRead, logout,
     seedDatabase
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'messages'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'messages'>('home');
   const [processingImage, setProcessingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -68,14 +69,6 @@ export const AdminPanel: React.FC = () => {
       if (location.pathname === '/admin') navigate('/');
   };
 
-  const moveShort = (index: number, direction: 'up' | 'down') => {
-    const newShorts = [...shorts];
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= newShorts.length) return;
-    [newShorts[index], newShorts[newIndex]] = [newShorts[newIndex], newShorts[index]];
-    setShorts(newShorts);
-  };
-
   if (!isAuthenticated && isAdminOpen) return null;
 
   const NavItem = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
@@ -112,6 +105,7 @@ export const AdminPanel: React.FC = () => {
                         <NavItem id="home" label="Home" icon={Layout} />
                         <NavItem id="projects" label="Projects" icon={Clapperboard} />
                         <NavItem id="shorts" label="Shorts" icon={Youtube} />
+                        <NavItem id="about" label="About" icon={User} />
                         <NavItem id="messages" label="Inquiries" icon={Mail} />
                     </nav>
                 </div>
@@ -173,6 +167,63 @@ export const AdminPanel: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* ABOUT TAB */}
+                    {activeTab === 'about' && (
+                        <div className="space-y-8">
+                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-7 space-y-6">
+                                    <div className="p-6 rounded-2xl bg-[#0F0F11] border border-white/5 space-y-6">
+                                        <h3 className="text-xs font-bold uppercase tracking-widest text-orange-400 border-b border-white/5 pb-4">Bio Details</h3>
+                                        <div className="space-y-4">
+                                            <input type="text" placeholder="Subtitle (e.g. 01 / The Visionary)" value={aboutData.subtitle} onChange={(e) => updateAboutData({ subtitle: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none" />
+                                            <textarea rows={6} placeholder="Description" value={aboutData.description} onChange={(e) => updateAboutData({ description: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none" />
+                                            <label className="text-xs text-gray-500 uppercase tracking-widest block mt-4">Testimonials Background</label>
+                                            <div className="flex gap-2">
+                                                <input type="text" placeholder="Background Image URL" value={aboutData.testimonialsBackground || ''} onChange={(e) => updateAboutData({ testimonialsBackground: e.target.value })} className="flex-1 bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-gray-400 focus:outline-none" />
+                                                <label className="flex items-center px-4 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10"><Camera size={16} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateAboutData({ testimonialsBackground: url }))} /></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="lg:col-span-5 space-y-4">
+                                    <div className="rounded-2xl overflow-hidden border border-white/10 aspect-[3/4] relative group bg-[#0F0F11]">
+                                        <img src={aboutData.portrait} className="w-full h-full object-cover" alt="Portrait Preview" />
+                                        <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white font-bold"><Camera size={32} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateAboutData({ portrait: url }))} /></label>
+                                    </div>
+                                    <input type="text" placeholder="Portrait URL" value={aboutData.portrait} onChange={(e) => updateAboutData({ portrait: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-gray-500" />
+                                </div>
+                             </div>
+
+                             <div className="space-y-6">
+                                 <div className="flex justify-between items-center px-2">
+                                     <h3 className="text-lg font-bold text-white">Client Reviews (Conveyor)</h3>
+                                     <button onClick={() => addTestimonial()} className="px-4 py-2 bg-white text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"><Plus size={14} /> Add Review</button>
+                                 </div>
+
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     {aboutData.testimonials.map((t) => (
+                                         <div key={t.id} className="p-6 rounded-2xl bg-[#0F0F11] border border-white/5 group relative">
+                                             <button onClick={() => deleteTestimonial(t.id)} className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                             <div className="space-y-4">
+                                                 <textarea rows={3} value={t.text} onChange={(e) => updateTestimonial(t.id, { text: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-xs text-white italic" placeholder="Review Text" />
+                                                 <div className="flex items-center gap-4">
+                                                     <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 group/av">
+                                                         <img src={t.avatar} className="w-full h-full object-cover" />
+                                                         <label className="absolute inset-0 bg-black/60 opacity-0 group-hover/av:opacity-100 flex items-center justify-center cursor-pointer"><Camera size={14} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateTestimonial(t.id, { avatar: url }))} /></label>
+                                                     </div>
+                                                     <div className="flex-1 grid grid-cols-2 gap-2">
+                                                         <input type="text" value={t.name} onChange={(e) => updateTestimonial(t.id, { name: e.target.value })} className="bg-black/20 border border-white/10 rounded-lg p-2 text-xs text-white" placeholder="Name" />
+                                                         <input type="text" value={t.company} onChange={(e) => updateTestimonial(t.id, { company: e.target.value })} className="bg-black/20 border border-white/10 rounded-lg p-2 text-xs text-white" placeholder="Company" />
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     ))}
+                                 </div>
+                             </div>
                         </div>
                     )}
 
@@ -273,18 +324,14 @@ export const AdminPanel: React.FC = () => {
                             </div>
 
                             <Reorder.Group axis="y" values={shorts} onReorder={setShorts} className="space-y-4">
-                                {shorts.map((short, idx) => (
+                                {shorts.map((short) => (
                                     <Reorder.Item 
                                         key={short.id} 
                                         value={short} 
                                         className="bg-[#0F0F11] border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row gap-6 group"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="flex flex-col gap-1">
-                                                <button onClick={() => moveShort(idx, 'up')} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white transition-colors"><ChevronUp size={16} /></button>
-                                                <div className="flex justify-center cursor-grab active:cursor-grabbing text-gray-700 group-hover:text-white transition-colors"><GripVertical size={20} /></div>
-                                                <button onClick={() => moveShort(idx, 'down')} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white transition-colors"><ChevronDown size={16} /></button>
-                                            </div>
+                                            <div className="flex justify-center cursor-grab active:cursor-grabbing text-gray-700 group-hover:text-white transition-colors"><GripVertical size={20} /></div>
                                             <div className="aspect-[9/16] w-24 rounded-lg overflow-hidden border border-white/10 relative">
                                                 <img src={short.image} className="w-full h-full object-cover" alt={short.title} />
                                                 <label className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"><Camera size={16} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateShort(short.id, { image: url }))} /></label>

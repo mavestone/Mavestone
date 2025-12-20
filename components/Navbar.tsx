@@ -51,7 +51,7 @@ export const Navbar: React.FC = () => {
 
             window.scrollTo({
                 top: offsetPosition,
-                behavior: 'smooth'
+                behavior: 'auto' // Changed to auto to let SmoothScroll handle easing
             });
         }
     };

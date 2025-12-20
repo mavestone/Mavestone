@@ -5,25 +5,28 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
-  }
-  body {
-    @apply bg-[#050505] text-[#F5F5F7] overflow-x-hidden;
+    /* Disable native smooth scrolling to prevent conflict with JS smooth scroll */
+    scroll-behavior: auto;
+    /* Ensure scrollbar is available */
+    overflow-y: scroll; 
   }
 
-  @media (min-width: 768px) {
-    html {
-      scroll-snap-type: y mandatory; /* Enable vertical snapping only on desktop */
-    }
+  body {
+    @apply bg-[#050505] text-[#F5F5F7];
+    /* Prevent horizontal scroll from full-width sections/animations */
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Sleek and dark */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0F0F11;
+  background: #050505;
 }
 ::-webkit-scrollbar-thumb {
   background: #333;
@@ -36,10 +39,10 @@
 /* Glassmorphism Utilities */
 .glass-panel {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.3);
 }
 
 .text-glow {
@@ -70,4 +73,22 @@
   opacity: 0.05;
   background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
   animation: noise 0.2s steps(10) infinite;
+}
+
+.bg-grain {
+  background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }

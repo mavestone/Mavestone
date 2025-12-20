@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="w-full py-12 border-t border-white/5 bg-black text-center relative z-10 snap-start">
+    <footer className="w-full py-12 border-t border-white/5 bg-black text-center relative z-10">
       <div className="container mx-auto px-6 flex flex-col items-center">
         <h3 className="text-2xl font-bold tracking-tighter text-white mb-8">Mavestone.</h3>
         

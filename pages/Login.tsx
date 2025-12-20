@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
@@ -28,8 +29,7 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Grain Overlay */}
-        <div className="grain-overlay"></div>
+        {/* Grain Overlay Removed */}
         
         {/* Abstract bg */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] pointer-events-none"></div>

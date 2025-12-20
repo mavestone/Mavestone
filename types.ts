@@ -25,6 +25,23 @@ export interface Short {
   category?: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  company: string;
+  text: string;
+  avatar: string;
+}
+
+export interface AboutData {
+  title: string;
+  subtitle: string;
+  description: string;
+  portrait: string;
+  testimonials: Testimonial[];
+  testimonialsBackground?: string;
+}
+
 export interface LatestVideoData {
   title: string;
   description: string;

@@ -126,13 +126,14 @@ const CustomCursor: React.FC = () => {
 const AppContent: React.FC = () => {
   const location = useLocation();
 
+  // Reset scroll position on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
 
   return (
     <div className="bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto lg:cursor-none">
-        <div className="grain-overlay"></div>
+        {/* Removed Global Grain Overlay */}
         <CustomCursor />
 
         <Routes>

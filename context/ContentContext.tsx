@@ -1,14 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION, PROJECT_PAGE_CONFIG } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig } from '../types';
+import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT } from '../constants';
+import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
   inProduction: InProductionData;
   shorts: Short[];
   films: Film[];
+  aboutData: AboutData;
   messages: Message[];
   projectConfig: ProjectHeroConfig;
   isAdminOpen: boolean;
@@ -19,6 +20,10 @@ interface ContentContextType {
   closeAdmin: () => void;
   updateLatestVideo: (data: Partial<LatestVideoData>) => void;
   updateInProduction: (data: Partial<InProductionData>) => void;
+  updateAboutData: (data: Partial<AboutData>) => void;
+  updateTestimonial: (id: string, data: Partial<Testimonial>) => void;
+  addTestimonial: () => void;
+  deleteTestimonial: (id: string) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
   setShorts: (shorts: Short[]) => void;
   addShort: () => void;
@@ -40,6 +45,15 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
+const DEFAULT_ABOUT: AboutData = {
+    title: "Visualizing The Unseen.",
+    subtitle: "01 / The Visionary",
+    description: "Liam blends editorial aesthetic with cinematic narrative. Based in Sydney & Tokyo, Mavestone Studio partners with creators who demand more than just visuals—they demand a legacy.",
+    portrait: LIAM_PORTRAIT,
+    testimonials: TESTIMONIALS,
+    testimonialsBackground: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop"
+};
+
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -50,6 +64,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
+  const [aboutData, setAboutData] = useState<AboutData>(DEFAULT_ABOUT);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -73,6 +88,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (row.key === 'shorts') setShorts(row.data);
             if (row.key === 'films') setFilms(row.data);
             if (row.key === 'project_config') setProjectConfig(row.data);
+            if (row.key === 'about_data') setAboutData(row.data);
           });
         }
       } catch (e) {
@@ -100,6 +116,26 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateLatestVideo = (data: Partial<LatestVideoData>) => setLatestVideo(prev => ({ ...prev, ...data }));
   const updateInProduction = (data: Partial<InProductionData>) => setInProduction(prev => ({ ...prev, ...data }));
+  const updateAboutData = (data: Partial<AboutData>) => setAboutData(prev => ({ ...prev, ...data }));
+  const updateTestimonial = (id: string, data: Partial<Testimonial>) => setAboutData(prev => ({
+      ...prev,
+      testimonials: prev.testimonials.map(t => t.id === id ? { ...t, ...data } : t)
+  }));
+  const addTestimonial = () => setAboutData(prev => ({
+      ...prev,
+      testimonials: [...prev.testimonials, {
+          id: Math.random().toString(36).substr(2, 9),
+          name: "New Client",
+          company: "Company",
+          text: "Review text here...",
+          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200"
+      }]
+  }));
+  const deleteTestimonial = (id: string) => setAboutData(prev => ({
+      ...prev,
+      testimonials: prev.testimonials.filter(t => t.id !== id)
+  }));
+
   const updateShort = (id: string, data: Partial<Short>) => setShorts(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateFilm = (id: string, data: Partial<Film>) => setFilms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateProjectConfig = (data: Partial<ProjectHeroConfig>) => setProjectConfig(prev => ({ ...prev, ...data }));
@@ -145,7 +181,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'in_production', data: inProduction },
       { key: 'shorts', data: shorts },
       { key: 'films', data: films },
-      { key: 'project_config', data: projectConfig }
+      { key: 'project_config', data: projectConfig },
+      { key: 'about_data', data: aboutData }
     ];
     const { error } = await client.from('site_content').upsert(updates);
     if (error) throw error;
@@ -204,7 +241,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'in_production', data: IN_PRODUCTION },
       { key: 'shorts', data: SHORTS },
       { key: 'films', data: FILMS },
-      { key: 'project_config', data: PROJECT_PAGE_CONFIG }
+      { key: 'project_config', data: PROJECT_PAGE_CONFIG },
+      { key: 'about_data', data: DEFAULT_ABOUT }
     ];
     await client.from('site_content').upsert(updates);
     window.location.reload();
@@ -212,10 +250,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <ContentContext.Provider value={{
-      latestVideo, inProduction, shorts, films, messages, projectConfig,
+      latestVideo, inProduction, shorts, films, aboutData, messages, projectConfig,
       isAdminOpen, isAuthenticated, isLoading,
       toggleAdmin, openAdmin, closeAdmin,
-      updateLatestVideo, updateInProduction, updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
+      updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
+      updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
       updateFilm, addFilm, deleteFilm, updateProjectConfig,
       saveChanges, uploadImage, login, logout, seedDatabase,
       sendMessage, fetchMessages, markMessageRead

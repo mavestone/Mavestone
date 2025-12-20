@@ -3,15 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
 import { useContent } from '../context/ContentContext';
 import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
+import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const Shorts: React.FC = () => {
   const { shorts } = useContent();
   const [playingId, setPlayingId] = useState<string | null>(null);
-  
-  // Ref to hold the active YouTube player instance
+  const scrollRef = useRef<HTMLDivElement>(null);
   const activePlayerRef = useRef<any>(null);
-  // Refs for container elements
   const containerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const getVideoId = (urlOrId: string) => {
@@ -22,133 +20,165 @@ export const Shorts: React.FC = () => {
   };
 
   const handleClick = (short: any) => {
-      setPlayingId(short.id);
+    setPlayingId(short.id);
   };
 
-  // Limit to most recent 4
-  const displayShorts = shorts.slice(0, 4);
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / (window.innerWidth >= 768 ? 2 : 1);
+      const scrollTo = direction === 'left' ? scrollLeft - cardWidth : scrollLeft + cardWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
 
-  // YouTube logic
   useEffect(() => {
     let interval: any;
 
     if (activePlayerRef.current) {
-        try {
-            activePlayerRef.current.destroy();
-        } catch(e) { console.error(e); }
-        activePlayerRef.current = null;
+      try {
+        activePlayerRef.current.destroy();
+      } catch (e) {
+        console.error(e);
+      }
+      activePlayerRef.current = null;
     }
 
     if (playingId) {
-        const currentShort = shorts.find(s => s.id === playingId);
-        const container = containerRefs.current[playingId];
-        const videoId = getVideoId(currentShort?.videoId || '');
+      const currentShort = shorts.find((s) => s.id === playingId);
+      const container = containerRefs.current[playingId];
+      const videoId = getVideoId(currentShort?.videoId || '');
 
-        if (container && videoId) {
-            const initPlayer = () => {
-                if (!window.YT || !window.YT.Player) return false;
+      if (container && videoId) {
+        const initPlayer = () => {
+          if (!window.YT || !window.YT.Player) return false;
 
-                activePlayerRef.current = new window.YT.Player(container, {
-                    height: '100%',
-                    width: '100%',
-                    videoId: videoId,
-                    playerVars: {
-                        autoplay: 1,
-                        controls: 1,
-                        rel: 0,
-                        modestbranding: 1,
-                        playsinline: 1,
-                        loop: 1,
-                        playlist: videoId,
-                    },
-                    events: {
-                        onReady: (e: any) => e.target.playVideo()
-                    }
-                });
-                return true;
-            };
+          activePlayerRef.current = new window.YT.Player(container, {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+              autoplay: 1,
+              controls: 1,
+              rel: 0,
+              modestbranding: 1,
+              playsinline: 1,
+              loop: 1,
+              playlist: videoId,
+            },
+            events: {
+              onReady: (e: any) => e.target.playVideo(),
+            },
+          });
+          return true;
+        };
 
-            if (!initPlayer()) {
-                interval = setInterval(() => {
-                    if (initPlayer()) clearInterval(interval);
-                }, 100);
-            }
+        if (!initPlayer()) {
+          interval = setInterval(() => {
+            if (initPlayer()) clearInterval(interval);
+          }, 100);
         }
+      }
     }
 
     return () => {
-        if (interval) clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [playingId, shorts]);
 
+  const displayShorts = shorts.slice(0, 10);
+
   return (
-    <SectionWrapper id="shorts" className="bg-soft-black/50">
-      <div className="mb-16 text-left md:text-center max-w-2xl mx-auto">
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-4">Short Stories. Big Impact.</h2>
-        <p className="text-gray-400">Cinematic vertical narratives designed for the mobile era.</p>
+    <SectionWrapper id="shorts" className="bg-soft-black/50 overflow-visible">
+      <div className="mb-12 md:mb-16 text-left md:text-center max-w-3xl mx-auto">
+        <h2 className="text-4xl md:text-7xl font-black tracking-tighter text-white mb-4">Scroll Stopping Shorts</h2>
+        <p className="text-gray-400 font-medium md:text-xl tracking-tight">Crafting high-impact narratives for the vertical format.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {displayShorts.map((short, index) => {
-           const isPlaying = playingId === short.id;
+      <div className="relative">
+        {/* Slider Container */}
+        <div 
+          ref={scrollRef}
+          className="flex lg:grid lg:grid-cols-4 gap-5 md:gap-8 overflow-x-auto lg:overflow-x-visible scrollbar-hide snap-x snap-mandatory lg:snap-none pb-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {displayShorts.map((short, index) => {
+            const isPlaying = playingId === short.id;
 
-           return (
-          <motion.div
-            key={short.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.6 }}
-            viewport={{ once: true }}
-            className="group relative aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer isolate border border-white/5 shadow-2xl"
-            onClick={() => handleClick(short)}
-          >
-             {!isPlaying ? (
-                 <div className="absolute inset-0 w-full h-full">
-                    {/* Background Image */}
+            return (
+              <motion.div
+                key={short.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05, duration: 0.5 }}
+                viewport={{ once: true }}
+                className="flex-shrink-0 w-full md:w-[calc(50%-1.25rem)] lg:w-auto snap-center group relative aspect-[9/16] rounded-3xl overflow-hidden cursor-pointer isolate border border-white/5 shadow-2xl"
+                onClick={() => handleClick(short)}
+              >
+                {!isPlaying ? (
+                  <div className="absolute inset-0 w-full h-full">
                     <img
-                        src={short.image}
-                        alt={short.title}
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-110"
+                      src={short.image}
+                      alt={short.title}
+                      className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000 transform group-hover:scale-105"
                     />
-                    
-                    {/* Play Icon Center */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                            <Play size={24} className="text-white fill-current ml-1" />
-                        </div>
+
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+                      <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                        <Play size={28} className="text-white fill-current ml-1" />
+                      </div>
                     </div>
 
-                    {/* Gradients */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
 
-                    {/* Floating Glass Content */}
-                    <div className="absolute inset-x-4 bottom-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                        <div className="glass-panel p-4 rounded-xl border border-white/10 backdrop-blur-md bg-white/5 group-hover:bg-white/10 transition-colors">
-                            <div className="flex items-center gap-2 mb-1">
-                                <Play size={10} className="text-red-500 fill-current" />
-                                <h4 className="font-bold text-white text-sm leading-tight truncate">{short.title}</h4>
-                            </div>
-                            <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-400">
-                                <span>YouTube Short</span>
-                                {short.showViews !== false && short.views !== "Synced" && short.views !== "New" && (
-                                    <span className="flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                        {short.views}
-                                    </span>
-                                )}
-                            </div>
+                    <div className="absolute inset-x-5 bottom-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                      <div className="glass-panel p-5 rounded-2xl border border-white/10 backdrop-blur-2xl bg-black/40">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          <h4 className="font-black text-white text-xs uppercase tracking-tight truncate">
+                            {short.title}
+                          </h4>
                         </div>
+                        <div className="flex items-center justify-between text-[9px] uppercase tracking-widest text-gray-500 font-black">
+                          <span>Story</span>
+                          {short.showViews !== false && short.views !== 'Synced' && (
+                             <span className="text-white/60">{short.views} VIEWS</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                 </div>
-             ) : (
-                 <div 
-                    ref={el => { containerRefs.current[short.id] = el; }} 
-                    className="w-full h-full bg-black" 
-                 />
-             )}
-          </motion.div>
-        )})}
+                  </div>
+                ) : (
+                  <div
+                    ref={(el) => {
+                      containerRefs.current[short.id] = el;
+                    }}
+                    className="w-full h-full bg-black"
+                  />
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Navigation Row - Underneath on Mobile/Tablet */}
+        <div className="flex lg:hidden items-center justify-center gap-8 mt-10">
+           <button 
+              onClick={() => scroll('left')} 
+              className="w-16 h-16 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all active:scale-90"
+              aria-label="Previous Short"
+           >
+              <ChevronLeft size={28} />
+           </button>
+           <div className="h-[1px] w-16 bg-white/10"></div>
+           <button 
+              onClick={() => scroll('right')} 
+              className="w-16 h-16 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all active:scale-90"
+              aria-label="Next Short"
+           >
+              <ChevronRight size={28} />
+           </button>
+        </div>
       </div>
     </SectionWrapper>
   );

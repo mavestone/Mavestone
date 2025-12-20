@@ -16,7 +16,7 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ children, classN
     <section 
         id={id} 
         ref={ref} 
-        className={`relative w-full px-6 md:px-12 lg:px-24 py-24 md:py-32 overflow-hidden snap-start ${className}`}
+        className={`relative w-full px-6 md:px-12 lg:px-24 py-24 md:py-32 overflow-hidden ${className}`}
     >
       <motion.div
         initial={{ opacity: 0, y: 50 }}

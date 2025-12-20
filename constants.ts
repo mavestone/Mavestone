@@ -4,14 +4,46 @@ import { Film, Short, NavItem, InProductionData, ProjectHeroConfig } from './typ
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '#hero' },
   { label: 'Work', href: '#work' },
-  { label: 'Portfolio', href: '/projects' },
   { label: 'Shorts', href: '#shorts' },
   { label: 'About', href: '#about' },
+  { label: 'Testimonials', href: '#testimonials' },
   { label: 'Contact', href: '#contact' },
 ];
 
-// Unified cinematic placeholder for clean editing start
-const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop";
+// High-end cinematic portrait of a creator in a vast landscape (matches drone pilot vibe)
+export const LIAM_PORTRAIT = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop"; 
+
+export const TESTIMONIALS = [
+  {
+    id: '1',
+    name: "Zoe Grace",
+    company: "Levee",
+    text: "Mavestone doesn't just deliver content; they deliver a feeling. The cinematic weight of their work is unmatched.",
+    // Using abstract geometric shapes/symbols to simulate logos
+    avatar: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=200&auto=format&fit=crop"
+  },
+  {
+    id: '2',
+    name: "Rob Robinson",
+    company: "ILAN",
+    text: "Working with Liam transformed our brand's visual identity. He brings an editorial soul to commercial briefs.",
+    avatar: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?q=80&w=200&auto=format&fit=crop"
+  },
+  {
+    id: '3',
+    name: "Sarah Jenkins",
+    company: "Flux Media",
+    text: "The ability to find the human heart in a complex story is what makes Mavestone a global standout.",
+    avatar: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=200&auto=format&fit=crop"
+  },
+  {
+    id: '4',
+    name: "Mark Thorne",
+    company: "Peak Performance",
+    text: "Absolute precision from storyboard to screen. Professional, visionary, and technically flawless.",
+    avatar: "https://images.unsplash.com/photo-1563694983011-6f4d90358083?q=80&w=200&auto=format&fit=crop"
+  }
+];
 
 // Generated SVG Data URI for 'M ORIGINAL' Logo placeholder
 const DEFAULT_LOGO_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100' fill='none'%3E%3Ctext x='10' y='80' font-family='sans-serif' font-weight='900' font-size='80' fill='%23E50914'%3EM%3C/text%3E%3Ctext x='90' y='75' font-family='sans-serif' font-weight='700' font-size='24' letter-spacing='8' fill='%23FFFFFF'%3EORIGINAL%3C/text%3E%3C/svg%3E";
@@ -20,13 +52,13 @@ export const PROJECT_PAGE_CONFIG: ProjectHeroConfig = {
   heroVideoId: "jfopjfSYLcM",
   label: "Original",
   featuredFilmId: "1", // Default to Vantage Point
-  logoImage: DEFAULT_LOGO_IMAGE // Use the SVG placeholder so user sees image replacement immediately
+  logoImage: DEFAULT_LOGO_IMAGE 
 };
 
 export const LATEST_VIDEO = {
   title: "The Escape",
   description: "Clive Owen returns as The Driver in this action-packed short film featuring high-stakes driving and cinematic storytelling.",
-  image: PLACEHOLDER_IMAGE, 
+  image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop", 
   videoId: "jfopjfSYLcM",
 };
 

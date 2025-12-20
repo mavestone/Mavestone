@@ -33,7 +33,7 @@ export const Contact: React.FC = () => {
     if (success) {
         setSuccess(true);
         setFormData({ name: '', email: '', message: '' });
-        setTimeout(() => setSuccess(false), 5000); // Reset success after 5s
+        setTimeout(() => setSuccess(false), 5000);
     } else {
         setError("Failed to send message. Please try again.");
     }
@@ -42,22 +42,21 @@ export const Contact: React.FC = () => {
 
   return (
     <SectionWrapper id="contact" className="mb-24">
-      <div className="w-full max-w-5xl mx-auto bg-soft-black/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 md:p-16 overflow-hidden relative">
-        {/* Decorative Background Blob */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+      <div className="w-full max-w-5xl mx-auto bg-[#0A0A0A] backdrop-blur-3xl border border-white/5 rounded-[2rem] md:rounded-[4rem] p-8 md:p-16 overflow-hidden relative shadow-2xl">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
         
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div className="flex flex-col justify-between">
                 <div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Let's create something legendary.</h2>
-                    <p className="text-gray-400 mb-8">Tell us your creative vision, lets bring it to life!</p>
+                    <h2 className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">Let's craft a <br/><span className="text-white/40">masterpiece.</span></h2>
+                    <p className="text-gray-400 mb-8 font-medium">Tell us your vision, and we'll engineer the cinematic outcome.</p>
                     
-                    <div className="flex gap-4 mb-8">
+                    <div className="flex gap-6 mb-8">
                         <a 
                             href="https://www.linkedin.com/in/liamleslie/" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="w-12 h-12 rounded-full bg-[#0077B5] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-blue-900/20"
+                            className="w-14 h-14 rounded-full bg-[#0077b5] border border-[#0077b5] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
                             aria-label="LinkedIn"
                         >
                             <Linkedin size={24} fill="currentColor" strokeWidth={0} />
@@ -66,17 +65,17 @@ export const Contact: React.FC = () => {
                             href="https://wa.me/61449035614" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-green-900/20"
+                            className="w-14 h-14 rounded-full bg-[#25D366] border border-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
                             aria-label="WhatsApp"
                         >
-                            <WhatsAppIcon className="w-6 h-6" />
+                            <WhatsAppIcon className="w-7 h-7" />
                         </a>
                     </div>
 
                     <div className="space-y-6">
                         <div>
-                            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Email</h4>
-                            <a href="mailto:hello@mavestone.com" className="text-gray-400 hover:text-white transition-colors">hello@mavestone.com</a>
+                            <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Primary Contact</h4>
+                            <a href="mailto:hello@mavestone.com" className="text-2xl font-bold text-white hover:text-white/60 transition-colors tracking-tight">hello@mavestone.com</a>
                         </div>
                     </div>
                 </div>
@@ -84,52 +83,52 @@ export const Contact: React.FC = () => {
 
             <div className="relative">
                 {success ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-green-500/30 text-center p-8 animate-in fade-in duration-500">
-                        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-                            <CheckCircle size={32} className="text-green-400" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 text-center p-8 animate-in fade-in duration-500">
+                        <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                            <CheckCircle size={32} className="text-white" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-2">Message Sent!</h3>
-                        <p className="text-gray-300">Thanks for reaching out. We'll be in touch shortly.</p>
+                        <h3 className="text-2xl font-black text-white mb-2">Sent Successfully</h3>
+                        <p className="text-gray-300 font-medium">Liam will review your inquiry shortly.</p>
                     </div>
                 ) : (
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Name</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Identity</label>
                             <input 
                                 type="text" 
                                 value={formData.name}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                                placeholder="John Doe"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-4 md:p-5 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium"
+                                placeholder="YOUR FULL NAME"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Email</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Email</label>
                             <input 
                                 type="email" 
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                                placeholder="john@example.com"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-4 md:p-5 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium"
+                                placeholder="YOUR@EMAIL.COM"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-widest text-gray-500 ml-1">Message</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">The Vision</label>
                             <textarea 
                                 rows={4}
                                 value={formData.message}
                                 onChange={(e) => setFormData({...formData, message: e.target.value})}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all resize-none"
-                                placeholder="Tell us about your project..."
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-4 md:p-5 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all resize-none font-medium"
+                                placeholder="DESCRIBE YOUR PROJECT..."
                             ></textarea>
                         </div>
                         
-                        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+                        {error && <p className="text-red-400 text-xs font-bold text-center">{error}</p>}
 
                         <div className="pt-4">
-                            <MagneticButton variant="primary" className="w-full">
+                            <MagneticButton variant="primary" className="w-full !py-5 !font-black !text-sm uppercase tracking-widest">
                                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
-                                <span>{loading ? 'Sending...' : 'Send Project'}</span>
+                                <span>{loading ? 'Transmitting...' : 'Initiate Project'}</span>
                             </MagneticButton>
                         </div>
                     </form>
