@@ -12,18 +12,17 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 const CustomCursor: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isOverVideo, setIsOverVideo] = useState(false);
   
   // Mouse position values (MotionValues for performance)
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
   // Smooth springs for cursor movement
-  // Outer circle: Responsive but smooth
   const springConfigOuter = { damping: 20, stiffness: 300, mass: 0.5 };
   const cursorX = useSpring(mouseX, springConfigOuter);
   const cursorY = useSpring(mouseY, springConfigOuter);
 
-  // Inner dot: Slight lag for "premium" feel (heavier mass, lower stiffness)
   const springConfigInner = { damping: 40, stiffness: 200, mass: 0.8 };
   const dotX = useSpring(mouseX, springConfigInner);
   const dotY = useSpring(mouseY, springConfigInner);
@@ -37,7 +36,17 @@ const CustomCursor: React.FC = () => {
 
     const checkHover = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
-        // Check if the target or its parents are interactive
+        if (!target) return;
+
+        // Check if cursor is over a video player or iframe
+        const isVideo = 
+            target.tagName === 'IFRAME' || 
+            target.closest('iframe') || 
+            target.closest('.video-container') ||
+            target.classList.contains('video-player');
+        
+        setIsOverVideo(!!isVideo);
+
         const isInteractive = 
             target.tagName === 'A' || 
             target.tagName === 'BUTTON' || 
@@ -68,9 +77,11 @@ const CustomCursor: React.FC = () => {
     };
   }, [mouseX, mouseY, isVisible]);
 
+  const shouldHideBlob = !isVisible || isOverVideo;
+
   return (
     <>
-        {/* Outer Ring - Now Solid */}
+        {/* Outer Ring */}
         <motion.div
             className="fixed top-0 left-0 bg-white rounded-full mix-blend-difference pointer-events-none z-[9999] hidden lg:block"
             style={{ 
@@ -82,8 +93,8 @@ const CustomCursor: React.FC = () => {
             animate={{ 
                 width: isHovering ? 80 : 40, 
                 height: isHovering ? 80 : 40,
-                opacity: isVisible ? 1 : 0,
-                scale: isVisible ? 1 : 0.5
+                opacity: shouldHideBlob ? 0 : 1,
+                scale: shouldHideBlob ? 0.5 : 1
             }}
             transition={{ 
                 width: { duration: 0.2, ease: "easeOut" },
@@ -92,7 +103,7 @@ const CustomCursor: React.FC = () => {
             }}
         />
         
-        {/* Inner Dot (Lags behind) */}
+        {/* Inner Dot */}
         <motion.div
             className="fixed top-0 left-0 bg-white rounded-full mix-blend-difference pointer-events-none z-[9999] hidden lg:block"
             style={{ 
@@ -104,8 +115,9 @@ const CustomCursor: React.FC = () => {
                 height: 6
             }}
             animate={{
-                opacity: isVisible ? 1 : 0
+                opacity: shouldHideBlob ? 0 : 1
             }}
+            transition={{ opacity: { duration: 0.2 } }}
         />
     </>
   );
@@ -114,17 +126,13 @@ const CustomCursor: React.FC = () => {
 const AppContent: React.FC = () => {
   const location = useLocation();
 
-  // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
 
   return (
     <div className="bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto lg:cursor-none">
-        {/* Grain Overlay */}
         <div className="grain-overlay"></div>
-
-        {/* Cinematic Custom Cursor */}
         <CustomCursor />
 
         <Routes>
@@ -134,7 +142,6 @@ const AppContent: React.FC = () => {
             <Route path="/projects" element={<Projects />} />
         </Routes>
         
-        {/* Global Admin Panel Overlay */}
         <AdminPanel />
     </div>
   );

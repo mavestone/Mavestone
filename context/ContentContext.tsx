@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION, PROJECT_PAGE_CONFIG } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, SyncSettings } from '../types';
+import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
@@ -11,7 +11,6 @@ interface ContentContextType {
   films: Film[];
   messages: Message[];
   projectConfig: ProjectHeroConfig;
-  syncSettings: SyncSettings;
   isAdminOpen: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -21,6 +20,7 @@ interface ContentContextType {
   updateLatestVideo: (data: Partial<LatestVideoData>) => void;
   updateInProduction: (data: Partial<InProductionData>) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
+  setShorts: (shorts: Short[]) => void;
   addShort: () => void;
   bulkAddShorts: (newShorts: Short[]) => void;
   deleteShort: (id: string) => void;
@@ -28,7 +28,6 @@ interface ContentContextType {
   addFilm: () => void;
   deleteFilm: (id: string) => void;
   updateProjectConfig: (data: Partial<ProjectHeroConfig>) => void;
-  updateSyncSettings: (data: Partial<SyncSettings>) => void;
   saveChanges: () => Promise<void>;
   uploadImage: (file: File) => Promise<string | null>;
   login: (email: string, pass: string) => Promise<{ error: any }>;
@@ -37,37 +36,22 @@ interface ContentContextType {
   sendMessage: (name: string, email: string, message: string) => Promise<{ success: boolean; error?: any }>;
   fetchMessages: () => Promise<void>;
   markMessageRead: (id: string) => Promise<void>;
-  syncFromYouTube: () => Promise<void>;
-  syncShortsFromYouTube: () => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
-
-// Helper to parse YouTube ISO 8601 duration to seconds
-const parseYouTubeDuration = (duration: string): number => {
-  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if (!match) return 0;
-  const hours = parseInt(match[1] || '0');
-  const minutes = parseInt(match[2] || '0');
-  const seconds = parseInt(match[3] || '0');
-  return hours * 3600 + minutes * 60 + seconds;
-};
 
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Content State
   const [latestVideo, setLatestVideo] = useState<LatestVideoData>(LATEST_VIDEO);
   const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [syncSettings, setSyncSettings] = useState<SyncSettings>({
-    youtubeChannelId: 'UCf_CST5v2V7eJ6XqS9T5A-A',
-    youtubeApiKey: 'AIzaSyAVGpCJjg9ZVy_rfFE8zk9CM4DPziWt_VM',
-  });
 
   useEffect(() => {
     const init = async () => {
@@ -76,9 +60,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setIsLoading(false);
         return;
       }
+
       try {
         const { data: { session } } = await client.auth.getSession();
         setIsAuthenticated(!!session);
+
         const { data, error } = await client.from('site_content').select('*');
         if (!error && data) {
           data.forEach(row => {
@@ -87,21 +73,25 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (row.key === 'shorts') setShorts(row.data);
             if (row.key === 'films') setFilms(row.data);
             if (row.key === 'project_config') setProjectConfig(row.data);
-            if (row.key === 'sync_settings') setSyncSettings(row.data);
           });
         }
       } catch (e) {
-        console.error("Initialization error:", e);
+        console.error("Error initializing content:", e);
       } finally {
         setIsLoading(false);
       }
     };
+
     init();
+
     const client = supabase;
     const { data: { subscription } } = client ? client.auth.onAuthStateChange((_event, session) => {
         setIsAuthenticated(!!session);
     }) : { data: { subscription: null } };
-    return () => { subscription?.unsubscribe(); };
+
+    return () => {
+        subscription?.unsubscribe();
+    };
   }, []);
 
   const toggleAdmin = () => setIsAdminOpen(prev => !prev);
@@ -113,7 +103,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateShort = (id: string, data: Partial<Short>) => setShorts(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateFilm = (id: string, data: Partial<Film>) => setFilms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateProjectConfig = (data: Partial<ProjectHeroConfig>) => setProjectConfig(prev => ({ ...prev, ...data }));
-  const updateSyncSettings = (data: Partial<SyncSettings>) => setSyncSettings(prev => ({ ...prev, ...data }));
 
   const addShort = () => {
     setShorts(prev => [...prev, {
@@ -123,13 +112,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
       videoId: "",
       showViews: true,
-      category: "Short",
-      externalSource: 'manual'
+      category: "Short"
     }]);
   };
 
   const bulkAddShorts = (newShorts: Short[]) => setShorts(prev => [...prev, ...newShorts]);
   const deleteShort = (id: string) => setShorts(prev => prev.filter(item => item.id !== id));
+
   const addFilm = () => {
     setFilms(prev => [...prev, {
       id: Math.random().toString(36).substr(2, 9),
@@ -138,8 +127,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       tagline: "Tagline",
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
       videoId: "",
+      location: "Studio",
+      filmType: "Feature",
+      year: "2024",
+      genres: "Documentary",
+      duration: "10m"
     }]);
   };
+
   const deleteFilm = (id: string) => setFilms(prev => prev.filter(item => item.id !== id));
 
   const saveChanges = async () => {
@@ -150,61 +145,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'in_production', data: inProduction },
       { key: 'shorts', data: shorts },
       { key: 'films', data: films },
-      { key: 'project_config', data: projectConfig },
-      { key: 'sync_settings', data: syncSettings }
+      { key: 'project_config', data: projectConfig }
     ];
     const { error } = await client.from('site_content').upsert(updates);
     if (error) throw error;
-  };
-
-  const syncFromYouTube = async () => {
-    const { youtubeApiKey: key, youtubeChannelId: channelId } = syncSettings;
-    if (!key || !channelId) throw new Error("Missing YouTube Configuration.");
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=1&type=video`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.items?.length) {
-      const item = data.items[0];
-      setLatestVideo({
-        title: item.snippet.title,
-        description: item.snippet.description,
-        image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
-        videoId: item.id.videoId
-      });
-    }
-  };
-
-  const syncShortsFromYouTube = async () => {
-    const { youtubeApiKey: key, youtubeChannelId: channelId } = syncSettings;
-    if (!key || !channelId) throw new Error("Missing YouTube Configuration.");
-    
-    // Step 1: Search for videos
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?key=${key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=50&type=video`;
-    const searchRes = await fetch(searchUrl);
-    const searchData = await searchRes.json();
-    if (!searchData.items) return;
-
-    const videoIds = searchData.items.map((i: any) => i.id.videoId).join(',');
-    
-    // Step 2: Get details for duration and full metadata
-    const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?key=${key}&id=${videoIds}&part=snippet,contentDetails,statistics`;
-    const detailsRes = await fetch(detailsUrl);
-    const detailsData = await detailsRes.json();
-
-    if (detailsData.items) {
-      const filteredShorts: Short[] = detailsData.items
-        .filter((item: any) => parseYouTubeDuration(item.contentDetails.duration) <= 60)
-        .map((item: any) => ({
-          id: item.id,
-          title: item.snippet.title,
-          views: `${(parseInt(item.statistics.viewCount) / 1000).toFixed(0)}K`,
-          image: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url,
-          videoId: item.id,
-          showViews: true,
-          externalSource: 'youtube'
-        }));
-      setShorts(filteredShorts);
-    }
   };
 
   const uploadImage = async (file: File) => {
@@ -260,8 +204,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'in_production', data: IN_PRODUCTION },
       { key: 'shorts', data: SHORTS },
       { key: 'films', data: FILMS },
-      { key: 'project_config', data: PROJECT_PAGE_CONFIG },
-      { key: 'sync_settings', data: { youtubeChannelId: 'UCf_CST5v2V7eJ6XqS9T5A-A', youtubeApiKey: 'AIzaSyAVGpCJjg9ZVy_rfFE8zk9CM4DPziWt_VM' } }
+      { key: 'project_config', data: PROJECT_PAGE_CONFIG }
     ];
     await client.from('site_content').upsert(updates);
     window.location.reload();
@@ -269,13 +212,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <ContentContext.Provider value={{
-      latestVideo, inProduction, shorts, films, messages, projectConfig, syncSettings,
+      latestVideo, inProduction, shorts, films, messages, projectConfig,
       isAdminOpen, isAuthenticated, isLoading,
       toggleAdmin, openAdmin, closeAdmin,
-      updateLatestVideo, updateInProduction, updateShort, addShort, bulkAddShorts, deleteShort,
-      updateFilm, addFilm, deleteFilm, updateProjectConfig, updateSyncSettings,
+      updateLatestVideo, updateInProduction, updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
+      updateFilm, addFilm, deleteFilm, updateProjectConfig,
       saveChanges, uploadImage, login, logout, seedDatabase,
-      sendMessage, fetchMessages, markMessageRead, syncFromYouTube, syncShortsFromYouTube
+      sendMessage, fetchMessages, markMessageRead
     }}>
       {children}
     </ContentContext.Provider>

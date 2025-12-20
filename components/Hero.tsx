@@ -41,12 +41,11 @@ export const Hero: React.FC = () => {
     const mouse = { x: -1000, y: -1000 };
 
     // Configuration
-    // Reduced particle count for cleaner look
     const PARTICLE_COUNT = width > 768 ? 1600 : 800; 
-    const MOUSE_RADIUS = 60; // Interaction radius
-    const FRICTION = 0.96; // High friction = slippery drift
-    const EASE = 0.002; // Very low ease = very lazy/slow return (no snap)
-    const BASE_DRIFT_SPEED = 0.15; // Slow, cinematic drift
+    const MOUSE_RADIUS = 60; 
+    const FRICTION = 0.96; 
+    const EASE = 0.002; 
+    const BASE_DRIFT_SPEED = 0.15; 
 
     class Particle {
       x: number;
@@ -61,7 +60,7 @@ export const Hero: React.FC = () => {
       activeAlpha: number;
       twinkleSpeed: number;
       twinklePhase: number;
-      z: number; // Depth factor
+      z: number; 
 
       constructor(initialX?: number, initialY?: number, initialZ?: number) {
         this.x = initialX ?? Math.random() * width;
@@ -70,7 +69,7 @@ export const Hero: React.FC = () => {
         this.originY = this.y;
         this.vx = 0;
         this.vy = 0;
-        this.z = initialZ ?? Math.random() * 1.5 + 0.5; // Depth 0.5 to 2.0
+        this.z = initialZ ?? Math.random() * 1.5 + 0.5; 
         this.size = Math.random() * 1.2 + 0.5;
         
         this.baseAlpha = Math.random() * 0.4 + 0.3; 
@@ -82,7 +81,6 @@ export const Hero: React.FC = () => {
       }
 
       update() {
-        // 0. Radial Drift (Warp Effect)
         const centerX = width / 2;
         const centerY = height / 2;
         const driftSpeed = BASE_DRIFT_SPEED * this.z;
@@ -99,11 +97,8 @@ export const Hero: React.FC = () => {
              this.originY += (Math.random() - 0.5) * 2;
         }
 
-        // Respawn logic - WIDER EXPANSION POINT
-        // 400px padding ensures they don't pop out visibly
         if (this.originX < -100 || this.originX > width + 100 || this.originY < -100 || this.originY > height + 100) {
             const angle = Math.random() * Math.PI * 2;
-            // Greater expansion point: Spawn from a larger ring
             const minRadius = 150;
             const maxRadius = 600;
             const spawnRadius = minRadius + Math.random() * (maxRadius - minRadius);
@@ -118,7 +113,6 @@ export const Hero: React.FC = () => {
             this.activeAlpha = 0; 
         }
 
-        // 1. Mouse Interaction
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -133,31 +127,26 @@ export const Hero: React.FC = () => {
             this.activeAlpha = 1;
         }
 
-        // 2. Spring Back (Slacker)
         const dxHome = this.originX - this.x;
         const dyHome = this.originY - this.y;
         
         this.vx += dxHome * EASE;
         this.vy += dyHome * EASE;
 
-        // 3. Physics
         this.vx *= FRICTION;
         this.vy *= FRICTION;
         
         this.x += this.vx;
         this.y += this.vy;
 
-        // 4. Twinkle
         this.twinklePhase += this.twinkleSpeed;
         const twinkleVal = Math.sin(this.twinklePhase);
         let targetAlpha = this.baseAlpha + twinkleVal * 0.4; 
         
-        // Edge fading
         const distFromCenter = Math.sqrt(Math.pow(this.x - width/2, 2) + Math.pow(this.y - height/2, 2));
         const maxDist = Math.max(width, height) * 0.6;
         
         const edgeFade = Math.max(0, Math.min(1, (maxDist - distFromCenter) / 100));
-        // Fade in from center void
         const centerFade = Math.min(1, (distFromCenter - 100) / 200);
         
         targetAlpha *= edgeFade;
@@ -272,10 +261,8 @@ export const Hero: React.FC = () => {
         ref={containerRef} 
         className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black snap-start"
     >
-      {/* Light Ray - Top Right */}
       <div className="absolute top-0 right-0 w-[500px] h-[600px] bg-gradient-to-bl from-blue-500/20 via-blue-900/5 to-transparent blur-[80px] pointer-events-none opacity-60 z-10" />
 
-      {/* Canvas Galaxy Background */}
       <motion.div 
         style={{ y, opacity }}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
@@ -286,7 +273,6 @@ export const Hero: React.FC = () => {
         />
       </motion.div>
 
-      {/* Hero Content */}
       <div className="relative z-10 container px-6 mx-auto flex flex-col items-center text-center pointer-events-none">
         <div className="max-w-5xl pointer-events-auto">
             <motion.div 
@@ -306,16 +292,16 @@ export const Hero: React.FC = () => {
                 animate="visible"
                 className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-white mb-10 leading-[0.9]"
             >
-                <span className="block mb-2 md:mb-4 overflow-hidden py-2 text-white">
+                <span className="block mb-2 md:mb-4 py-2 text-white">
                     {line1.split("").map((char, i) => (
-                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">
+                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom pr-[0.05em]">
                             {char === " " ? "\u00A0" : char}
                         </motion.span>
                     ))}
                 </span>
-                <span className="block overflow-hidden py-2 text-white">
+                <span className="block py-2 text-white">
                     {line2.split("").map((char, i) => (
-                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">
+                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom pr-[0.05em]">
                             {char === " " ? "\u00A0" : char}
                         </motion.span>
                     ))}

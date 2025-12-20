@@ -19,16 +19,10 @@ export interface Short {
   title: string;
   views: string;
   image: string;
-  videoId: string; // YouTube Video ID
+  videoId: string;
   showViews?: boolean;
   year?: string;
   category?: string;
-  externalSource?: 'youtube' | 'manual';
-}
-
-export interface SyncSettings {
-  youtubeChannelId: string;
-  youtubeApiKey: string;
 }
 
 export interface LatestVideoData {

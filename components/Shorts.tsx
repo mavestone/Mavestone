@@ -25,6 +25,9 @@ export const Shorts: React.FC = () => {
       setPlayingId(short.id);
   };
 
+  // Limit to most recent 4
+  const displayShorts = shorts.slice(0, 4);
+
   // YouTube logic
   useEffect(() => {
     let interval: any;
@@ -86,7 +89,7 @@ export const Shorts: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {shorts.map((short, index) => {
+        {displayShorts.map((short, index) => {
            const isPlaying = playingId === short.id;
 
            return (
