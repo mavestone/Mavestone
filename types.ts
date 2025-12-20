@@ -12,7 +12,7 @@ export interface Film {
   filmType?: string;
   duration?: string;
   genres?: string;
-  externalSource?: 'youtube' | 'instagram' | 'manual';
+  externalSource?: 'youtube' | 'manual';
 }
 
 export interface Short {
@@ -20,11 +20,11 @@ export interface Short {
   title: string;
   views: string;
   image: string;
-  videoId: string; // Used for YouTube ID or Instagram Permalink/Embed URL
+  videoId: string; // YouTube Video ID
   showViews?: boolean;
   year?: string;
   category?: string;
-  externalSource?: 'youtube' | 'instagram' | 'manual';
+  externalSource?: 'youtube' | 'manual';
 }
 
 export interface SyncSettings {

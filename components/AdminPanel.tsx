@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Settings, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, Instagram } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Settings, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ export const AdminPanel: React.FC = () => {
     syncSettings, updateSyncSettings,
     saveChanges, uploadImage,
     isAuthenticated, fetchMessages, messages, markMessageRead, logout,
-    syncFromYouTube
+    syncFromYouTube, syncShortsFromYouTube
   } = useContent();
 
   const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'messages' | 'settings'>('home');
@@ -64,10 +64,23 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleSyncYouTube = async () => {
+  const handleSyncYouTubeFeatured = async () => {
     setIsSyncing(true);
     try {
       await syncFromYouTube();
+      alert("Featured video synced from YouTube!");
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleSyncYouTubeShorts = async () => {
+    setIsSyncing(true);
+    try {
+      await syncShortsFromYouTube();
+      alert("Shorts gallery updated from YouTube!");
     } catch (e: any) {
       alert(e.message);
     } finally {
@@ -113,7 +126,7 @@ export const AdminPanel: React.FC = () => {
                         <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">CMS Dashboard</p>
                     </div>
                     <nav className="space-y-2">
-                        <NavItem id="home" label="Dashboard" icon={Layout} />
+                        <NavItem id="home" label="Home Editor" icon={Layout} />
                         <NavItem id="projects" label="Project Manager" icon={Clapperboard} />
                         <NavItem id="messages" label="Inquiries" icon={Mail} />
                         <NavItem id="settings" label="API Settings" icon={Settings} />
@@ -144,20 +157,19 @@ export const AdminPanel: React.FC = () => {
                 </div>
 
                 <div className="p-8 pb-32 max-w-7xl mx-auto">
-                    {/* HOME TAB */}
                     {activeTab === 'home' && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             <div className="lg:col-span-7 space-y-6">
                                 <div className="p-6 rounded-2xl bg-[#0F0F11] border border-white/5 space-y-6">
                                     <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                        <h3 className="text-sm font-bold uppercase tracking-widest text-blue-400">Featured Video</h3>
+                                        <h3 className="text-sm font-bold uppercase tracking-widest text-blue-400">Featured Home Video</h3>
                                         <button 
-                                            onClick={handleSyncYouTube}
+                                            onClick={handleSyncYouTubeFeatured}
                                             disabled={isSyncing}
                                             className="text-[10px] flex items-center gap-2 bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-full hover:bg-blue-500/20 transition-all uppercase tracking-widest font-bold"
                                         >
                                             {isSyncing ? <Loader2 className="animate-spin" size={12} /> : <Youtube size={12} />}
-                                            Sync from YouTube
+                                            Sync Latest from YT
                                         </button>
                                     </div>
                                     <div className="space-y-4">
@@ -181,7 +193,6 @@ export const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                    {/* PROJECTS TAB */}
                     {activeTab === 'projects' && (
                         <div className="space-y-12">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -208,40 +219,19 @@ export const AdminPanel: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* FILMS */}
                             <div className="pt-8 border-t border-white/5">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-teal-400">Feature Films</h3>
-                                    <button onClick={addFilm} className="px-4 py-2 bg-white text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"><Plus size={14} /> Add Film</button>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {films.map((film) => (
-                                        <div key={film.id} className="p-5 rounded-2xl bg-[#0F0F11] border border-white/5 space-y-4 group">
-                                            <div className="flex justify-between items-center">
-                                                <input type="text" value={film.title} onChange={(e) => updateFilm(film.id, { title: e.target.value })} className="bg-transparent text-white font-bold focus:outline-none w-full" />
-                                                <button onClick={() => deleteFilm(film.id)} className="text-gray-600 hover:text-red-500 ml-2 transition-colors"><Trash2 size={16} /></button>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <input type="text" placeholder="Location" value={film.location || ''} onChange={(e) => updateFilm(film.id, { location: e.target.value })} className="bg-black/20 border border-white/10 rounded-lg p-2 text-[10px] text-white" />
-                                                <input type="text" placeholder="Year" value={film.year || ''} onChange={(e) => updateFilm(film.id, { year: e.target.value })} className="bg-black/20 border border-white/10 rounded-lg p-2 text-[10px] text-white" />
-                                            </div>
-                                            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/5">
-                                                <img src={film.image} className="w-full h-full object-cover" alt={film.title} />
-                                                <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                                                    <Camera size={20} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateFilm(film.id, { image: url }))} />
-                                                </label>
-                                            </div>
-                                            <input type="text" placeholder="YouTube ID" value={film.videoId || ''} onChange={(e) => updateFilm(film.id, { videoId: extractYouTubeId(e.target.value) })} className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-xs font-mono text-blue-300 focus:outline-none" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* SHORTS */}
-                            <div className="pt-8 border-t border-white/5">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-purple-400">Short Stories / Reels</h3>
-                                    <button onClick={addShort} className="px-4 py-2 bg-white text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"><Plus size={14} /> Add Manual Reel</button>
+                                    <h3 className="text-lg font-bold text-purple-400">Short Stories / Shorts</h3>
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={handleSyncYouTubeShorts} 
+                                            disabled={isSyncing}
+                                            className="px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-purple-500/20 transition-all"
+                                        >
+                                            <Youtube size={14} /> Sync Shorts from YT
+                                        </button>
+                                        <button onClick={addShort} className="px-4 py-2 bg-white text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"><Plus size={14} /> Add Manual</button>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                     {shorts.map((short) => (
@@ -249,15 +239,14 @@ export const AdminPanel: React.FC = () => {
                                             <img src={short.image} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt={short.title} />
                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-between">
                                                 <div className="flex justify-between items-center">
-                                                    <button onClick={() => updateShort(short.id, { externalSource: short.externalSource === 'instagram' ? 'youtube' : 'instagram' })} className="text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded bg-white/10 text-white">
-                                                        {short.externalSource === 'instagram' ? <Instagram size={10} className="inline mr-1" /> : <Youtube size={10} className="inline mr-1" />} 
-                                                        {short.externalSource === 'instagram' ? 'IG' : 'YT'}
-                                                    </button>
+                                                    <div className="text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded bg-white/10 text-white flex items-center gap-1">
+                                                        <Youtube size={10} /> YT
+                                                    </div>
                                                     <button onClick={() => deleteShort(short.id)} className="text-red-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                                                 </div>
                                                 <div className="space-y-2">
                                                     <input type="text" placeholder="Title" value={short.title} onChange={(e) => updateShort(short.id, { title: e.target.value })} className="w-full bg-white/10 border border-white/5 text-[10px] p-2 rounded text-white focus:outline-none" />
-                                                    <input type="text" placeholder={short.externalSource === 'instagram' ? "Reel URL" : "YouTube ID"} value={short.videoId} onChange={(e) => updateShort(short.id, { videoId: short.externalSource === 'instagram' ? e.target.value : extractYouTubeId(e.target.value) })} className="w-full bg-white/10 border border-white/5 text-[10px] p-2 rounded text-blue-300 font-mono focus:outline-none" />
+                                                    <input type="text" placeholder="YouTube ID" value={short.videoId} onChange={(e) => updateShort(short.id, { videoId: extractYouTubeId(e.target.value) })} className="w-full bg-white/10 border border-white/5 text-[10px] p-2 rounded text-blue-300 font-mono focus:outline-none" />
                                                     <label className="w-full flex items-center justify-center py-2 bg-white/5 border border-white/5 rounded text-[10px] cursor-pointer hover:bg-white/10 transition-colors">
                                                         <Camera size={12} className="mr-1" /> Thumbnail
                                                         <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateShort(short.id, { image: url }))} />
@@ -288,17 +277,14 @@ export const AdminPanel: React.FC = () => {
                     {activeTab === 'settings' && (
                         <div className="max-w-2xl mx-auto space-y-6">
                             <div className="p-8 rounded-3xl bg-[#0F0F11] border border-white/5 space-y-8 shadow-2xl">
-                                <h3 className="text-lg font-bold text-white border-b border-white/5 pb-4">System Settings</h3>
+                                <h3 className="text-lg font-bold text-white border-b border-white/5 pb-4">YouTube Configuration</h3>
                                 <div className="space-y-6">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2"><Youtube size={14} /> YouTube Channel Configuration</label>
+                                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2"><Youtube size={14} /> Data API Settings</label>
                                         <input type="text" placeholder="YouTube Data API Key" value={syncSettings.youtubeApiKey} onChange={(e) => updateSyncSettings({ youtubeApiKey: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/30" />
                                         <input type="text" placeholder="YouTube Channel ID" value={syncSettings.youtubeChannelId} onChange={(e) => updateSyncSettings({ youtubeChannelId: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/30" />
-                                    </div>
-                                    <div className="space-y-4 pt-6 border-t border-white/5">
-                                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2"><Instagram size={14} /> Instagram Reels</label>
-                                        <p className="text-xs text-gray-400 leading-relaxed">
-                                            To add Instagram Reels, please manually copy the link (e.g., https://www.instagram.com/reels/XXXX/) from Instagram and paste it into the "Projects" tab. The system will handle the link routing automatically.
+                                        <p className="text-[10px] text-gray-600 leading-relaxed italic">
+                                            The API Key and Channel ID are used to fetch your latest uploads and gallery automatically.
                                         </p>
                                     </div>
                                 </div>

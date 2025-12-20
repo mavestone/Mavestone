@@ -22,6 +22,7 @@ interface ContentContextType {
   updateInProduction: (data: Partial<InProductionData>) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
   addShort: () => void;
+  bulkAddShorts: (newShorts: Short[]) => void;
   deleteShort: (id: string) => void;
   updateFilm: (id: string, data: Partial<Film>) => void;
   addFilm: () => void;
@@ -37,7 +38,7 @@ interface ContentContextType {
   fetchMessages: () => Promise<void>;
   markMessageRead: (id: string) => Promise<void>;
   syncFromYouTube: () => Promise<void>;
-  syncFromInstagram: () => Promise<void>;
+  syncShortsFromYouTube: () => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -56,21 +57,22 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [messages, setMessages] = useState<Message[]>([]);
   const [syncSettings, setSyncSettings] = useState<SyncSettings>({
     youtubeChannelId: 'UCf_CST5v2V7eJ6XqS9T5A-A',
-    youtubeApiKey: '',
+    youtubeApiKey: 'AIzaSyAVGpCJjg9ZVy_rfFE8zk9CM4DPziWt_VM', // Hardcoded as per user request
   });
 
   useEffect(() => {
     const init = async () => {
-      if (!supabase) {
+      const client = supabase;
+      if (!client) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await client.auth.getSession();
         setIsAuthenticated(!!session);
 
-        const { data, error } = await supabase.from('site_content').select('*');
+        const { data, error } = await client.from('site_content').select('*');
         if (!error && data) {
           data.forEach(row => {
             if (row.key === 'latest_video') setLatestVideo(row.data);
@@ -90,7 +92,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     init();
 
-    const { data: { subscription } } = supabase ? supabase.auth.onAuthStateChange((_event, session) => {
+    const client = supabase;
+    const { data: { subscription } } = client ? client.auth.onAuthStateChange((_event, session) => {
         setIsAuthenticated(!!session);
     }) : { data: { subscription: null } };
 
@@ -123,6 +126,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }]);
   };
 
+  const bulkAddShorts = (newShorts: Short[]) => {
+    setShorts(prev => [...prev, ...newShorts]);
+  };
+
   const deleteShort = (id: string) => setShorts(prev => prev.filter(item => item.id !== id));
 
   const addFilm = () => {
@@ -143,7 +150,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const deleteFilm = (id: string) => setFilms(prev => prev.filter(item => item.id !== id));
 
   const saveChanges = async () => {
-    if (!supabase || !isAuthenticated) return;
+    const client = supabase;
+    if (!client || !isAuthenticated) return;
     const updates = [
       { key: 'latest_video', data: latestVideo },
       { key: 'in_production', data: inProduction },
@@ -152,7 +160,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'project_config', data: projectConfig },
       { key: 'sync_settings', data: syncSettings }
     ];
-    const { error } = await supabase.from('site_content').upsert(updates);
+    const { error } = await client.from('site_content').upsert(updates);
     if (error) throw error;
   };
 
@@ -179,48 +187,88 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const syncShortsFromYouTube = async () => {
+    if (!syncSettings.youtubeApiKey || !syncSettings.youtubeChannelId) {
+        throw new Error("Missing YouTube API Key or Channel ID in Settings.");
+    }
+    
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${syncSettings.youtubeApiKey}&channelId=${syncSettings.youtubeChannelId}&part=snippet,id&order=date&maxResults=10&type=video`;
+    
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.items) {
+      const newShorts: Short[] = data.items.map((item: any) => ({
+        id: item.id.videoId,
+        title: item.snippet.title,
+        views: "Synced",
+        image: item.snippet.thumbnails.high.url,
+        videoId: item.id.videoId,
+        showViews: false,
+        category: "Shorts",
+        externalSource: 'youtube'
+      }));
+      setShorts(newShorts);
+    }
+  };
+
   const uploadImage = async (file: File) => {
-    if (!supabase) return null;
+    const client = supabase;
+    if (!client) return null;
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const { error: uploadError } = await supabase.storage.from('media').upload(fileName, file);
+    const { error: uploadError } = await client.storage.from('media').upload(fileName, file);
     if (uploadError) return null;
-    const { data } = supabase.storage.from('media').getPublicUrl(fileName);
+    const { data } = client.storage.from('media').getPublicUrl(fileName);
     return data.publicUrl;
   };
 
-  const login = (email: string, pass: string) => supabase.auth.signInWithPassword({ email, password: pass });
-  const logout = async () => { if(supabase) await supabase.auth.signOut(); setIsAdminOpen(false); setIsAuthenticated(false); };
+  const login = (email: string, pass: string) => {
+    const client = supabase;
+    if (!client) return Promise.resolve({ error: { message: "Supabase not connected" } });
+    return client.auth.signInWithPassword({ email, password: pass });
+  };
+
+  const logout = async () => { 
+    const client = supabase;
+    if(client) await client.auth.signOut(); 
+    setIsAdminOpen(false); 
+    setIsAuthenticated(false); 
+  };
   
   const sendMessage = async (name: string, email: string, message: string) => {
-    if (!supabase) return { success: false };
-    const { error } = await supabase.from('messages').insert([{ name, email, message }]);
+    const client = supabase;
+    if (!client) return { success: false };
+    const { error } = await client.from('messages').insert([{ name, email, message }]);
     return { success: !error, error };
   };
 
   const fetchMessages = async () => {
-    if (!supabase) return;
-    const { data } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+    const client = supabase;
+    if (!client) return;
+    const { data } = await client.from('messages').select('*').order('created_at', { ascending: false });
     if (data) setMessages(data);
   };
 
   const markMessageRead = async (id: string) => {
-    if (!supabase) return;
-    await supabase.from('messages').update({ read: true }).eq('id', id);
+    const client = supabase;
+    if (!client) return;
+    await client.from('messages').update({ read: true }).eq('id', id);
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
   };
 
   const seedDatabase = async () => {
-    if (!supabase) return;
+    const client = supabase;
+    if (!client) return;
     const updates = [
       { key: 'latest_video', data: LATEST_VIDEO },
       { key: 'in_production', data: IN_PRODUCTION },
       { key: 'shorts', data: SHORTS },
       { key: 'films', data: FILMS },
       { key: 'project_config', data: PROJECT_PAGE_CONFIG },
-      { key: 'sync_settings', data: { youtubeChannelId: 'UCf_CST5v2V7eJ6XqS9T5A-A', youtubeApiKey: '' } }
+      { key: 'sync_settings', data: { youtubeChannelId: 'UCf_CST5v2V7eJ6XqS9T5A-A', youtubeApiKey: 'AIzaSyAVGpCJjg9ZVy_rfFE8zk9CM4DPziWt_VM' } }
     ];
-    await supabase.from('site_content').upsert(updates);
+    await client.from('site_content').upsert(updates);
     window.location.reload();
   };
 
@@ -229,10 +277,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       latestVideo, inProduction, shorts, films, messages, projectConfig, syncSettings,
       isAdminOpen, isAuthenticated, isLoading,
       toggleAdmin, openAdmin, closeAdmin,
-      updateLatestVideo, updateInProduction, updateShort, addShort, deleteShort,
+      updateLatestVideo, updateInProduction, updateShort, addShort, bulkAddShorts, deleteShort,
       updateFilm, addFilm, deleteFilm, updateProjectConfig, updateSyncSettings,
       saveChanges, uploadImage, login, logout, seedDatabase,
-      sendMessage, fetchMessages, markMessageRead, syncFromYouTube, syncFromInstagram: async () => {}
+      sendMessage, fetchMessages, markMessageRead, syncFromYouTube, syncShortsFromYouTube, syncFromInstagram: async () => {}
     }}>
       {children}
     </ContentContext.Provider>
