@@ -5,8 +5,8 @@
 
 @layer base {
   html {
-    /* Disable native smooth scrolling to prevent conflict with JS smooth scroll */
-    scroll-behavior: auto;
+    /* Enable native smooth scrolling */
+    scroll-behavior: smooth;
     /* Ensure scrollbar is available */
     overflow-y: scroll; 
   }

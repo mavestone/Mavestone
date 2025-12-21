@@ -51,7 +51,7 @@ export const ScrollIndicator: React.FC = () => {
         
         window.scrollTo({
             top: offset,
-            behavior: 'auto'
+            behavior: 'smooth'
         });
     }
   };

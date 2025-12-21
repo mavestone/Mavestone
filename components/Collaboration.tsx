@@ -50,23 +50,23 @@ export const Collaboration: React.FC = () => {
                         <img 
                             src={portrait} 
                             alt="Liam Leslie" 
-                            className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
                         />
                         {/* Grain removed from here */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90"></div>
                         
                         {/* Caption Overlay */}
-                        <div className="absolute bottom-4 left-4 md:bottom-10 md:left-10 right-4">
+                        <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 z-20 max-w-[85%]">
                             <motion.div 
                                 initial={{ y: 20, opacity: 0 }}
                                 whileInView={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4 }}
                                 viewport={{ once: true }}
+                                className="glass-panel px-5 py-4 md:px-8 md:py-6 rounded-2xl bg-black/30 backdrop-blur-xl border border-white/10 shadow-2xl"
                             >
-                                <p className="text-white font-black text-[10px] md:text-3xl lg:text-5xl tracking-tighter mb-0.5 leading-none">Liam Leslie</p>
-                                <div className="flex items-center gap-1 md:gap-3">
-                                    <span className="w-2 md:w-8 h-[1px] bg-white/40"></span>
-                                    <p className="text-white/60 text-[5px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.4em]">Director</p>
+                                <p className="text-white font-black text-xl md:text-3xl lg:text-4xl tracking-tight mb-2 leading-none">Liam Leslie</p>
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <p className="text-white/90 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.25em]">Creative Director</p>
                                 </div>
                             </motion.div>
                         </div>
@@ -181,7 +181,7 @@ export const Collaboration: React.FC = () => {
                 ))}
             </motion.div>
         </div>
-      </section>
+      </SectionWrapper>
     </div>
   );
 };

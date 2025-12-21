@@ -6,7 +6,6 @@ import { useContent } from '../context/ContentContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Info, X } from 'lucide-react';
 import { ProjectCarousel } from '../components/ui/ProjectCarousel';
-import { SmoothScroll } from '../components/ui/SmoothScroll';
 
 export const Projects: React.FC = () => {
   const { films, shorts, inProduction, projectConfig } = useContent();
@@ -164,7 +163,7 @@ export const Projects: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <SmoothScroll>
+      
         {/* HERO SECTION */}
         <div className="relative w-full h-[80vh] md:h-[85vh] overflow-hidden">
             {/* Background Video */}
@@ -298,7 +297,6 @@ export const Projects: React.FC = () => {
         </div>
 
         <Footer />
-      </SmoothScroll>
     </div>
   );
 };

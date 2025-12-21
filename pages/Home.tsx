@@ -8,23 +8,20 @@ import { Collaboration } from '../components/Collaboration';
 import { Contact } from '../components/Contact';
 import { Footer } from '../components/Footer';
 import { ScrollIndicator } from '../components/ui/ScrollIndicator';
-import { SmoothScroll } from '../components/ui/SmoothScroll';
 
 export const Home: React.FC = () => {
   return (
     <>
         <ScrollIndicator />
         <Navbar />
-        <SmoothScroll>
-            <main>
-                <Hero />
-                <LatestVideo />
-                <Shorts />
-                <Collaboration />
-                <Contact />
-            </main>
-            <Footer />
-        </SmoothScroll>
+        <main>
+            <Hero />
+            <LatestVideo />
+            <Shorts />
+            <Collaboration />
+            <Contact />
+        </main>
+        <Footer />
     </>
   );
 };
