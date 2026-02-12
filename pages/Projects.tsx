@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
@@ -6,6 +5,7 @@ import { useContent } from '../context/ContentContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Info, X } from 'lucide-react';
 import { ProjectCarousel } from '../components/ui/ProjectCarousel';
+import { Film } from '../types';
 
 export const Projects: React.FC = () => {
   const { films, shorts, inProduction, projectConfig } = useContent();
@@ -15,13 +15,19 @@ export const Projects: React.FC = () => {
   
   // Use config to find featured film, fallback to first in list
   const featuredId = projectConfig?.featuredFilmId;
-  const featured = films.find(f => f.id === featuredId) || films[0] || { 
+  const featured: Film = films.find(f => f.id === featuredId) || films[0] || { 
+      id: "default",
       title: "Mavestone", 
       tagline: "Stories that move people", 
       image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2500&auto=format&fit=crop",
       category: "Featured Film",
       description: "We blend cinematic visuals with strategic storytelling to build brands that leave a legacy.",
-      videoId: "jfopjfSYLcM"
+      videoId: "jfopjfSYLcM",
+      year: "2024",
+      location: "Global",
+      filmType: "Showreel",
+      duration: "02:30",
+      genres: "Showreel"
   };
 
   // Ensure background video is from the featured project
