@@ -14,7 +14,8 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     renderer: THREE.WebGLRenderer
     uniforms: any
     animationId: number
-    frameCount: number
+    framesSinceTrigger: number
+    currentIntro: number
   } | null>(null)
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       }
     `
 
-    // Fragment shader
+    // Fragment shader - Removed spotlight/mouse logic
     const fragmentShader = `
       #define TWO_PI 6.2831853072
       #define PI 3.14159265359
@@ -37,7 +38,6 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       precision highp float;
       uniform vec2 resolution;
       uniform float time;
-      uniform vec2 uMouse;
       uniform float uIntro;
 
       void main(void) {
@@ -52,20 +52,8 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
           }
         }
         
-        // Mouse interaction logic
-        // Calculate distance from mouse to current pixel
-        float dist = distance(gl_FragCoord.xy, uMouse);
-        
-        // Create a glow mask: 1.0 at mouse, fading to 0.0 at 600px radius (Larger radius)
-        float mouseGlow = 1.0 - smoothstep(0.0, 600.0, dist);
-        mouseGlow = clamp(mouseGlow, 0.0, 1.0);
-        
-        // Combine intro opacity and mouse glow
-        // We want the pattern to be visible if uIntro is high OR if mouseGlow is high
-        float visibility = max(uIntro, mouseGlow * 1.5); // Boost glow intensity slightly
-        
-        // Apply visibility to color
-        gl_FragColor = vec4(color * visibility, 1.0);
+        // Visibility is determined solely by uIntro (timeline based)
+        gl_FragColor = vec4(color * uIntro, 1.0);
       }
     `
 
@@ -79,8 +67,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     const uniforms = {
       time: { type: "f", value: 1.0 },
       resolution: { type: "v2", value: new THREE.Vector2() },
-      uMouse: { type: "v2", value: new THREE.Vector2(-1000, -1000) }, // Start off-screen
-      uIntro: { type: "f", value: 1.0 }, // Start fully visible
+      uIntro: { type: "f", value: 1.0 }, // Start visible
     }
 
     const material = new THREE.ShaderMaterial({
@@ -107,16 +94,12 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       uniforms.resolution.value.y = height * window.devicePixelRatio
     }
 
-    // Handle mouse move
-    const onMouseMove = (e: MouseEvent) => {
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-        // Calculate relative to the container
-        // Y needs to be inverted for WebGL (0 is bottom)
-        const x = (e.clientX - rect.left) * window.devicePixelRatio;
-        const y = (rect.height - (e.clientY - rect.top)) * window.devicePixelRatio;
-        
-        uniforms.uMouse.value.set(x, y);
+    // Handle mouse interaction
+    const onMouseMove = () => {
+        if (sceneRef.current) {
+            // Reset the counter to keep animation playing/restart it
+            sceneRef.current.framesSinceTrigger = 0;
+        }
     }
 
     // Initial resize
@@ -125,35 +108,41 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     window.addEventListener("mousemove", onMouseMove, false)
 
     // Animation Config
-    const LOOP_DURATION_FRAMES = 350; // Approx 5-6 seconds
-    const FADE_OUT_FRAMES = 90; // 1.5 second fade out
+    const LOOP_DURATION_FRAMES = 350; // ~6 seconds active time
+    const FADE_OUT_FRAMES = 60; // ~1 second fade out
 
     // Animation loop
     const animate = () => {
       const animationId = requestAnimationFrame(animate)
       
       if (sceneRef.current) {
-          sceneRef.current.frameCount++;
-          const fc = sceneRef.current.frameCount;
+          sceneRef.current.framesSinceTrigger++;
+          const frames = sceneRef.current.framesSinceTrigger;
+          
+          let targetIntro = 0;
 
-          if (fc < LOOP_DURATION_FRAMES) {
-              // Playing loop
+          if (frames < LOOP_DURATION_FRAMES) {
+              // Active Phase
+              targetIntro = 1.0;
               uniforms.time.value += 0.05;
-              uniforms.uIntro.value = 1.0;
-          } else if (fc < LOOP_DURATION_FRAMES + FADE_OUT_FRAMES) {
-              // Fading out
-              // Keep moving during fade
+          } else if (frames < LOOP_DURATION_FRAMES + FADE_OUT_FRAMES) {
+              // Fade Out Phase
+              const fadeProgress = (frames - LOOP_DURATION_FRAMES) / FADE_OUT_FRAMES;
+              targetIntro = 1.0 - fadeProgress;
               uniforms.time.value += 0.05;
-              
-              // Fade uIntro from 1.0 to 0.0
-              const fadeProgress = (fc - LOOP_DURATION_FRAMES) / FADE_OUT_FRAMES;
-              uniforms.uIntro.value = 1.0 - fadeProgress;
           } else {
-              // Stopped and dark
-              uniforms.uIntro.value = 0.0;
-              // Add a very slow drift so the pattern feels "alive" when lit up by mouse
-              uniforms.time.value += 0.002;
+              // Stopped Phase
+              targetIntro = 0.0;
+              // Stop updating time to "pause" the pattern
           }
+
+          // Smoothly interpolate currentOpacity towards target
+          // This prevents abrupt jumps if mouse moves during fade out
+          const current = sceneRef.current.currentIntro;
+          const next = current + (targetIntro - current) * 0.1;
+          
+          sceneRef.current.currentIntro = next;
+          uniforms.uIntro.value = next;
       }
 
       renderer.render(scene, camera)
@@ -163,14 +152,15 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       }
     }
 
-    // Store scene references for cleanup
+    // Store scene references for cleanup and loop access
     sceneRef.current = {
       camera,
       scene,
       renderer,
       uniforms,
       animationId: 0,
-      frameCount: 0
+      framesSinceTrigger: 0,
+      currentIntro: 1.0
     }
 
     // Start animation
