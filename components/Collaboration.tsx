@@ -181,7 +181,7 @@ export const Collaboration: React.FC = () => {
                 ))}
             </motion.div>
         </div>
-      </SectionWrapper>
+      </section>
     </div>
   );
 };
