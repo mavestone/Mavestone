@@ -1,9 +1,70 @@
 
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useRef, useState } from 'react';
+import { motion, useScroll, useTransform, Variants } from 'framer-motion';
 import { MagneticButton } from './ui/MagneticButton';
 import { Play } from 'lucide-react';
 import { ShaderAnimation } from './ui/ShaderAnimation';
+
+const letterVariants: Variants = {
+    hidden: { opacity: 0, y: 100, filter: 'blur(20px)', scale: 1.1 },
+    visible: { 
+        opacity: 1, y: 0, filter: 'blur(0px)', scale: 1, 
+        transition: { duration: 1.4, ease: [0.19, 1, 0.22, 1] } 
+    }
+};
+
+const wordVariants: Variants = {
+    hidden: {},
+    visible: { 
+        transition: { 
+            staggerChildren: 0.05,
+            delayChildren: 0.2
+        } 
+    }
+};
+
+const InteractiveWord = ({ children }: { children: string }) => {
+    const ref = useRef<HTMLSpanElement>(null);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const { clientX, clientY } = e;
+        const rect = ref.current?.getBoundingClientRect();
+        if (rect) {
+            const x = clientX - (rect.left + rect.width / 2);
+            const y = clientY - (rect.top + rect.height / 2);
+            // Reduced sensitivity for smoother, less aggressive movement
+            setPosition({ x: x * 0.08, y: y * 0.08 }); 
+        }
+    };
+
+    const handleMouseLeave = () => {
+        setPosition({ x: 0, y: 0 });
+    };
+
+    return (
+        <motion.span
+            ref={ref}
+            variants={wordVariants}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            animate={{ x: position.x, y: position.y }}
+            // Smoother spring physics
+            transition={{ type: "spring", stiffness: 80, damping: 25, mass: 0.5 }}
+            className="inline-block cursor-default whitespace-nowrap relative z-30 mr-[0.2em] md:mr-[0.25em] last:mr-0"
+        >
+             {children.split("").map((char, i) => (
+                 <motion.span 
+                    key={i} 
+                    variants={letterVariants} 
+                    className="inline-block origin-bottom"
+                >
+                    {char}
+                 </motion.span>
+             ))}
+        </motion.span>
+    )
+}
 
 export const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -16,18 +77,15 @@ export const Hero: React.FC = () => {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  const letterVariants = {
-    hidden: { opacity: 0, y: 100, filter: 'blur(20px)', scale: 1.1 },
-    visible: { 
-        opacity: 1, y: 0, filter: 'blur(0px)', scale: 1, 
-        transition: { duration: 1.4, ease: [0.19, 1, 0.22, 1] } 
-    }
-  };
-
   const titleVariants = {
     hidden: { opacity: 0 },
-    // Increased delay to allow the shader animation to "play once" (be seen) before text appears
-    visible: { opacity: 1, transition: { staggerChildren: 0.04, delayChildren: 1.2 } }
+    visible: { 
+        opacity: 1, 
+        transition: { 
+            staggerChildren: 0.3, // Stagger the words/lines
+            delayChildren: 0.5 
+        } 
+    }
   };
 
   return (
@@ -67,13 +125,13 @@ export const Hero: React.FC = () => {
                 className="text-[clamp(3rem,10vw,8.5rem)] font-black tracking-[-0.05em] text-white mb-8 leading-[0.85]"
             >
                 <span className="block py-2 overflow-visible">
-                    {"Stories that".split("").map((char, i) => (
-                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">{char === " " ? "\u00A0" : char}</motion.span>
+                    {["Stories", "that"].map((word, i) => (
+                        <InteractiveWord key={i}>{word}</InteractiveWord>
                     ))}
                 </span>
                 <span className="block py-2 overflow-visible">
-                    {"move people".split("").map((char, i) => (
-                        <motion.span key={i} variants={letterVariants} className="inline-block origin-bottom">{char === " " ? "\u00A0" : char}</motion.span>
+                    {["move", "people"].map((word, i) => (
+                        <InteractiveWord key={i}>{word}</InteractiveWord>
                     ))}
                 </span>
             </motion.h1>

@@ -14,8 +14,6 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     renderer: THREE.WebGLRenderer
     uniforms: any
     animationId: number
-    framesSinceTrigger: number
-    currentIntro: number
   } | null>(null)
 
   useEffect(() => {
@@ -30,15 +28,11 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       }
     `
 
-    // Fragment shader - Removed spotlight/mouse logic
+    // Fragment shader
     const fragmentShader = `
-      #define TWO_PI 6.2831853072
-      #define PI 3.14159265359
-
       precision highp float;
       uniform vec2 resolution;
       uniform float time;
-      uniform float uIntro;
 
       void main(void) {
         vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
@@ -52,8 +46,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
           }
         }
         
-        // Visibility is determined solely by uIntro (timeline based)
-        gl_FragColor = vec4(color * uIntro, 1.0);
+        gl_FragColor = vec4(color, 1.0);
       }
     `
 
@@ -67,7 +60,6 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     const uniforms = {
       time: { type: "f", value: 1.0 },
       resolution: { type: "v2", value: new THREE.Vector2() },
-      uIntro: { type: "f", value: 1.0 }, // Start visible
     }
 
     const material = new THREE.ShaderMaterial({
@@ -94,56 +86,16 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       uniforms.resolution.value.y = height * window.devicePixelRatio
     }
 
-    // Handle mouse interaction
-    const onMouseMove = () => {
-        if (sceneRef.current) {
-            // Reset the counter to keep animation playing/restart it
-            sceneRef.current.framesSinceTrigger = 0;
-        }
-    }
-
     // Initial resize
     onWindowResize()
     window.addEventListener("resize", onWindowResize, false)
-    window.addEventListener("mousemove", onMouseMove, false)
-
-    // Animation Config
-    const LOOP_DURATION_FRAMES = 350; // ~6 seconds active time
-    const FADE_OUT_FRAMES = 60; // ~1 second fade out
 
     // Animation loop
     const animate = () => {
       const animationId = requestAnimationFrame(animate)
       
-      if (sceneRef.current) {
-          sceneRef.current.framesSinceTrigger++;
-          const frames = sceneRef.current.framesSinceTrigger;
-          
-          let targetIntro = 0;
-
-          if (frames < LOOP_DURATION_FRAMES) {
-              // Active Phase
-              targetIntro = 1.0;
-              uniforms.time.value += 0.05;
-          } else if (frames < LOOP_DURATION_FRAMES + FADE_OUT_FRAMES) {
-              // Fade Out Phase
-              const fadeProgress = (frames - LOOP_DURATION_FRAMES) / FADE_OUT_FRAMES;
-              targetIntro = 1.0 - fadeProgress;
-              uniforms.time.value += 0.05;
-          } else {
-              // Stopped Phase
-              targetIntro = 0.0;
-              // Stop updating time to "pause" the pattern
-          }
-
-          // Smoothly interpolate currentOpacity towards target
-          // This prevents abrupt jumps if mouse moves during fade out
-          const current = sceneRef.current.currentIntro;
-          const next = current + (targetIntro - current) * 0.1;
-          
-          sceneRef.current.currentIntro = next;
-          uniforms.uIntro.value = next;
-      }
+      // Continuous smooth loop
+      uniforms.time.value += 0.05;
 
       renderer.render(scene, camera)
 
@@ -152,15 +104,13 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       }
     }
 
-    // Store scene references for cleanup and loop access
+    // Store scene references for cleanup
     sceneRef.current = {
       camera,
       scene,
       renderer,
       uniforms,
-      animationId: 0,
-      framesSinceTrigger: 0,
-      currentIntro: 1.0
+      animationId: 0
     }
 
     // Start animation
@@ -169,7 +119,6 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     // Cleanup function
     return () => {
       window.removeEventListener("resize", onWindowResize)
-      window.removeEventListener("mousemove", onMouseMove)
 
       if (sceneRef.current) {
         cancelAnimationFrame(sceneRef.current.animationId)
