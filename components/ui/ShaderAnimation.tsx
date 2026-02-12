@@ -56,13 +56,13 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
         // Calculate distance from mouse to current pixel
         float dist = distance(gl_FragCoord.xy, uMouse);
         
-        // Create a glow mask: 1.0 at mouse, fading to 0.0 at 400px radius
-        float mouseGlow = 1.0 - smoothstep(0.0, 400.0, dist);
+        // Create a glow mask: 1.0 at mouse, fading to 0.0 at 600px radius (Larger radius)
+        float mouseGlow = 1.0 - smoothstep(0.0, 600.0, dist);
         mouseGlow = clamp(mouseGlow, 0.0, 1.0);
         
         // Combine intro opacity and mouse glow
         // We want the pattern to be visible if uIntro is high OR if mouseGlow is high
-        float visibility = max(uIntro, mouseGlow);
+        float visibility = max(uIntro, mouseGlow * 1.5); // Boost glow intensity slightly
         
         // Apply visibility to color
         gl_FragColor = vec4(color * visibility, 1.0);
@@ -111,8 +111,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     const onMouseMove = (e: MouseEvent) => {
         if (!container) return;
         const rect = container.getBoundingClientRect();
-        // Calculate relative to the container, but since it's full screen/fixed usually in Hero, 
-        // we map window coordinates to the canvas
+        // Calculate relative to the container
         // Y needs to be inverted for WebGL (0 is bottom)
         const x = (e.clientX - rect.left) * window.devicePixelRatio;
         const y = (rect.height - (e.clientY - rect.top)) * window.devicePixelRatio;
@@ -127,7 +126,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
 
     // Animation Config
     const LOOP_DURATION_FRAMES = 350; // Approx 5-6 seconds
-    const FADE_OUT_FRAMES = 60; // 1 second fade out
+    const FADE_OUT_FRAMES = 90; // 1.5 second fade out
 
     // Animation loop
     const animate = () => {
@@ -143,8 +142,8 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
               uniforms.uIntro.value = 1.0;
           } else if (fc < LOOP_DURATION_FRAMES + FADE_OUT_FRAMES) {
               // Fading out
-              // Freeze time (optional, or keep moving slowly. Freezing requested "then stop")
-              // uniforms.time.value += 0.005; // Very slow drift? No, user said "stop"
+              // Keep moving during fade
+              uniforms.time.value += 0.05;
               
               // Fade uIntro from 1.0 to 0.0
               const fadeProgress = (fc - LOOP_DURATION_FRAMES) / FADE_OUT_FRAMES;
@@ -152,7 +151,8 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
           } else {
               // Stopped and dark
               uniforms.uIntro.value = 0.0;
-              // Time frozen
+              // Add a very slow drift so the pattern feels "alive" when lit up by mouse
+              uniforms.time.value += 0.002;
           }
       }
 
