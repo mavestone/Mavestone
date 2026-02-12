@@ -14,6 +14,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     renderer: THREE.WebGLRenderer
     uniforms: any
     animationId: number
+    frameCount: number
   } | null>(null)
 
   useEffect(() => {
@@ -36,6 +37,8 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       precision highp float;
       uniform vec2 resolution;
       uniform float time;
+      uniform vec2 uMouse;
+      uniform float uIntro;
 
       void main(void) {
         vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
@@ -49,7 +52,20 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
           }
         }
         
-        gl_FragColor = vec4(color[0],color[1],color[2],1.0);
+        // Mouse interaction logic
+        // Calculate distance from mouse to current pixel
+        float dist = distance(gl_FragCoord.xy, uMouse);
+        
+        // Create a glow mask: 1.0 at mouse, fading to 0.0 at 400px radius
+        float mouseGlow = 1.0 - smoothstep(0.0, 400.0, dist);
+        mouseGlow = clamp(mouseGlow, 0.0, 1.0);
+        
+        // Combine intro opacity and mouse glow
+        // We want the pattern to be visible if uIntro is high OR if mouseGlow is high
+        float visibility = max(uIntro, mouseGlow);
+        
+        // Apply visibility to color
+        gl_FragColor = vec4(color * visibility, 1.0);
       }
     `
 
@@ -63,6 +79,8 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     const uniforms = {
       time: { type: "f", value: 1.0 },
       resolution: { type: "v2", value: new THREE.Vector2() },
+      uMouse: { type: "v2", value: new THREE.Vector2(-1000, -1000) }, // Start off-screen
+      uIntro: { type: "f", value: 1.0 }, // Start fully visible
     }
 
     const material = new THREE.ShaderMaterial({
@@ -89,14 +107,55 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       uniforms.resolution.value.y = height * window.devicePixelRatio
     }
 
+    // Handle mouse move
+    const onMouseMove = (e: MouseEvent) => {
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        // Calculate relative to the container, but since it's full screen/fixed usually in Hero, 
+        // we map window coordinates to the canvas
+        // Y needs to be inverted for WebGL (0 is bottom)
+        const x = (e.clientX - rect.left) * window.devicePixelRatio;
+        const y = (rect.height - (e.clientY - rect.top)) * window.devicePixelRatio;
+        
+        uniforms.uMouse.value.set(x, y);
+    }
+
     // Initial resize
     onWindowResize()
     window.addEventListener("resize", onWindowResize, false)
+    window.addEventListener("mousemove", onMouseMove, false)
+
+    // Animation Config
+    const LOOP_DURATION_FRAMES = 350; // Approx 5-6 seconds
+    const FADE_OUT_FRAMES = 60; // 1 second fade out
 
     // Animation loop
     const animate = () => {
       const animationId = requestAnimationFrame(animate)
-      uniforms.time.value += 0.05
+      
+      if (sceneRef.current) {
+          sceneRef.current.frameCount++;
+          const fc = sceneRef.current.frameCount;
+
+          if (fc < LOOP_DURATION_FRAMES) {
+              // Playing loop
+              uniforms.time.value += 0.05;
+              uniforms.uIntro.value = 1.0;
+          } else if (fc < LOOP_DURATION_FRAMES + FADE_OUT_FRAMES) {
+              // Fading out
+              // Freeze time (optional, or keep moving slowly. Freezing requested "then stop")
+              // uniforms.time.value += 0.005; // Very slow drift? No, user said "stop"
+              
+              // Fade uIntro from 1.0 to 0.0
+              const fadeProgress = (fc - LOOP_DURATION_FRAMES) / FADE_OUT_FRAMES;
+              uniforms.uIntro.value = 1.0 - fadeProgress;
+          } else {
+              // Stopped and dark
+              uniforms.uIntro.value = 0.0;
+              // Time frozen
+          }
+      }
+
       renderer.render(scene, camera)
 
       if (sceneRef.current) {
@@ -111,6 +170,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
       renderer,
       uniforms,
       animationId: 0,
+      frameCount: 0
     }
 
     // Start animation
@@ -119,6 +179,7 @@ export function ShaderAnimation({ className }: ShaderAnimationProps) {
     // Cleanup function
     return () => {
       window.removeEventListener("resize", onWindowResize)
+      window.removeEventListener("mousemove", onMouseMove)
 
       if (sceneRef.current) {
         cancelAnimationFrame(sceneRef.current.animationId)
