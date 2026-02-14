@@ -178,7 +178,7 @@ export const Navbar: React.FC = () => {
                       Logout
                   </MagneticButton>
               ) : (
-                  <MagneticButton variant="primary" className="w-full max-w-[200px] flex justify-center" onClick={(e) => handleScroll(e, '#contact')}>
+                  <MagneticButton variant="primary" className="w-full max-w-[200px] flex justify-center mx-auto" onClick={(e) => handleScroll(e, '#contact')}>
                       Start a Project
                   </MagneticButton>
               )}
@@ -192,7 +192,7 @@ export const Navbar: React.FC = () => {
                         href={link.href} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-white transition-colors duration-300"
+                        className="text-gray-400 hover:text-white transition-colors duration-300 transform active:scale-95"
                         aria-label={link.label}
                     >
                         {link.icon}
