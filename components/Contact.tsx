@@ -41,38 +41,38 @@ export const Contact: React.FC = () => {
   };
 
   return (
-    <SectionWrapper id="contact" className="mb-24">
-      <div className="w-full max-w-5xl mx-auto bg-[#0A0A0A] backdrop-blur-3xl border border-white/5 rounded-[2rem] md:rounded-[4rem] p-8 md:p-16 overflow-hidden relative shadow-2xl">
+    <SectionWrapper id="contact" className="mb-12 md:mb-24">
+      <div className="w-full max-w-5xl mx-auto bg-[#0A0A0A] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-8 md:p-16 overflow-hidden relative shadow-2xl">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
         
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
             <div className="flex flex-col justify-between">
                 <div>
-                    <h2 className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">Let's craft a <br/><span className="text-white/40">masterpiece.</span></h2>
-                    <p className="text-gray-400 mb-8 font-medium">Tell us your vision, and we'll engineer the cinematic outcome.</p>
+                    <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">Let's craft a <br/><span className="text-white/40">masterpiece.</span></h2>
+                    <p className="text-gray-400 mb-8 font-medium text-sm md:text-base">Tell us your vision, and we'll engineer the cinematic outcome.</p>
                     
-                    <div className="flex gap-6 mb-8">
+                    <div className="flex gap-4 md:gap-6 mb-8">
                         <a 
                             href="https://www.linkedin.com/in/liamleslie/" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="w-14 h-14 rounded-full bg-[#0077b5] border border-[#0077b5] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#0077b5] border border-[#0077b5] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
                             aria-label="LinkedIn"
                         >
-                            <Linkedin size={24} fill="currentColor" strokeWidth={0} />
+                            <Linkedin size={20} className="md:w-6 md:h-6" fill="currentColor" strokeWidth={0} />
                         </a>
                         <a 
                             href="https://wa.me/61449035614" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="w-14 h-14 rounded-full bg-[#25D366] border border-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] border border-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
                             aria-label="WhatsApp"
                         >
-                            <WhatsAppIcon className="w-7 h-7" />
+                            <WhatsAppIcon className="w-6 h-6 md:w-7 md:h-7" />
                         </a>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-6 hidden md:block">
                         <div>
                             <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Primary Contact</h4>
                             <a href="mailto:hello@mavestone.com" className="text-2xl font-bold text-white hover:text-white/60 transition-colors tracking-tight">hello@mavestone.com</a>
@@ -91,14 +91,14 @@ export const Contact: React.FC = () => {
                         <p className="text-gray-300 font-medium">Liam will review your inquiry shortly.</p>
                     </div>
                 ) : (
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Identity</label>
                             <input 
                                 type="text" 
                                 value={formData.name}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-4 md:p-5 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
                                 placeholder="YOUR FULL NAME"
                             />
                         </div>
@@ -108,7 +108,7 @@ export const Contact: React.FC = () => {
                                 type="email" 
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-4 md:p-5 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
                                 placeholder="YOUR@EMAIL.COM"
                             />
                         </div>
@@ -118,18 +118,22 @@ export const Contact: React.FC = () => {
                                 rows={4}
                                 value={formData.message}
                                 onChange={(e) => setFormData({...formData, message: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-4 md:p-5 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all resize-none font-medium"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all resize-none font-medium placeholder:text-white/20"
                                 placeholder="DESCRIBE YOUR PROJECT..."
                             ></textarea>
                         </div>
                         
                         {error && <p className="text-red-400 text-xs font-bold text-center">{error}</p>}
 
-                        <div className="pt-4">
-                            <MagneticButton variant="primary" className="w-full !py-5 !font-black !text-sm uppercase tracking-widest">
+                        <div className="pt-2 md:pt-4">
+                            <MagneticButton variant="primary" className="w-full !py-4 md:!py-5 !font-black !text-xs md:!text-sm uppercase tracking-widest justify-center">
                                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
                                 <span>{loading ? 'Transmitting...' : 'Initiate Project'}</span>
                             </MagneticButton>
+                        </div>
+
+                         <div className="block md:hidden text-center mt-6">
+                            <a href="mailto:hello@mavestone.com" className="text-sm font-bold text-white/80 hover:text-white transition-colors tracking-tight">hello@mavestone.com</a>
                         </div>
                     </form>
                 )}
