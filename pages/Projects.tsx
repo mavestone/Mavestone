@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
@@ -8,7 +9,7 @@ import { ProjectCarousel } from '../components/ui/ProjectCarousel';
 import { Film } from '../types';
 
 export const Projects: React.FC = () => {
-  const { films, shorts, inProduction, projectConfig } = useContent();
+  const { films, clientWork, shorts, inProduction, projectConfig } = useContent();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeItem, setActiveItem] = useState<any>(null); // For details modal
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false); // For fullscreen player
@@ -254,7 +255,16 @@ export const Projects: React.FC = () => {
                 onMoreInfo={openDetails}
             />
 
-            {/* Row 2: Short Stories */}
+             {/* Row 2: Client Work */}
+             <ProjectCarousel 
+                title="Client Work" 
+                items={clientWork} 
+                type="film" 
+                onPlay={openPlayer}
+                onMoreInfo={openDetails}
+            />
+
+            {/* Row 3: Short Stories */}
             <ProjectCarousel 
                 title="Short Stories" 
                 items={shorts} 
@@ -263,7 +273,7 @@ export const Projects: React.FC = () => {
                 onMoreInfo={openDetails}
             />
 
-            {/* Row 3: Coming Soon - Responsive Adaptation */}
+            {/* Row 4: Coming Soon - Responsive Adaptation */}
             <div className="px-4 md:px-12 w-full">
                 <h2 className="text-xl md:text-2xl font-semibold text-white mb-4 shadow-black drop-shadow-md">
                     Coming Soon

@@ -156,3 +156,48 @@ export const FILMS: Film[] = [
     genres: "Drama, Sci-Fi"
   },
 ];
+
+export const CLIENT_WORK: Film[] = [
+  {
+    id: 'c1',
+    title: "Porsche: 911 Legacy",
+    category: "Commercial",
+    tagline: "Timeless machine.",
+    image: "https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2000&auto=format&fit=crop",
+    videoId: "jfopjfSYLcM",
+    description: "A commercial celebrating 60 years of the Porsche 911. Precision engineering meets cinematic storytelling.",
+    year: "2023",
+    location: "Stuttgart, Germany",
+    filmType: "Commercial",
+    duration: "60s",
+    genres: "Automotive, Luxury"
+  },
+  {
+    id: 'c2',
+    title: "Nike: Run Forever",
+    category: "Brand Campaign",
+    tagline: "Unstoppable motion.",
+    image: "https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=2000&auto=format&fit=crop",
+    videoId: "jfopjfSYLcM",
+    description: "High energy global campaign for the new running lineup. Capturing the raw emotion of movement.",
+    year: "2024",
+    location: "Portland, USA",
+    filmType: "Spot",
+    duration: "45s",
+    genres: "Sports, Lifestyle"
+  },
+  {
+    id: 'c3',
+    title: "Aesop: Tactility",
+    category: "Brand Film",
+    tagline: "Sensory design.",
+    image: "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?q=80&w=2000&auto=format&fit=crop",
+    videoId: "jfopjfSYLcM",
+    description: "Exploring the texture and scent of the new collection through a purely visual and auditory journey.",
+    year: "2023",
+    location: "Melbourne, Australia",
+    filmType: "Brand Film",
+    duration: "2m",
+    genres: "Beauty, Design"
+  }
+];

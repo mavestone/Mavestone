@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { LATEST_VIDEO, SHORTS, FILMS, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT } from '../constants';
+import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT } from '../constants';
 import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial } from '../types';
 
 interface ContentContextType {
@@ -9,6 +9,7 @@ interface ContentContextType {
   inProduction: InProductionData;
   shorts: Short[];
   films: Film[];
+  clientWork: Film[];
   aboutData: AboutData;
   messages: Message[];
   projectConfig: ProjectHeroConfig;
@@ -32,6 +33,9 @@ interface ContentContextType {
   updateFilm: (id: string, data: Partial<Film>) => void;
   addFilm: () => void;
   deleteFilm: (id: string) => void;
+  updateClientWork: (id: string, data: Partial<Film>) => void;
+  addClientWork: () => void;
+  deleteClientWork: (id: string) => void;
   updateProjectConfig: (data: Partial<ProjectHeroConfig>) => void;
   saveChanges: () => Promise<void>;
   uploadImage: (file: File) => Promise<string | null>;
@@ -64,6 +68,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [inProduction, setInProduction] = useState<InProductionData>(IN_PRODUCTION);
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
+  const [clientWork, setClientWork] = useState<Film[]>(CLIENT_WORK);
   const [aboutData, setAboutData] = useState<AboutData>(DEFAULT_ABOUT);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -87,6 +92,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (row.key === 'in_production') setInProduction(row.data);
             if (row.key === 'shorts') setShorts(row.data);
             if (row.key === 'films') setFilms(row.data);
+            if (row.key === 'client_work') setClientWork(row.data);
             if (row.key === 'project_config') setProjectConfig(row.data);
             if (row.key === 'about_data') setAboutData(row.data);
           });
@@ -138,6 +144,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateShort = (id: string, data: Partial<Short>) => setShorts(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateFilm = (id: string, data: Partial<Film>) => setFilms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+  const updateClientWork = (id: string, data: Partial<Film>) => setClientWork(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateProjectConfig = (data: Partial<ProjectHeroConfig>) => setProjectConfig(prev => ({ ...prev, ...data }));
 
   const addShort = () => {
@@ -170,8 +177,24 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       duration: "10m"
     }]);
   };
-
   const deleteFilm = (id: string) => setFilms(prev => prev.filter(item => item.id !== id));
+
+  const addClientWork = () => {
+    setClientWork(prev => [...prev, {
+      id: Math.random().toString(36).substr(2, 9),
+      title: "New Client Work",
+      category: "Commercial",
+      tagline: "Tagline",
+      image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
+      videoId: "",
+      location: "Location",
+      filmType: "Commercial",
+      year: "2024",
+      genres: "Brand",
+      duration: "60s"
+    }]);
+  };
+  const deleteClientWork = (id: string) => setClientWork(prev => prev.filter(item => item.id !== id));
 
   const saveChanges = async () => {
     const client = supabase;
@@ -181,6 +204,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'in_production', data: inProduction },
       { key: 'shorts', data: shorts },
       { key: 'films', data: films },
+      { key: 'client_work', data: clientWork },
       { key: 'project_config', data: projectConfig },
       { key: 'about_data', data: aboutData }
     ];
@@ -241,6 +265,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'in_production', data: IN_PRODUCTION },
       { key: 'shorts', data: SHORTS },
       { key: 'films', data: FILMS },
+      { key: 'client_work', data: CLIENT_WORK },
       { key: 'project_config', data: PROJECT_PAGE_CONFIG },
       { key: 'about_data', data: DEFAULT_ABOUT }
     ];
@@ -250,12 +275,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <ContentContext.Provider value={{
-      latestVideo, inProduction, shorts, films, aboutData, messages, projectConfig,
+      latestVideo, inProduction, shorts, films, clientWork, aboutData, messages, projectConfig,
       isAdminOpen, isAuthenticated, isLoading,
       toggleAdmin, openAdmin, closeAdmin,
       updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
       updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
-      updateFilm, addFilm, deleteFilm, updateProjectConfig,
+      updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
       saveChanges, uploadImage, login, logout, seedDatabase,
       sendMessage, fetchMessages, markMessageRead
     }}>

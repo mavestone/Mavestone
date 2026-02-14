@@ -23,7 +23,7 @@ const wordVariants: Variants = {
     }
 };
 
-const InteractiveWord = ({ children }: { children: string }) => {
+const InteractiveWord = ({ word }: { word: string }) => {
     const ref = useRef<HTMLSpanElement>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -53,7 +53,7 @@ const InteractiveWord = ({ children }: { children: string }) => {
             transition={{ type: "spring", stiffness: 80, damping: 25, mass: 0.5 }}
             className="inline-block cursor-default whitespace-nowrap relative z-30 mr-[0.2em] md:mr-[0.25em] last:mr-0"
         >
-             {children.split("").map((char, i) => (
+             {word.split("").map((char, i) => (
                  <motion.span 
                     key={i} 
                     variants={letterVariants} 
@@ -126,12 +126,12 @@ export const Hero: React.FC = () => {
             >
                 <span className="block py-2 overflow-visible">
                     {["Stories", "that"].map((word, i) => (
-                        <InteractiveWord key={i}>{word}</InteractiveWord>
+                        <InteractiveWord key={i} word={word} />
                     ))}
                 </span>
                 <span className="block py-2 overflow-visible">
                     {["move", "people"].map((word, i) => (
-                        <InteractiveWord key={i}>{word}</InteractiveWord>
+                        <InteractiveWord key={i} word={word} />
                     ))}
                 </span>
             </motion.h1>

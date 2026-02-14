@@ -13,6 +13,7 @@ export const AdminPanel: React.FC = () => {
     inProduction, updateInProduction,
     shorts, setShorts, updateShort, addShort, deleteShort,
     films, updateFilm, addFilm, deleteFilm,
+    clientWork, updateClientWork, addClientWork, deleteClientWork,
     aboutData, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     projectConfig, updateProjectConfig,
     saveChanges, uploadImage,
@@ -269,7 +270,7 @@ export const AdminPanel: React.FC = () => {
                             </div>
 
                             <div className="flex justify-between items-center px-2 pt-8">
-                                <h3 className="text-lg font-bold text-white">Project Gallery</h3>
+                                <h3 className="text-lg font-bold text-white">Selected Works (Originals)</h3>
                                 <button onClick={() => addFilm()} className="px-4 py-2 bg-white text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"><Plus size={14} /> Add New Project</button>
                             </div>
 
@@ -304,6 +305,48 @@ export const AdminPanel: React.FC = () => {
                                                     <input type="text" placeholder="Genres" value={film.genres || ''} onChange={(e) => updateFilm(film.id, { genres: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
                                                 </div>
                                                 <textarea rows={3} placeholder="Full Description for Lightbox" value={film.description || ''} onChange={(e) => updateFilm(film.id, { description: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white focus:outline-none" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-between items-center px-2 pt-8 border-t border-white/5 mt-12">
+                                <h3 className="text-lg font-bold text-white">Client Work</h3>
+                                <button onClick={() => addClientWork()} className="px-4 py-2 bg-white text-black rounded-full text-xs font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"><Plus size={14} /> Add Client Project</button>
+                            </div>
+
+                             <div className="space-y-6">
+                                {clientWork.map((film) => (
+                                    <div key={film.id} className="p-6 rounded-2xl bg-[#0F0F11] border border-white/5 group">
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                            <div className="lg:col-span-4 space-y-4">
+                                                <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
+                                                    <img src={film.image} className="w-full h-full object-cover" alt={film.title} />
+                                                    <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"><Camera size={24} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateClientWork(film.id, { image: url }))} /></label>
+                                                </div>
+                                                <input type="text" placeholder="Thumbnail URL" value={film.image} onChange={(e) => updateClientWork(film.id, { image: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-[10px] text-gray-500" />
+                                                <input type="text" placeholder="YouTube URL or ID" value={film.videoId || ''} onChange={(e) => updateClientWork(film.id, { videoId: extractYouTubeId(e.target.value) })} className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-xs font-mono text-blue-300" />
+                                            </div>
+                                            <div className="lg:col-span-8 space-y-4">
+                                                <div className="flex justify-between items-start">
+                                                    <input type="text" placeholder="Project Title" value={film.title} onChange={(e) => updateClientWork(film.id, { title: e.target.value })} className="text-xl font-bold bg-transparent text-white border-b border-transparent focus:border-white/20 focus:outline-none w-full mr-4" />
+                                                    <button onClick={() => deleteClientWork(film.id)} className="p-2 text-gray-600 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <input type="text" placeholder="Category" value={film.category} onChange={(e) => updateClientWork(film.id, { category: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                    <input type="text" placeholder="Tagline" value={film.tagline} onChange={(e) => updateClientWork(film.id, { tagline: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                    <input type="text" placeholder="Year" value={film.year || ''} onChange={(e) => updateClientWork(film.id, { year: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <input type="text" placeholder="Location" value={film.location || ''} onChange={(e) => updateClientWork(film.id, { location: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                    <input type="text" placeholder="Film Type (e.g. Feature)" value={film.filmType || ''} onChange={(e) => updateClientWork(film.id, { filmType: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <input type="text" placeholder="Duration (e.g. 1h 20m)" value={film.duration || ''} onChange={(e) => updateClientWork(film.id, { duration: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                    <input type="text" placeholder="Genres" value={film.genres || ''} onChange={(e) => updateClientWork(film.id, { genres: e.target.value })} className="bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white" />
+                                                </div>
+                                                <textarea rows={3} placeholder="Full Description for Lightbox" value={film.description || ''} onChange={(e) => updateClientWork(film.id, { description: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white focus:outline-none" />
                                             </div>
                                         </div>
                                     </div>
