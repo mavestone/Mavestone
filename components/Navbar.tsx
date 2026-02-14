@@ -3,9 +3,22 @@ import React, { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../constants';
 import { MagneticButton } from './ui/MagneticButton';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Instagram, Linkedin, Youtube } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+// Custom Icons for X and TikTok
+const XIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+  </svg>
+);
 
 export const Navbar: React.FC = () => {
   const [hidden, setHidden] = useState(false);
@@ -14,6 +27,14 @@ export const Navbar: React.FC = () => {
   const { isAuthenticated, logout, openAdmin } = useContent();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const socialLinks = [
+    { href: "https://www.instagram.com/mavestonemedia", icon: <Instagram size={24} />, label: "Instagram" },
+    { href: "https://x.com/mavestone", icon: <XIcon className="w-6 h-6" />, label: "X" },
+    { href: "https://www.linkedin.com/company/mavestone/", icon: <Linkedin size={24} />, label: "LinkedIn" },
+    { href: "https://www.youtube.com/@mavestone", icon: <Youtube size={24} />, label: "YouTube" },
+    { href: "https://www.tiktok.com/@mavestone", icon: <TikTokIcon className="w-6 h-6" />, label: "TikTok" },
+  ];
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
@@ -128,7 +149,7 @@ export const Navbar: React.FC = () => {
         initial={{ opacity: 0, pointerEvents: "none" }}
         animate={{ opacity: isMobileMenuOpen ? 1 : 0, pointerEvents: isMobileMenuOpen ? "auto" : "none" }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center cursor-none"
+        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center cursor-auto"
       >
           <button 
             onClick={() => setIsMobileMenuOpen(false)}
@@ -137,28 +158,47 @@ export const Navbar: React.FC = () => {
         >
             <X size={24} />
         </button>
-        <div className="flex flex-col gap-8 text-center">
-            {NAV_ITEMS.map((item) => (
-            <a
-                key={item.label}
-                href={item.href}
-                onClick={(e) => handleScroll(e, item.href)}
-                className="text-4xl font-light text-white hover:text-gray-400 transition-colors cursor-pointer"
-            >
-                {item.label}
-            </a>
-            ))}
-              <div className="mt-8">
-                {isAuthenticated ? (
-                    <MagneticButton variant="secondary" onClick={() => { logout(); setIsMobileMenuOpen(false); }}>
-                        Logout
-                    </MagneticButton>
-                ) : (
-                    <MagneticButton variant="primary" onClick={(e) => handleScroll(e, '#contact')}>
-                        Start a Project
-                    </MagneticButton>
-                )}
-              </div>
+        <div className="flex flex-col gap-8 text-center items-center w-full max-w-sm px-6">
+            <div className="flex flex-col gap-6">
+              {NAV_ITEMS.map((item) => (
+              <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleScroll(e, item.href)}
+                  className="text-4xl font-light text-white hover:text-gray-400 transition-colors cursor-pointer"
+              >
+                  {item.label}
+              </a>
+              ))}
+            </div>
+
+            <div className="mt-8 flex flex-col items-center gap-4 w-full">
+              {isAuthenticated ? (
+                  <MagneticButton variant="secondary" onClick={() => { logout(); setIsMobileMenuOpen(false); }}>
+                      Logout
+                  </MagneticButton>
+              ) : (
+                  <MagneticButton variant="primary" className="w-full max-w-[200px] flex justify-center" onClick={(e) => handleScroll(e, '#contact')}>
+                      Start a Project
+                  </MagneticButton>
+              )}
+            </div>
+
+            {/* Social Links for Mobile */}
+            <div className="mt-8 flex items-center justify-center gap-6 pt-8 border-t border-white/10 w-full">
+                {socialLinks.map((link) => (
+                    <a 
+                        key={link.label}
+                        href={link.href} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-white transition-colors duration-300"
+                        aria-label={link.label}
+                    >
+                        {link.icon}
+                    </a>
+                ))}
+            </div>
         </div>
       </motion.div>
     </>

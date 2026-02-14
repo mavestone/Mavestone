@@ -13,6 +13,7 @@ const CustomCursor: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isOverVideo, setIsOverVideo] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   
   // Mouse position values (MotionValues for performance)
   const mouseX = useMotionValue(-100);
@@ -28,6 +29,18 @@ const CustomCursor: React.FC = () => {
   const dotY = useSpring(mouseY, springConfigInner);
 
   useEffect(() => {
+    const checkDevice = () => {
+        setIsDesktop(window.innerWidth >= 1024);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) return;
+
     const moveCursor = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -75,7 +88,9 @@ const CustomCursor: React.FC = () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [mouseX, mouseY, isVisible]);
+  }, [mouseX, mouseY, isVisible, isDesktop]);
+
+  if (!isDesktop) return null;
 
   const shouldHideBlob = !isVisible || isOverVideo;
 
@@ -83,7 +98,7 @@ const CustomCursor: React.FC = () => {
     <>
         {/* Outer Ring */}
         <motion.div
-            className="fixed top-0 left-0 bg-white rounded-full mix-blend-difference pointer-events-none z-[9999] hidden lg:block"
+            className="fixed top-0 left-0 bg-white rounded-full mix-blend-difference pointer-events-none z-[9999]"
             style={{ 
                 x: cursorX, 
                 y: cursorY,
@@ -105,7 +120,7 @@ const CustomCursor: React.FC = () => {
         
         {/* Inner Dot */}
         <motion.div
-            className="fixed top-0 left-0 bg-white rounded-full mix-blend-difference pointer-events-none z-[9999] hidden lg:block"
+            className="fixed top-0 left-0 bg-white rounded-full mix-blend-difference pointer-events-none z-[9999]"
             style={{ 
                 x: dotX, 
                 y: dotY,
