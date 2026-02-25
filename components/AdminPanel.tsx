@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, User } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -17,11 +17,13 @@ export const AdminPanel: React.FC = () => {
     aboutData, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     projectConfig, updateProjectConfig,
     saveChanges, uploadImage,
-    isAuthenticated, fetchMessages, messages, markMessageRead, logout,
+    isAuthenticated, fetchMessages, messages, markMessageRead, updateMessage, deleteMessage, logout,
     seedDatabase
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'messages'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm'>('home');
+  const [crmView, setCrmView] = useState<'cards' | 'spreadsheet'>('cards');
+  const [crmSort, setCrmSort] = useState<'date' | 'status' | 'priority' | 'value'>('date');
   const [processingImage, setProcessingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -30,7 +32,7 @@ export const AdminPanel: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-      if (activeTab === 'messages' && isAuthenticated) fetchMessages();
+      if (activeTab === 'crm' && isAuthenticated) fetchMessages();
   }, [activeTab, isAuthenticated, fetchMessages]);
 
   const extractYouTubeId = (url: string) => {
@@ -107,7 +109,7 @@ export const AdminPanel: React.FC = () => {
                         <NavItem id="projects" label="Projects" icon={Clapperboard} />
                         <NavItem id="shorts" label="Shorts" icon={Youtube} />
                         <NavItem id="about" label="About" icon={User} />
-                        <NavItem id="messages" label="Inquiries" icon={Mail} />
+                        <NavItem id="crm" label="CRM / Leads" icon={Users} />
                     </nav>
                 </div>
 
@@ -404,23 +406,297 @@ export const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                    {/* MESSAGES TAB */}
-                    {activeTab === 'messages' && (
-                        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {messages.length === 0 ? (
-                                <div className="col-span-2 py-24 text-center">
-                                    <Mail className="mx-auto w-12 h-12 text-gray-800 mb-4" />
-                                    <p className="text-gray-500">Inbox is empty.</p>
+                    {/* CRM TAB */}
+                    {activeTab === 'crm' && (
+                        <div className="space-y-8">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                                    <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold mb-1">Total Leads</p>
+                                    <p className="text-2xl font-black text-white">{messages.length}</p>
                                 </div>
-                            ) : messages.map(msg => (
-                                <div key={msg.id} className={`p-6 rounded-2xl border transition-all ${msg.read ? 'bg-[#0F0F11] border-white/5 opacity-60' : 'bg-[#121214] border-green-500/30 shadow-lg shadow-green-500/5'}`}>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div><h4 className="text-white font-bold">{msg.name}</h4><p className="text-xs text-blue-400">{msg.email}</p></div>
-                                        {!msg.read && <button onClick={() => markMessageRead(msg.id)} className="text-[10px] text-green-400 px-2 py-1 bg-green-500/10 rounded font-bold uppercase tracking-widest hover:bg-green-500/20 transition-colors">Mark Read</button>}
+                                <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/10">
+                                    <p className="text-[10px] text-green-400 uppercase tracking-widest font-bold mb-1">New</p>
+                                    <p className="text-2xl font-black text-white">{messages.filter(m => m.status === 'new' || !m.status).length}</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
+                                    <p className="text-[10px] text-orange-400 uppercase tracking-widest font-bold mb-1">Contacted</p>
+                                    <p className="text-2xl font-black text-white">{messages.filter(m => m.status === 'contacted').length}</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10">
+                                    <p className="text-[10px] text-purple-400 uppercase tracking-widest font-bold mb-1">Converted</p>
+                                    <p className="text-2xl font-black text-white">{messages.filter(m => m.status === 'converted').length}</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                                    <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold mb-1">Pipeline Value</p>
+                                    <p className="text-2xl font-black text-white">${messages.reduce((acc, m) => acc + (m.value || 0), 0).toLocaleString()}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0F0F11] p-4 rounded-2xl border border-white/5">
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => setCrmView('cards')}
+                                        className={`p-2 rounded-lg transition-all ${crmView === 'cards' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                                        title="Card View"
+                                    >
+                                        <List size={18} />
+                                    </button>
+                                    <button 
+                                        onClick={() => setCrmView('spreadsheet')}
+                                        className={`p-2 rounded-lg transition-all ${crmView === 'spreadsheet' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                                        title="Spreadsheet View"
+                                    >
+                                        <Table size={18} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sort By:</span>
+                                        <select 
+                                            value={crmSort}
+                                            onChange={(e) => setCrmSort(e.target.value as any)}
+                                            className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/20"
+                                        >
+                                            <option value="date">Date Received</option>
+                                            <option value="status">Lead Status</option>
+                                            <option value="priority">Priority</option>
+                                            <option value="value">Deal Value</option>
+                                        </select>
                                     </div>
-                                    <p className="text-sm text-gray-300 bg-black/40 p-4 rounded-xl border border-white/5 leading-relaxed">{msg.message}</p>
                                 </div>
-                            ))}
+                            </div>
+
+                            <div className="space-y-4">
+                                {messages.length === 0 ? (
+                                    <div className="py-24 text-center bg-[#0F0F11] rounded-3xl border border-white/5">
+                                        <Users className="mx-auto w-12 h-12 text-gray-800 mb-4" />
+                                        <p className="text-gray-500">No leads captured yet.</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {crmView === 'cards' ? (
+                                            <div className="space-y-4">
+                                                {[...messages].sort((a, b) => {
+                                                    if (crmSort === 'date') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                                                    if (crmSort === 'status') return (a.status || '').localeCompare(b.status || '');
+                                                    if (crmSort === 'priority') {
+                                                        const pMap = { high: 3, medium: 2, low: 1 };
+                                                        return (pMap[b.priority || 'medium'] || 0) - (pMap[a.priority || 'medium'] || 0);
+                                                    }
+                                                    if (crmSort === 'value') return (b.value || 0) - (a.value || 0);
+                                                    return 0;
+                                                }).map(msg => (
+                                                    <div key={msg.id} className={`p-6 rounded-2xl border transition-all ${msg.read ? 'bg-[#0F0F11] border-white/5' : 'bg-[#121214] border-blue-500/30 shadow-lg shadow-blue-500/5'}`}>
+                                                        <div className="flex flex-col lg:flex-row justify-between gap-6">
+                                                            <div className="flex-1 space-y-4">
+                                                                <div className="flex justify-between items-start">
+                                                                    <div>
+                                                                        <div className="flex items-center gap-3 mb-1">
+                                                                            <h4 className="text-lg font-bold text-white">{msg.name}</h4>
+                                                                            {msg.company && <span className="text-gray-500 text-sm">@ {msg.company}</span>}
+                                                                            {!msg.read && <span className="px-2 py-0.5 bg-blue-500 text-[8px] font-black uppercase tracking-widest rounded text-white">New</span>}
+                                                                            <select 
+                                                                                value={msg.priority || 'medium'} 
+                                                                                onChange={(e) => updateMessage(msg.id, { priority: e.target.value as any })}
+                                                                                className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border focus:outline-none transition-colors ${
+                                                                                    msg.priority === 'high' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+                                                                                    msg.priority === 'low' ? 'bg-gray-500/20 border-gray-500/30 text-gray-400' :
+                                                                                    'bg-blue-500/20 border-blue-500/30 text-blue-400'
+                                                                                }`}
+                                                                            >
+                                                                                <option value="low">Low Priority</option>
+                                                                                <option value="medium">Medium Priority</option>
+                                                                                <option value="high">High Priority</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div className="flex flex-wrap items-center gap-4 text-xs">
+                                                                            <a href={`mailto:${msg.email}`} className="text-blue-400 hover:underline flex items-center gap-1"><Mail size={12} /> {msg.email}</a>
+                                                                            {msg.phone && <a href={`tel:${msg.phone}`} className="text-gray-400 hover:text-white flex items-center gap-1"><Phone size={12} /> {msg.phone}</a>}
+                                                                            <span className="text-gray-500 flex items-center gap-1"><Clock size={12} /> {new Date(msg.created_at).toLocaleDateString()}</span>
+                                                                            {msg.source && <span className="text-gray-600 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full text-[10px]"><TrendingUp size={10} /> {msg.source}</span>}
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div className="flex flex-col items-end gap-2">
+                                                                        <select 
+                                                                            value={msg.status || 'new'} 
+                                                                            onChange={(e) => updateMessage(msg.id, { status: e.target.value as any })}
+                                                                            className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border focus:outline-none transition-colors ${
+                                                                                msg.status === 'converted' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
+                                                                                msg.status === 'contacted' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' :
+                                                                                msg.status === 'qualified' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                                                                                msg.status === 'lost' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                                                                'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                                                                            }`}
+                                                                        >
+                                                                            <option value="new">New Lead</option>
+                                                                            <option value="contacted">Contacted</option>
+                                                                            <option value="qualified">Qualified</option>
+                                                                            <option value="converted">Converted</option>
+                                                                            <option value="lost">Lost</option>
+                                                                        </select>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Value:</span>
+                                                                            <div className="relative">
+                                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-emerald-500 text-xs">$</span>
+                                                                                <input 
+                                                                                    type="number" 
+                                                                                    value={msg.value || 0} 
+                                                                                    onChange={(e) => updateMessage(msg.id, { value: parseInt(e.target.value) || 0 })}
+                                                                                    className="bg-black/40 border border-white/10 rounded-lg pl-5 pr-2 py-1 text-xs text-white w-24 focus:outline-none focus:border-emerald-500/50"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="bg-black/40 p-5 rounded-xl border border-white/5">
+                                                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2"><MessageSquare size={12} /> Message Content</p>
+                                                                    <p className="text-sm text-gray-300 leading-relaxed italic">"{msg.message}"</p>
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-2"><FileText size={12} /> Internal Notes</label>
+                                                                    <textarea 
+                                                                        value={msg.notes || ''} 
+                                                                        onChange={(e) => updateMessage(msg.id, { notes: e.target.value })}
+                                                                        placeholder="Add follow-up notes, project scope, or budget details..."
+                                                                        className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-4 text-xs text-gray-300 focus:outline-none focus:border-white/20 transition-all min-h-[80px]"
+                                                                    />
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="lg:w-48 flex flex-col gap-2">
+                                                                {!msg.read && (
+                                                                    <button 
+                                                                        onClick={() => markMessageRead(msg.id)}
+                                                                        className="w-full py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <CheckCircle2 size={14} /> Mark as Read
+                                                                    </button>
+                                                                )}
+                                                                <a 
+                                                                    href={`mailto:${msg.email}?subject=Mavestone Inquiry - Re: ${msg.name}`}
+                                                                    className="w-full py-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-colors flex items-center justify-center gap-2"
+                                                                >
+                                                                    <Mail size={14} /> Send Email
+                                                                </a>
+                                                                <button 
+                                                                    onClick={() => { if(confirm("Permanently delete this lead?")) deleteMessage(msg.id) }}
+                                                                    className="w-full py-3 text-gray-600 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mt-auto"
+                                                                >
+                                                                    <Trash2 size={14} /> Delete Lead
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="overflow-x-auto rounded-2xl border border-white/5 bg-[#0F0F11]">
+                                                <table className="w-full text-left border-collapse">
+                                                    <thead>
+                                                        <tr className="border-b border-white/5 bg-white/[0.02]">
+                                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Name</th>
+                                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Status</th>
+                                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Priority</th>
+                                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Value</th>
+                                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Date</th>
+                                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {[...messages].sort((a, b) => {
+                                                            if (crmSort === 'date') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                                                            if (crmSort === 'status') return (a.status || '').localeCompare(b.status || '');
+                                                            if (crmSort === 'priority') {
+                                                                const pMap = { high: 3, medium: 2, low: 1 };
+                                                                return (pMap[b.priority || 'medium'] || 0) - (pMap[a.priority || 'medium'] || 0);
+                                                            }
+                                                            if (crmSort === 'value') return (b.value || 0) - (a.value || 0);
+                                                            return 0;
+                                                        }).map(msg => (
+                                                            <tr key={msg.id} className="border-t border-white/5 hover:bg-white/[0.01] transition-colors">
+                                                                <td className="p-4">
+                                                                    <div className="font-bold text-white">{msg.name}</div>
+                                                                    <div className="text-[10px] text-gray-500">{msg.email}</div>
+                                                                </td>
+                                                                <td className="p-4">
+                                                                    <select 
+                                                                        value={msg.status || 'new'} 
+                                                                        onChange={(e) => updateMessage(msg.id, { status: e.target.value as any })}
+                                                                        className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border focus:outline-none transition-colors ${
+                                                                            msg.status === 'converted' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
+                                                                            msg.status === 'contacted' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' :
+                                                                            msg.status === 'qualified' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                                                                            msg.status === 'lost' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                                                            'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                                                                        }`}
+                                                                    >
+                                                                        <option value="new">New</option>
+                                                                        <option value="contacted">Contacted</option>
+                                                                        <option value="qualified">Qualified</option>
+                                                                        <option value="converted">Converted</option>
+                                                                        <option value="lost">Lost</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td className="p-4">
+                                                                    <select 
+                                                                        value={msg.priority || 'medium'} 
+                                                                        onChange={(e) => updateMessage(msg.id, { priority: e.target.value as any })}
+                                                                        className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border focus:outline-none transition-colors ${
+                                                                            msg.priority === 'high' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+                                                                            msg.priority === 'low' ? 'bg-gray-500/20 border-gray-500/30 text-gray-400' :
+                                                                            'bg-blue-500/20 border-blue-500/30 text-blue-400'
+                                                                        }`}
+                                                                    >
+                                                                        <option value="low">Low</option>
+                                                                        <option value="medium">Medium</option>
+                                                                        <option value="high">High</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td className="p-4">
+                                                                    <div className="flex items-center gap-1">
+                                                                        <span className="text-emerald-500 text-xs">$</span>
+                                                                        <input 
+                                                                            type="number" 
+                                                                            value={msg.value || 0} 
+                                                                            onChange={(e) => updateMessage(msg.id, { value: parseInt(e.target.value) || 0 })}
+                                                                            className="bg-transparent border-none p-0 text-xs text-white w-20 focus:outline-none"
+                                                                        />
+                                                                    </div>
+                                                                </td>
+                                                                <td className="p-4 text-xs text-gray-500">
+                                                                    {new Date(msg.created_at).toLocaleDateString()}
+                                                                </td>
+                                                                <td className="p-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <button 
+                                                                            onClick={() => { if(confirm("Permanently delete this lead?")) deleteMessage(msg.id) }}
+                                                                            className="p-2 text-gray-500 hover:text-red-400 transition-colors"
+                                                                            title="Delete"
+                                                                        >
+                                                                            <Trash2 size={14} />
+                                                                        </button>
+                                                                        <a 
+                                                                            href={`mailto:${msg.email}`}
+                                                                            className="p-2 text-gray-500 hover:text-blue-400 transition-colors"
+                                                                            title="Email"
+                                                                        >
+                                                                            <Mail size={14} />
+                                                                        </a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

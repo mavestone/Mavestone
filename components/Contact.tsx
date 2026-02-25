@@ -13,7 +13,14 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 export const Contact: React.FC = () => {
   const { sendMessage } = useContent();
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '',
+    company: '',
+    source: '',
+    message: '' 
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -21,18 +28,18 @@ export const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
-        setError("Please fill in all fields.");
+        setError("Please fill in all required fields.");
         return;
     }
     
     setError('');
     setLoading(true);
 
-    const { success } = await sendMessage(formData.name, formData.email, formData.message);
+    const { success } = await sendMessage(formData);
 
     if (success) {
         setSuccess(true);
-        setFormData({ name: '', email: '', message: '' });
+        setFormData({ name: '', email: '', phone: '', company: '', source: '', message: '' });
         setTimeout(() => setSuccess(false), 5000);
     } else {
         setError("Failed to send message. Please try again.");
@@ -92,30 +99,75 @@ export const Contact: React.FC = () => {
                     </div>
                 ) : (
                     <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Identity</label>
-                            <input 
-                                type="text" 
-                                value={formData.name}
-                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
-                                placeholder="YOUR FULL NAME"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Identity</label>
+                                <input 
+                                    type="text" 
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
+                                    placeholder="YOUR FULL NAME"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Email</label>
+                                <input 
+                                    type="email" 
+                                    required
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
+                                    placeholder="YOUR@EMAIL.COM"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Email</label>
-                            <input 
-                                type="email" 
-                                value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
-                                placeholder="YOUR@EMAIL.COM"
-                            />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Phone</label>
+                                <input 
+                                    type="tel" 
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
+                                    placeholder="+1 234 567 890"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Company</label>
+                                <input 
+                                    type="text" 
+                                    value={formData.company}
+                                    onChange={(e) => setFormData({...formData, company: e.target.value})}
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
+                                    placeholder="ORGANIZATION NAME"
+                                />
+                            </div>
                         </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">How did you hear about us?</label>
+                            <select 
+                                value={formData.source}
+                                onChange={(e) => setFormData({...formData, source: e.target.value})}
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium appearance-none"
+                            >
+                                <option value="" disabled className="bg-charcoal">SELECT AN OPTION</option>
+                                <option value="Social Media" className="bg-charcoal">Social Media</option>
+                                <option value="Referral" className="bg-charcoal">Referral</option>
+                                <option value="Search Engine" className="bg-charcoal">Search Engine</option>
+                                <option value="Previous Client" className="bg-charcoal">Previous Client</option>
+                                <option value="Other" className="bg-charcoal">Other</option>
+                            </select>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">The Vision</label>
                             <textarea 
                                 rows={4}
+                                required
                                 value={formData.message}
                                 onChange={(e) => setFormData({...formData, message: e.target.value})}
                                 className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all resize-none font-medium placeholder:text-white/20"

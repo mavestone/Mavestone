@@ -73,8 +73,16 @@ export interface Message {
   created_at: string;
   name: string;
   email: string;
+  phone?: string;
+  company?: string;
   message: string;
   read: boolean;
+  status?: 'new' | 'contacted' | 'qualified' | 'lost' | 'converted';
+  priority?: 'low' | 'medium' | 'high';
+  value?: number;
+  source?: string;
+  notes?: string;
+  tags?: string[];
 }
 
 declare global {

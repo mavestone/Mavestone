@@ -42,9 +42,11 @@ interface ContentContextType {
   login: (email: string, pass: string) => Promise<{ error: any }>;
   logout: () => Promise<void>;
   seedDatabase: () => Promise<void>;
-  sendMessage: (name: string, email: string, message: string) => Promise<{ success: boolean; error?: any }>;
+  sendMessage: (data: { name: string; email: string; message: string; phone?: string; company?: string; source?: string }) => Promise<{ success: boolean; error?: any }>;
   fetchMessages: () => Promise<void>;
   markMessageRead: (id: string) => Promise<void>;
+  updateMessage: (id: string, data: Partial<Message>) => Promise<void>;
+  deleteMessage: (id: string) => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -236,13 +238,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsAuthenticated(false); 
   };
   
-  const sendMessage = async (name: string, email: string, message: string) => {
+
+
+  const sendMessage = async (data: { name: string; email: string; message: string; phone?: string; company?: string; source?: string }) => {
     const client = supabase;
     if (!client) return { success: false };
-    const { error } = await client.from('messages').insert([{ name, email, message }]);
+    const { error } = await client.from('messages').insert([{ ...data, status: 'new', priority: 'medium' }]);
     return { success: !error, error };
   };
-
   const fetchMessages = async () => {
     const client = supabase;
     if (!client) return;
@@ -253,8 +256,28 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const markMessageRead = async (id: string) => {
     const client = supabase;
     if (!client) return;
-    await client.from('messages').update({ read: true }).eq('id', id);
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+    await client.from('messages').update({ read: true, status: 'contacted' }).eq('id', id);
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true, status: 'contacted' } : m));
+  };
+
+  const updateMessage = async (id: string, data: Partial<Message>) => {
+    const client = supabase;
+    if (!client) return;
+    
+    // Update local state immediately for responsiveness
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, ...data } : m));
+    
+    // Then update DB
+    await client.from('messages').update(data).eq('id', id);
+  };
+
+  const deleteMessage = async (id: string) => {
+    const client = supabase;
+    if (!client) return;
+    const { error } = await client.from('messages').delete().eq('id', id);
+    if (!error) {
+      setMessages(prev => prev.filter(m => m.id !== id));
+    }
   };
 
   const seedDatabase = async () => {
@@ -282,7 +305,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
       updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
       saveChanges, uploadImage, login, logout, seedDatabase,
-      sendMessage, fetchMessages, markMessageRead
+      sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
     }}>
       {children}
     </ContentContext.Provider>
