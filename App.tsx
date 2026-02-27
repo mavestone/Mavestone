@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { ContentProvider } from './context/ContentContext';
+import { ContentProvider, useContent } from './context/ContentContext';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
@@ -10,6 +10,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const CustomCursor: React.FC = () => {
+  const { isAdminOpen } = useContent();
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isOverVideo, setIsOverVideo] = useState(false);
@@ -77,6 +78,11 @@ const CustomCursor: React.FC = () => {
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
+    if (isAdminOpen) {
+      setIsVisible(false);
+      return;
+    }
+
     window.addEventListener('mousemove', moveCursor);
     window.addEventListener('mouseover', checkHover);
     document.addEventListener('mouseleave', handleMouseLeave);
@@ -88,9 +94,9 @@ const CustomCursor: React.FC = () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [mouseX, mouseY, isVisible, isDesktop]);
+  }, [mouseX, mouseY, isVisible, isDesktop, isAdminOpen]);
 
-  if (!isDesktop) return null;
+  if (!isDesktop || isAdminOpen) return null;
 
   const shouldHideBlob = !isVisible || isOverVideo;
 
@@ -140,6 +146,7 @@ const CustomCursor: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const location = useLocation();
+  const { isAdminOpen } = useContent();
 
   // Reset scroll position on route change
   useEffect(() => {
@@ -147,7 +154,7 @@ const AppContent: React.FC = () => {
   }, [location]);
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto lg:cursor-none">
+    <div className={`bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto ${isAdminOpen ? 'lg:cursor-auto' : 'lg:cursor-none'}`}>
         {/* Removed Global Grain Overlay */}
         <CustomCursor />
 

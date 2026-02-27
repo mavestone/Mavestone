@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial } from '../types';
+import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial, OutboundCall, OutboundEmail, AutomationEmail, Newsletter, GmailConfig, MailingList } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
@@ -12,6 +12,12 @@ interface ContentContextType {
   clientWork: Film[];
   aboutData: AboutData;
   messages: Message[];
+  outboundCalls: OutboundCall[];
+  outboundEmails: OutboundEmail[];
+  automations: AutomationEmail[];
+  newsletters: Newsletter[];
+  mailingLists: MailingList[];
+  gmailConfig: GmailConfig;
   projectConfig: ProjectHeroConfig;
   isAdminOpen: boolean;
   isAuthenticated: boolean;
@@ -37,6 +43,15 @@ interface ContentContextType {
   addClientWork: () => void;
   deleteClientWork: (id: string) => void;
   updateProjectConfig: (data: Partial<ProjectHeroConfig>) => void;
+  updateAutomation: (id: string, data: Partial<AutomationEmail>) => void;
+  updateNewsletter: (id: string, data: Partial<Newsletter>) => void;
+  addNewsletter: () => void;
+  deleteNewsletter: (id: string) => void;
+  addMailingList: (name: string, contacts?: { name: string; email: string }[]) => void;
+  updateMailingList: (id: string, data: Partial<MailingList>) => void;
+  deleteMailingList: (id: string) => void;
+  connectGmail: () => Promise<void>;
+  disconnectGmail: () => void;
   saveChanges: () => Promise<void>;
   uploadImage: (file: File) => Promise<string | null>;
   login: (email: string, pass: string) => Promise<{ error: any }>;
@@ -47,6 +62,7 @@ interface ContentContextType {
   markMessageRead: (id: string) => Promise<void>;
   updateMessage: (id: string, data: Partial<Message>) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
+  sendNewsletter: (newsletterId: string, listId?: string) => Promise<{ success: boolean; count: number; error?: string }>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -74,6 +90,45 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [aboutData, setAboutData] = useState<AboutData>(DEFAULT_ABOUT);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [outboundCalls, setOutboundCalls] = useState<OutboundCall[]>([]);
+  const [outboundEmails, setOutboundEmails] = useState<OutboundEmail[]>([]);
+  const [automations, setAutomations] = useState<AutomationEmail[]>([
+    { id: '1', name: 'Welcome Email', subject: 'Welcome to Mavestone Studio', content: 'Hi {{name}}, thanks for reaching out!', isActive: true, trigger: 'new_lead' }
+  ]);
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [mailingLists, setMailingLists] = useState<MailingList[]>([
+    { id: 'all-crm', name: 'All CRM Leads', contacts: [] }
+  ]);
+  const [gmailConfig, setGmailConfig] = useState<GmailConfig>({ isConnected: false });
+
+  // Sync All CRM Leads list
+  useEffect(() => {
+    setMailingLists(prev => prev.map(list => 
+      list.id === 'all-crm' 
+        ? { ...list, contacts: messages.map(m => ({ name: m.name, email: m.email })) }
+        : list
+    ));
+  }, [messages]);
+
+  useEffect(() => {
+    const handleOAuthMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'GMAIL_AUTH_SUCCESS') {
+        setGmailConfig({ isConnected: true, email: event.data.email });
+      }
+    };
+    window.addEventListener('message', handleOAuthMessage);
+
+    // Check initial status
+    fetch('/api/gmail/status')
+      .then(res => res.json())
+      .then(data => {
+        if (data.isConnected) {
+          setGmailConfig(prev => ({ ...prev, isConnected: true }));
+        }
+      });
+
+    return () => window.removeEventListener('message', handleOAuthMessage);
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -97,6 +152,9 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (row.key === 'client_work') setClientWork(row.data);
             if (row.key === 'project_config') setProjectConfig(row.data);
             if (row.key === 'about_data') setAboutData(row.data);
+            if (row.key === 'automations') setAutomations(row.data);
+            if (row.key === 'newsletters') setNewsletters(row.data);
+            if (row.key === 'gmail_config') setGmailConfig(row.data);
           });
         }
       } catch (e) {
@@ -148,6 +206,96 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateFilm = (id: string, data: Partial<Film>) => setFilms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateClientWork = (id: string, data: Partial<Film>) => setClientWork(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
   const updateProjectConfig = (data: Partial<ProjectHeroConfig>) => setProjectConfig(prev => ({ ...prev, ...data }));
+
+  const updateAutomation = (id: string, data: Partial<AutomationEmail>) => setAutomations(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
+  const updateNewsletter = (id: string, data: Partial<Newsletter>) => setNewsletters(prev => prev.map(n => n.id === id ? { ...n, ...data } : n));
+  const addNewsletter = () => setNewsletters(prev => [...prev, {
+    id: Math.random().toString(36).substr(2, 9),
+    title: 'New Newsletter',
+    subject: 'Monthly Update',
+    content: '<h1>Hello!</h1><p>Check out our latest work.</p>',
+    status: 'draft',
+    images: []
+  }]);
+  const deleteNewsletter = (id: string) => setNewsletters(prev => prev.filter(n => n.id !== id));
+
+  const addMailingList = (name: string, contacts: { name: string; email: string }[] = []) => {
+    setMailingLists(prev => [...prev, {
+      id: Math.random().toString(36).substr(2, 9),
+      name,
+      contacts
+    }]);
+  };
+
+  const updateMailingList = (id: string, data: Partial<MailingList>) => {
+    setMailingLists(prev => prev.map(l => l.id === id ? { ...l, ...data } : l));
+  };
+
+  const deleteMailingList = (id: string) => {
+    if (id === 'all-crm') return; // Don't delete the default list
+    setMailingLists(prev => prev.filter(l => l.id !== id));
+  };
+
+  const sendNewsletter = async (newsletterId: string, listId?: string) => {
+    const newsletter = newsletters.find(n => n.id === newsletterId);
+    if (!newsletter || !gmailConfig.isConnected) return { success: false, count: 0 };
+
+    const targetListId = listId || newsletter.targetListId;
+    const list = mailingLists.find(l => l.id === targetListId);
+    if (!list) return { success: false, count: 0 };
+
+    let successCount = 0;
+    let lastError = '';
+    for (const contact of list.contacts) {
+      try {
+        const response = await fetch('/api/gmail/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: contact.email,
+            subject: newsletter.subject,
+            content: newsletter.content.replace('{{name}}', contact.name)
+          })
+        });
+        if (response.ok) {
+          successCount++;
+        } else {
+          const err = await response.json();
+          lastError = err.details || err.error;
+        }
+      } catch (e: any) {
+        console.error("Failed to send newsletter to", contact.email, e);
+        lastError = e.message;
+      }
+    }
+
+    updateNewsletter(newsletterId, { status: 'sent' });
+    return { success: successCount > 0, count: successCount, error: lastError };
+  };
+  const connectGmail = async () => {
+    try {
+      const response = await fetch('/api/auth/google/url');
+      const { url } = await response.json();
+      
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      window.open(
+        url,
+        'gmail_oauth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+    } catch (error) {
+      console.error("Failed to get auth URL:", error);
+    }
+  };
+
+  const disconnectGmail = async () => {
+    await fetch('/api/gmail/disconnect', { method: 'POST' });
+    setGmailConfig({ isConnected: false });
+  };
 
   const addShort = () => {
     setShorts(prev => [...prev, {
@@ -208,7 +356,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'films', data: films },
       { key: 'client_work', data: clientWork },
       { key: 'project_config', data: projectConfig },
-      { key: 'about_data', data: aboutData }
+      { key: 'about_data', data: aboutData },
+      { key: 'automations', data: automations },
+      { key: 'newsletters', data: newsletters },
+      { key: 'gmail_config', data: gmailConfig }
     ];
     const { error } = await client.from('site_content').upsert(updates);
     if (error) throw error;
@@ -243,24 +394,95 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const sendMessage = async (data: { name: string; email: string; message: string; phone?: string; company?: string; source?: string }) => {
     const client = supabase;
     if (!client) return { success: false };
-    const { error } = await client.from('messages').insert([{ ...data, status: 'new', priority: 'medium' }]);
+    const { error } = await client.from('messages').insert([{ ...data, status: 'new', priority: 'medium', lead_type: 'warm' }]);
+    
+    if (!error && gmailConfig.isConnected) {
+      // Trigger automation
+      const welcomeEmail = automations.find(a => a.trigger === 'new_lead' && a.isActive);
+      if (welcomeEmail) {
+        try {
+          await fetch('/api/gmail/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: data.email,
+              subject: welcomeEmail.subject,
+              content: welcomeEmail.content.replace('{{name}}', data.name)
+            })
+          });
+        } catch (e) {
+          console.error("Failed to send automated email:", e);
+        }
+      }
+    }
+
     return { success: !error, error };
   };
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     const client = supabase;
     if (!client) return;
     const { data } = await client.from('messages').select('*').order('created_at', { ascending: false });
     if (data) setMessages(data);
-  };
 
-  const markMessageRead = async (id: string) => {
+    // Mock Outbound Data
+    setOutboundCalls([
+      {
+        id: '1',
+        leadId: 'lead-1',
+        leadName: 'John Doe',
+        timestamp: new Date().toISOString(),
+        duration: '5:24',
+        status: 'completed',
+        transcript: "Hello, this is John. I'm interested in your video production services for our upcoming product launch. We need something high-energy and cinematic. Can you provide a quote by Friday?"
+      },
+      {
+        id: '2',
+        leadId: 'lead-2',
+        leadName: 'Sarah Smith',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        duration: '0:45',
+        status: 'voicemail',
+        transcript: "Left voicemail regarding the documentary project."
+      }
+    ]);
+
+    setOutboundEmails([
+      {
+        id: '1',
+        leadId: 'lead-1',
+        leadName: 'John Doe',
+        subject: 'Re: Video Production Inquiry',
+        timestamp: new Date().toISOString(),
+        status: 'replied',
+        type: 'inbound',
+        thread: [
+          { from: 'hello@mavestone.com', to: 'john@example.com', timestamp: new Date(Date.now() - 3600000).toISOString(), content: "Hi John, thanks for reaching out! We'd love to help with your product launch. When are you free for a quick discovery call?" },
+          { from: 'john@example.com', to: 'hello@mavestone.com', timestamp: new Date().toISOString(), content: "I'm free tomorrow at 2pm. Looking forward to it!" }
+        ]
+      },
+      {
+        id: '2',
+        leadId: 'lead-cold-1',
+        leadName: 'Cold Prospect',
+        subject: 'Video Strategy for 2024',
+        timestamp: new Date(Date.now() - 172800000).toISOString(),
+        status: 'sent',
+        type: 'outreach',
+        thread: [
+          { from: 'hello@mavestone.com', to: 'prospect@example.com', timestamp: new Date(Date.now() - 172800000).toISOString(), content: "Hi there, I saw your recent campaign and thought our cinematic style would be a great fit..." }
+        ]
+      }
+    ]);
+  }, []);
+
+  const markMessageRead = useCallback(async (id: string) => {
     const client = supabase;
     if (!client) return;
     await client.from('messages').update({ read: true, status: 'contacted' }).eq('id', id);
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true, status: 'contacted' } : m));
-  };
+  }, []);
 
-  const updateMessage = async (id: string, data: Partial<Message>) => {
+  const updateMessage = useCallback(async (id: string, data: Partial<Message>) => {
     const client = supabase;
     if (!client) return;
     
@@ -269,16 +491,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     // Then update DB
     await client.from('messages').update(data).eq('id', id);
-  };
+  }, []);
 
-  const deleteMessage = async (id: string) => {
+  const deleteMessage = useCallback(async (id: string) => {
     const client = supabase;
     if (!client) return;
     const { error } = await client.from('messages').delete().eq('id', id);
     if (!error) {
       setMessages(prev => prev.filter(m => m.id !== id));
     }
-  };
+  }, []);
 
   const seedDatabase = async () => {
     const client = supabase;
@@ -296,17 +518,36 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     window.location.reload();
   };
 
+  const contextValue = useMemo(() => ({
+    latestVideo, inProduction, shorts, films, clientWork, aboutData, messages, outboundCalls, outboundEmails, projectConfig,
+    automations, newsletters, mailingLists, gmailConfig,
+    isAdminOpen, isAuthenticated, isLoading,
+    toggleAdmin, openAdmin, closeAdmin,
+    updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
+    updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
+    updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
+    updateAutomation, updateNewsletter, addNewsletter, deleteNewsletter,
+    addMailingList, updateMailingList, deleteMailingList, sendNewsletter,
+    connectGmail, disconnectGmail,
+    saveChanges, uploadImage, login, logout, seedDatabase,
+    sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
+  }), [
+    latestVideo, inProduction, shorts, films, clientWork, aboutData, messages, outboundCalls, outboundEmails, projectConfig,
+    automations, newsletters, mailingLists, gmailConfig,
+    isAdminOpen, isAuthenticated, isLoading,
+    toggleAdmin, openAdmin, closeAdmin,
+    updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
+    updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
+    updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
+    updateAutomation, updateNewsletter, addNewsletter, deleteNewsletter,
+    addMailingList, updateMailingList, deleteMailingList, sendNewsletter,
+    connectGmail, disconnectGmail,
+    saveChanges, uploadImage, login, logout, seedDatabase,
+    sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
+  ]);
+
   return (
-    <ContentContext.Provider value={{
-      latestVideo, inProduction, shorts, films, clientWork, aboutData, messages, projectConfig,
-      isAdminOpen, isAuthenticated, isLoading,
-      toggleAdmin, openAdmin, closeAdmin,
-      updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
-      updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
-      updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
-      saveChanges, uploadImage, login, logout, seedDatabase,
-      sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
-    }}>
+    <ContentContext.Provider value={contextValue}>
       {children}
     </ContentContext.Provider>
   );
