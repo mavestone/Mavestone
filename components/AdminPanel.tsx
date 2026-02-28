@@ -2,10 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, ExternalLink, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, PhoneCall, Search, ChevronDown, ChevronUp, PanelLeftClose, PanelLeftOpen, Megaphone, Zap, Image as ImageIcon, Send, Settings, Link2, FileUp, Eye } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, PhoneCall, Search, ChevronDown, ChevronUp, PanelLeftClose, PanelLeftOpen, Megaphone, Zap, Image as ImageIcon, Send, Settings, Link2, FileUp, Eye, Instagram, Linkedin, Slack } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
+
+const getEmailLink = (email: string, name: string, isConnected: boolean) => {
+    if (isConnected) {
+        return `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=Mavestone Inquiry - Re: ${name}`;
+    }
+    return `mailto:${email}?subject=Mavestone Inquiry - Re: ${name}`;
+};
 
 const CRMLeadItem: React.FC<{ 
     msg: Message; 
@@ -14,7 +21,9 @@ const CRMLeadItem: React.FC<{
     markMessageRead: (id: string) => void; 
     isHighlighted?: boolean;
     onViewContact: (id: string) => void;
-}> = ({ msg, updateMessage, deleteMessage, markMessageRead, isHighlighted, onViewContact }) => {
+    outboundEmails: any[];
+}> = ({ msg, updateMessage, deleteMessage, markMessageRead, isHighlighted, onViewContact, outboundEmails }) => {
+    const { gmailConfig } = useContent();
     const [localNotes, setLocalNotes] = useState(msg.notes || '');
     const [localValue, setLocalValue] = useState(msg.value || 0);
 
@@ -131,6 +140,29 @@ const CRMLeadItem: React.FC<{
                             className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-4 text-xs text-gray-300 focus:outline-none focus:border-white/20 transition-all min-h-[80px]"
                         />
                     </div>
+
+                    {/* Recent Outbound Activity */}
+                    {outboundEmails.filter(e => e.leadId === msg.id || e.leadId === msg.email).length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-white/5">
+                            <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Mail size={10} /> Recent Outbound Activity
+                            </h4>
+                            <div className="space-y-2">
+                                {outboundEmails
+                                    .filter(e => e.leadId === msg.id || e.leadId === msg.email)
+                                    .slice(0, 2)
+                                    .map(email => (
+                                        <div key={email.id} className="text-[10px] bg-white/[0.02] p-2 rounded-lg border border-white/5">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="font-bold text-gray-300">{email.subject}</span>
+                                                <span className="text-[8px] text-gray-500">{new Date(email.timestamp).toLocaleDateString()}</span>
+                                            </div>
+                                            <p className="text-gray-500 line-clamp-1 italic">"{email.thread[email.thread.length - 1].content}"</p>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="lg:w-48 flex flex-col gap-2">
@@ -142,15 +174,26 @@ const CRMLeadItem: React.FC<{
                             <CheckCircle2 size={14} /> Mark as Read
                         </button>
                     )}
+                    <button 
+                        onClick={() => onViewContact(msg.id)}
+                        className="w-full py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <TrendingUp size={14} /> View History
+                    </button>
                     <a 
-                        href={`mailto:${msg.email}?subject=Mavestone Inquiry - Re: ${msg.name}`}
+                        href={getEmailLink(msg.email, msg.name, gmailConfig.isConnected)}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="w-full py-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-colors flex items-center justify-center gap-2"
                     >
                         <Mail size={14} /> Send Email
                     </a>
                     <button 
-                        onClick={() => { if(window.confirm("Permanently delete this lead?")) deleteMessage(msg.id) }}
-                        className="w-full py-3 text-gray-600 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mt-auto"
+                        onClick={() => { 
+                            console.log("Delete clicked for lead card:", msg.id);
+                            if(window.confirm("Permanently delete this lead?")) deleteMessage(msg.id);
+                        }}
+                        className="w-full py-3 text-gray-600 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mt-auto border border-transparent hover:border-red-500/20 rounded-xl"
                     >
                         <Trash2 size={14} /> Delete Lead
                     </button>
@@ -167,6 +210,7 @@ const SpreadsheetRow: React.FC<{
     onEdit: (id: string) => void;
     onViewContact: (id: string) => void;
 }> = ({ msg, updateMessage, deleteMessage, onEdit, onViewContact }) => {
+    const { gmailConfig } = useContent();
     const [localValue, setLocalValue] = useState(msg.value || 0);
 
     useEffect(() => {
@@ -264,6 +308,13 @@ const SpreadsheetRow: React.FC<{
             <td className="p-4">
                 <div className="flex items-center gap-2">
                     <button 
+                        onClick={() => onViewContact(msg.id)}
+                        className="p-2 text-gray-500 hover:text-emerald-400 transition-colors"
+                        title="View Outbound History"
+                    >
+                        <TrendingUp size={14} />
+                    </button>
+                    <button 
                         onClick={() => onEdit(msg.id)}
                         className="p-2 text-gray-500 hover:text-white transition-colors"
                         title="Edit Lead / Notes"
@@ -271,14 +322,19 @@ const SpreadsheetRow: React.FC<{
                         <Edit3 size={14} />
                     </button>
                     <button 
-                        onClick={() => { if(window.confirm("Permanently delete this lead?")) deleteMessage(msg.id) }}
+                        onClick={() => { 
+                            console.log("Delete clicked for lead:", msg.id);
+                            if(window.confirm("Permanently delete this lead?")) deleteMessage(msg.id);
+                        }}
                         className="p-2 text-gray-500 hover:text-red-400 transition-colors"
                         title="Delete"
                     >
                         <Trash2 size={14} />
                     </button>
                     <a 
-                        href={`mailto:${msg.email}`}
+                        href={getEmailLink(msg.email, msg.name, gmailConfig.isConnected)}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="p-2 text-gray-500 hover:text-blue-400 transition-colors"
                         title="Email"
                     >
@@ -300,14 +356,14 @@ export const AdminPanel: React.FC = () => {
     clientWork, updateClientWork, addClientWork, deleteClientWork,
     aboutData, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     projectConfig, updateProjectConfig,
-    automations, updateAutomation, newsletters, updateNewsletter, addNewsletter, deleteNewsletter,
-    mailingLists, addMailingList, updateMailingList, deleteMailingList, sendNewsletter,
+    automations, updateAutomation, addAutomation, deleteAutomation, newsletters, updateNewsletter, addNewsletter, deleteNewsletter,
+    mailingLists, addMailingList, updateMailingList, deleteMailingList, addContactToList, sendNewsletter,
     gmailConfig, connectGmail, disconnectGmail,
     saveChanges, uploadImage,
     isAuthenticated, fetchMessages, messages, outboundCalls, outboundEmails, markMessageRead, updateMessage, deleteMessage, logout
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm' | 'outbound' | 'marketing'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm' | 'communication' | 'automations'>('home');
   const [crmView, setCrmView] = useState<'cards' | 'spreadsheet'>('spreadsheet');
   const [outboundFilter, setOutboundFilter] = useState<'all' | 'warm' | 'cold'>('all');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -316,9 +372,16 @@ export const AdminPanel: React.FC = () => {
   const [crmSearch, setCrmSearch] = useState('');
   const [dbStatus, setDbStatus] = useState<'checking' | 'ok' | 'error'>('checking');
   const [isSiteChangesOpen, setIsSiteChangesOpen] = useState(true);
+  const [automationsTab, setAutomationsTab] = useState<'workflows' | 'newsletters' | 'lists'>('workflows');
+  const [commApp, setCommApp] = useState<'gmail' | 'whatsapp'>('gmail');
+  const [commSearch, setCommSearch] = useState('');
+  const [selectedCommId, setSelectedCommId] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [previewNewsletterId, setPreviewNewsletterId] = useState<string | null>(null);
   const [isSendingNewsletter, setIsSendingNewsletter] = useState(false);
+  const [isGmailSettingsOpen, setIsGmailSettingsOpen] = useState(false);
 
   useEffect(() => {
       const checkSchema = async () => {
@@ -344,7 +407,7 @@ export const AdminPanel: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-      if (activeTab === 'crm' && isAuthenticated) fetchMessages();
+      if ((activeTab === 'crm' || activeTab === 'automations') && isAuthenticated) fetchMessages();
   }, [activeTab, isAuthenticated, fetchMessages]);
 
   const extractYouTubeId = (url: string) => {
@@ -451,9 +514,9 @@ export const AdminPanel: React.FC = () => {
                         </div>
                         
                         <div className="pt-4 border-t border-white/5 space-y-1">
-                            <NavItem id="crm" label="CRM (Inbound)" icon={Users} />
-                            <NavItem id="outbound" label="Outbound" icon={PhoneCall} />
-                            <NavItem id="marketing" label="Marketing" icon={Megaphone} />
+                            <NavItem id="crm" label="CRM" icon={Users} />
+                            <NavItem id="communication" label="Communication" icon={PhoneCall} />
+                            <NavItem id="automations" label="Automations" icon={Megaphone} />
                         </div>
                     </nav>
                 </div>
@@ -464,18 +527,19 @@ export const AdminPanel: React.FC = () => {
                         {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
                     </button>
-                    <div className="pt-4 border-t border-white/5 flex items-center justify-between px-2">
-                        <button onClick={handleClose} className="flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors"><ExternalLink size={14} /> Exit</button>
-                        <button onClick={() => { logout(); handleClose(); }} className="text-gray-500 hover:text-red-400 transition-colors"><LogOut size={16} /></button>
+                    <div className="pt-4 border-t border-white/5 flex items-center justify-end px-2">
+                        <button onClick={() => { logout(); handleClose(); }} className="text-gray-500 hover:text-red-400 transition-colors flex items-center gap-2 text-xs uppercase tracking-widest font-bold"><LogOut size={16} /> Logout</button>
                     </div>
-                    <div className="flex items-center justify-end">
-                        <button 
-                            onClick={() => setIsSidebarCollapsed(true)}
-                            className="p-2 text-gray-600 hover:text-white transition-colors"
-                            title="Collapse Sidebar"
-                        >
-                            <PanelLeftClose size={16} />
-                        </button>
+                    <div className="space-y-2 w-full">
+                        <div className="flex items-center justify-end">
+                            <button 
+                                onClick={() => setIsSidebarCollapsed(true)}
+                                className="p-2 text-gray-600 hover:text-white transition-colors"
+                                title="Collapse Sidebar"
+                            >
+                                <PanelLeftClose size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.aside>
@@ -927,8 +991,9 @@ export const AdminPanel: React.FC = () => {
                                                             isHighlighted={highlightedLeadId === msg.id}
                                                             onViewContact={(id) => {
                                                                 setSelectedLeadId(id);
-                                                                setActiveTab('outbound');
+                                                                setActiveTab('communication');
                                                             }}
+                                                            outboundEmails={outboundEmails}
                                                         />
                                                     ))}
                                                 </div>
@@ -964,7 +1029,7 @@ export const AdminPanel: React.FC = () => {
                                                                     deleteMessage={deleteMessage} 
                                                                     onViewContact={(id) => {
                                                                         setSelectedLeadId(id);
-                                                                        setActiveTab('outbound');
+                                                                        setActiveTab('communication');
                                                                     }}
                                                                     onEdit={(id) => {
                                                                         setHighlightedLeadId(id);
@@ -987,192 +1052,386 @@ export const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                    {/* OUTBOUND TAB */}
-                    {activeTab === 'outbound' && (
-                        <div className="space-y-8">
-                            <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0F0F11] p-4 rounded-2xl border border-white/5">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <button 
-                                            onClick={() => setOutboundFilter('all')}
-                                            className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${outboundFilter === 'all' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}
-                                        >
-                                            All Contacts
-                                        </button>
-                                        <button 
-                                            onClick={() => setOutboundFilter('warm')}
-                                            className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${outboundFilter === 'warm' ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 hover:text-gray-300'}`}
-                                        >
-                                            Inbound (Warm)
-                                        </button>
-                                        <button 
-                                            onClick={() => setOutboundFilter('cold')}
-                                            className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${outboundFilter === 'cold' ? 'bg-orange-500/10 text-orange-400' : 'text-gray-500 hover:text-gray-300'}`}
-                                        >
-                                            Outreach (Cold)
-                                        </button>
-                                    </div>
+                    {/* COMMUNICATION TAB */}
+                    {activeTab === 'communication' && (
+                        <div className="flex h-[calc(100vh-160px)] -m-8 bg-[#050505] overflow-hidden">
+                            {/* App Sidebar */}
+                            <div className="w-20 border-r border-white/5 flex flex-col items-center py-8 gap-8 bg-[#0A0A0A] rounded-r-[2rem] z-10 shadow-2xl">
+                                <button 
+                                    onClick={() => setCommApp('gmail')}
+                                    className={`p-4 rounded-2xl transition-all duration-300 ${commApp === 'gmail' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20 scale-110' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                                    title="Gmail"
+                                >
+                                    <Mail size={24} />
+                                </button>
+                                <button 
+                                    onClick={() => setCommApp('whatsapp')}
+                                    className={`p-4 rounded-2xl transition-all duration-300 ${commApp === 'whatsapp' ? 'bg-[#25D366] text-white shadow-lg shadow-[#25D366]/20 scale-110' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                                    title="WhatsApp"
+                                >
+                                    <MessageSquare size={24} />
+                                </button>
+                                <div className="mt-auto flex flex-col gap-8 pb-6">
+                                    <button className="p-4 text-gray-800 cursor-not-allowed opacity-20" title="Instagram"><Instagram size={24} /></button>
+                                    <button className="p-4 text-gray-800 cursor-not-allowed opacity-20" title="LinkedIn"><Linkedin size={24} /></button>
+                                    <button className="p-4 text-gray-800 cursor-not-allowed opacity-20" title="Slack"><Slack size={24} /></button>
                                 </div>
-                                {selectedLeadId && (
-                                    <button 
-                                        onClick={() => setSelectedLeadId(null)}
-                                        className="text-[10px] font-bold text-blue-400 hover:underline uppercase tracking-widest flex items-center gap-2"
-                                    >
-                                        <X size={12} /> Clear Lead Filter
-                                    </button>
-                                )}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Calls Section */}
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-xl font-bold text-white flex items-center gap-2"><PhoneCall className="text-blue-400" /> Outbound Calls</h3>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        {outboundCalls
-                                            .filter(c => !selectedLeadId || c.leadId === selectedLeadId)
-                                            .map(call => (
-                                            <div key={call.id} className="p-5 rounded-2xl bg-[#0F0F11] border border-white/5 hover:border-blue-500/20 transition-all group">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div>
-                                                        <h4 className="font-bold text-white group-hover:text-blue-400 transition-colors">{call.leadName}</h4>
-                                                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">{new Date(call.timestamp).toLocaleString()} • {call.duration}</p>
-                                                    </div>
-                                                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                                                        call.status === 'completed' ? 'bg-green-500/10 text-green-400' : 
-                                                        call.status === 'voicemail' ? 'bg-orange-500/10 text-orange-400' : 
-                                                        'bg-red-500/10 text-red-400'
-                                                    }`}>
-                                                        {call.status}
-                                                    </span>
-                                                </div>
-                                                <div className="bg-black/40 p-4 rounded-xl border border-white/5">
-                                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2"><MessageSquare size={12} /> AI Transcript</p>
-                                                    <p className="text-xs text-gray-400 leading-relaxed italic line-clamp-3 group-hover:line-clamp-none transition-all">"{call.transcript}"</p>
-                                                </div>
+                            {/* Inbox Content */}
+                            <div className="flex-1 flex overflow-hidden">
+                                {/* Message List */}
+                                <div className={`flex-1 flex flex-col border-r border-white/5 transition-all duration-500 ${selectedCommId ? 'max-w-md' : 'max-w-none'}`}>
+                                    {/* Search Bar Area */}
+                                    <div className="p-6 border-b border-white/5 bg-[#0A0A0A]/50 backdrop-blur-sm">
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors">
+                                                <Search size={18} />
                                             </div>
-                                        ))}
+                                            <input 
+                                                type="text" 
+                                                placeholder="Search all communication..."
+                                                value={commSearch}
+                                                onChange={(e) => setCommSearch(e.target.value)}
+                                                className="w-full bg-[#151515] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-gray-600"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Emails Section */}
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-xl font-bold text-white flex items-center gap-2"><Mail className="text-emerald-400" /> Outbound Emails</h3>
-                                    </div>
+                                    {/* Inbox List */}
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                        <div className="flex items-center justify-between px-2 mb-4">
+                                            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-gray-500">
+                                                {commApp === 'gmail' ? 'Gmail' : 'WhatsApp'}
+                                            </h2>
+                                            <div className="flex items-center gap-1">
+                                                {['all', 'warm', 'cold'].map(f => (
+                                                    <button 
+                                                        key={f}
+                                                        onClick={() => setOutboundFilter(f as any)}
+                                                        className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${outboundFilter === f ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-400'}`}
+                                                    >
+                                                        {f}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                    <div className="space-y-4">
-                                        {outboundEmails
-                                            .filter(e => (!selectedLeadId || e.leadId === selectedLeadId) && (outboundFilter === 'all' || e.type === (outboundFilter === 'warm' ? 'inbound' : 'outreach')))
-                                            .map(email => (
-                                            <div key={email.id} className="p-5 rounded-2xl bg-[#0F0F11] border border-white/5 hover:border-emerald-500/20 transition-all group">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div>
-                                                        <h4 className="font-bold text-white group-hover:text-emerald-400 transition-colors">{email.leadName}</h4>
-                                                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">{email.subject}</p>
-                                                    </div>
-                                                    <div className="flex flex-col items-end gap-1">
-                                                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                                                            email.status === 'replied' ? 'bg-emerald-500/10 text-emerald-400' : 
-                                                            email.status === 'opened' ? 'bg-blue-500/10 text-blue-400' : 
-                                                            'bg-gray-500/10 text-gray-400'
-                                                        }`}>
-                                                            {email.status}
-                                                        </span>
-                                                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                                                            email.type === 'inbound' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-orange-500/10 text-orange-400'
-                                                        }`}>
-                                                            {email.type === 'inbound' ? 'Warm' : 'Cold'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="space-y-3">
-                                                    {email.thread.map((msg, idx) => (
-                                                        <div key={idx} className={`flex flex-col ${msg.from === 'hello@mavestone.com' ? 'items-end' : 'items-start'}`}>
-                                                            <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] ${
-                                                                msg.from === 'hello@mavestone.com' 
-                                                                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-100 rounded-tr-none' 
-                                                                : 'bg-white/5 border border-white/10 text-gray-300 rounded-tl-none'
-                                                            }`}>
-                                                                {msg.content}
-                                                                <div className="mt-1 text-[8px] opacity-40">{new Date(msg.timestamp).toLocaleTimeString()}</div>
+                                        {commApp === 'gmail' ? (
+                                            [...outboundEmails]
+                                                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                                                .filter(e => (!selectedLeadId || e.leadId === selectedLeadId) && (outboundFilter === 'all' || e.type === (outboundFilter === 'warm' ? 'inbound' : 'outreach')))
+                                                .filter(e => 
+                                                    e.leadName.toLowerCase().includes(commSearch.toLowerCase()) || 
+                                                    e.subject.toLowerCase().includes(commSearch.toLowerCase()) ||
+                                                    e.thread.some(m => m.content.toLowerCase().includes(commSearch.toLowerCase()))
+                                                )
+                                                .map(email => (
+                                                    <motion.div 
+                                                        layout
+                                                        key={email.id} 
+                                                        onClick={() => setSelectedCommId(email.id)}
+                                                        className={`p-4 rounded-2xl border transition-all group cursor-pointer ${
+                                                            selectedCommId === email.id 
+                                                            ? 'bg-red-500/10 border-red-500/30' 
+                                                            : 'bg-[#0F0F11] border-white/5 hover:border-red-500/20 hover:bg-[#151517]'
+                                                        }`}
+                                                    >
+                                                        <div className="flex gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 font-bold text-sm border border-red-500/20">
+                                                                {email.leadName.charAt(0)}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex justify-between items-start mb-0.5">
+                                                                    <h4 className="font-bold text-white truncate text-sm">{email.leadName}</h4>
+                                                                    <span className="text-[9px] text-gray-600 whitespace-nowrap ml-2">{new Date(email.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                                                                </div>
+                                                                <p className="text-[11px] text-gray-400 font-medium truncate mb-1">{email.subject}</p>
+                                                                <p className="text-[10px] text-gray-500 line-clamp-1 opacity-60">{email.thread[email.thread.length - 1]?.content}</p>
                                                             </div>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
+                                                    </motion.div>
+                                                ))
+                                        ) : (
+                                            [...outboundCalls]
+                                                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                                                .filter(c => !selectedLeadId || c.leadId === selectedLeadId)
+                                                .filter(c => c.leadName.toLowerCase().includes(commSearch.toLowerCase()) || c.transcript.toLowerCase().includes(commSearch.toLowerCase()))
+                                                .map(call => (
+                                                    <motion.div 
+                                                        layout
+                                                        key={call.id} 
+                                                        onClick={() => setSelectedCommId(call.id)}
+                                                        className={`p-4 rounded-2xl border transition-all group cursor-pointer ${
+                                                            selectedCommId === call.id 
+                                                            ? 'bg-[#25D366]/10 border-[#25D366]/30' 
+                                                            : 'bg-[#0F0F11] border-white/5 hover:border-[#25D366]/20 hover:bg-[#151517]'
+                                                        }`}
+                                                    >
+                                                        <div className="flex gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center text-[#25D366] font-bold text-sm border border-[#25D366]/20">
+                                                                {call.leadName.charAt(0)}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex justify-between items-start mb-0.5">
+                                                                    <h4 className="font-bold text-white truncate text-sm">{call.leadName}</h4>
+                                                                    <span className="text-[9px] text-gray-600 whitespace-nowrap ml-2">{new Date(call.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                                                                </div>
+                                                                <p className="text-[10px] text-gray-500 line-clamp-2 opacity-60 italic">"{call.transcript}"</p>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Message Detail View */}
+                                <AnimatePresence mode="wait">
+                                    {selectedCommId ? (
+                                        <motion.div 
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            className="flex-1 flex flex-col bg-[#080808]"
+                                        >
+                                            {commApp === 'gmail' ? (
+                                                (() => {
+                                                    const email = outboundEmails.find(e => e.id === selectedCommId);
+                                                    if (!email) return null;
+                                                    return (
+                                                        <>
+                                                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#0A0A0A]">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 font-bold text-xl border border-red-500/20">
+                                                                        {email.leadName.charAt(0)}
+                                                                    </div>
+                                                                    <div>
+                                                                        <h3 className="font-bold text-white text-lg">{email.leadName}</h3>
+                                                                        <p className="text-xs text-gray-500">{email.subject}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <button onClick={() => setSelectedCommId(null)} className="p-2 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+                                                            </div>
+                                                            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                                                {email.thread.map((msg, idx) => (
+                                                                    <div key={idx} className={`flex flex-col ${msg.from === 'hello@mavestone.com' ? 'items-end' : 'items-start'}`}>
+                                                                        <div className="flex items-center gap-2 mb-2 px-1">
+                                                                            <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{msg.from === 'hello@mavestone.com' ? 'You' : email.leadName}</span>
+                                                                            <span className="text-[10px] text-gray-700">{new Date(msg.timestamp).toLocaleString()}</span>
+                                                                        </div>
+                                                                        <div className={`max-w-[80%] p-5 rounded-3xl text-sm leading-relaxed ${
+                                                                            msg.from === 'hello@mavestone.com' 
+                                                                            ? 'bg-red-500/10 border border-red-500/20 text-red-50 shadow-xl shadow-red-500/5 rounded-tr-none' 
+                                                                            : 'bg-white/5 border border-white/10 text-gray-200 rounded-tl-none'
+                                                                        }`}>
+                                                                            {msg.content}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            <div className="p-6 border-t border-white/5 bg-[#0A0A0A]">
+                                                                <div className="relative">
+                                                                    <textarea 
+                                                                        placeholder="Write a reply..."
+                                                                        value={replyContent}
+                                                                        onChange={(e) => setReplyContent(e.target.value)}
+                                                                        rows={4}
+                                                                        className="w-full bg-[#151515] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 transition-all resize-none"
+                                                                    />
+                                                                    <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                                                                        <button 
+                                                                            onClick={async () => {
+                                                                                if (!replyContent.trim()) return;
+                                                                                setIsSendingReply(true);
+                                                                                try {
+                                                                                    const tokens = localStorage.getItem('gmail_tokens');
+                                                                                    const response = await fetch('/api/gmail/send', {
+                                                                                        method: 'POST',
+                                                                                        headers: { 
+                                                                                            'Content-Type': 'application/json',
+                                                                                            ...(tokens ? { 'x-gmail-tokens': tokens } : {})
+                                                                                        },
+                                                                                        credentials: 'include',
+                                                                                        body: JSON.stringify({
+                                                                                            to: email.thread[0].from === 'hello@mavestone.com' ? email.thread[0].to : email.thread[0].from,
+                                                                                            subject: `Re: ${email.subject}`,
+                                                                                            content: replyContent,
+                                                                                            threadId: email.threadId
+                                                                                        })
+                                                                                    });
+                                                                                    if (response.ok) {
+                                                                                        setReplyContent('');
+                                                                                        fetchMessages();
+                                                                                    }
+                                                                                } finally {
+                                                                                    setIsSendingReply(false);
+                                                                                }
+                                                                            }}
+                                                                            disabled={isSendingReply || !replyContent.trim()}
+                                                                            className="px-6 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2"
+                                                                        >
+                                                                            {isSendingReply ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                                                                            Send Reply
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()
+                                            ) : (
+                                                (() => {
+                                                    const call = outboundCalls.find(c => c.id === selectedCommId);
+                                                    if (!call) return null;
+                                                    return (
+                                                        <>
+                                                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#0A0A0A]">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-12 h-12 rounded-full bg-[#25D366]/10 flex items-center justify-center text-[#25D366] font-bold text-xl border border-[#25D366]/20">
+                                                                        {call.leadName.charAt(0)}
+                                                                    </div>
+                                                                    <div>
+                                                                        <h3 className="font-bold text-white text-lg">{call.leadName}</h3>
+                                                                        <p className="text-xs text-gray-500">WhatsApp Call / Transcript</p>
+                                                                    </div>
+                                                                </div>
+                                                                <button onClick={() => setSelectedCommId(null)} className="p-2 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+                                                            </div>
+                                                            <div className="flex-1 overflow-y-auto p-8">
+                                                                <div className="max-w-2xl mx-auto space-y-8">
+                                                                    <div className="p-8 rounded-3xl bg-[#25D366]/5 border border-[#25D366]/10 space-y-6">
+                                                                        <div className="flex items-center justify-between border-b border-[#25D366]/10 pb-4">
+                                                                            <div className="flex items-center gap-2 text-[#25D366]">
+                                                                                <PhoneCall size={16} />
+                                                                                <span className="text-xs font-black uppercase tracking-widest">Call Details</span>
+                                                                            </div>
+                                                                            <span className="text-[10px] text-gray-500 uppercase tracking-widest">{new Date(call.timestamp).toLocaleString()}</span>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-2 gap-8">
+                                                                            <div>
+                                                                                <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mb-1">Duration</p>
+                                                                                <p className="text-white font-mono">{call.duration}</p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mb-1">Status</p>
+                                                                                <span className="px-2 py-0.5 rounded bg-[#25D366]/10 text-[#25D366] text-[10px] font-black uppercase tracking-widest">{call.status}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="pt-6 border-t border-[#25D366]/10">
+                                                                            <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mb-4 flex items-center gap-2"><MessageSquare size={12} /> AI Transcript</p>
+                                                                            <p className="text-sm text-gray-300 leading-relaxed italic">"{call.transcript}"</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()
+                                            )}
+                                        </motion.div>
+                                    ) : (
+                                        <div className="flex-1 flex items-center justify-center bg-[#080808]">
+                                            <div className="text-center space-y-4 opacity-20">
+                                                <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                                                    {commApp === 'gmail' ? <Mail size={48} /> : <MessageSquare size={48} />}
+                                                </div>
+                                                <p className="text-white font-bold tracking-widest uppercase text-xs">Select a message to view</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     )}
 
-                    {/* MARKETING TAB */}
-                    {activeTab === 'marketing' && (
+                    {/* AUTOMATIONS TAB */}
+                    {activeTab === 'automations' && (
                         <div className="space-y-12">
-                            {/* Gmail Integration */}
-                            <section className="space-y-6">
+                            <header className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-bold text-white flex items-center gap-2"><Mail className="text-red-400" /> Gmail Integration</h3>
-                                    {gmailConfig.isConnected ? (
-                                        <button onClick={disconnectGmail} className="text-[10px] font-bold text-red-400 hover:underline uppercase tracking-widest">Disconnect Account</button>
-                                    ) : (
-                                        <button onClick={connectGmail} className="px-6 py-2 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2">
-                                            <Link2 size={14} /> Link Gmail Account
+                                    <h2 className="text-4xl font-bold tracking-tighter text-white uppercase">Automations<span className="text-emerald-500">.</span></h2>
+                                    <button 
+                                        onClick={() => setIsGmailSettingsOpen(true)}
+                                        className="p-3 bg-white/5 border border-white/10 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                                        title="Gmail Settings"
+                                    >
+                                        <Settings size={20} />
+                                    </button>
+                                </div>
+                                <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                                    {[
+                                        { id: 'workflows', label: 'Workflows', icon: Zap },
+                                        { id: 'newsletters', label: 'Newsletters', icon: Megaphone },
+                                        { id: 'lists', label: 'Mailing Lists', icon: Users }
+                                    ].map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setAutomationsTab(tab.id as any)}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                                                automationsTab === tab.id 
+                                                ? 'bg-white text-black' 
+                                                : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                            }`}
+                                        >
+                                            <tab.icon size={14} /> {tab.label}
                                         </button>
-                                    )}
+                                    ))}
                                 </div>
-                                <div className={`p-8 rounded-3xl border transition-all ${gmailConfig.isConnected ? 'bg-red-500/5 border-red-500/20' : 'bg-[#0F0F11] border-white/5'}`}>
-                                    {gmailConfig.isConnected ? (
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
-                                                <Mail size={32} />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-lg font-bold text-white">Gmail Connected</h4>
-                                                <p className="text-sm text-gray-400">All outbound communication will be synced with <span className="text-white font-medium">{gmailConfig.email}</span></p>
-                                                <div className="mt-4 flex items-center gap-4">
-                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                                                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                                        Real-time Sync Active
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-6">
-                                            <Mail className="mx-auto w-12 h-12 text-gray-800 mb-4" />
-                                            <p className="text-gray-500 max-w-md mx-auto">Link your Gmail to send automated welcome emails, newsletters, and track all client communication directly from Mavestone CMS.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </section>
+                            </header>
 
-                            {/* Automations */}
-                            <section className="space-y-6">
+                            {automationsTab === 'workflows' && (
+                                <section className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-bold text-white flex items-center gap-2"><Zap className="text-yellow-400" /> Automated Workflows</h3>
+                                    <button onClick={addAutomation} className="px-6 py-2 bg-yellow-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-all flex items-center gap-2">
+                                        <Plus size={14} /> New Workflow
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {automations.map(auto => (
                                         <div key={auto.id} className="p-6 rounded-3xl bg-[#0F0F11] border border-white/5 space-y-6">
                                             <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h4 className="text-lg font-bold text-white">{auto.name}</h4>
-                                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Trigger: {auto.trigger.replace('_', ' ')}</p>
+                                                <div className="space-y-2 flex-1 mr-4">
+                                                    <input 
+                                                        type="text"
+                                                        value={auto.name}
+                                                        onChange={(e) => updateAutomation(auto.id, { name: e.target.value })}
+                                                        className="text-lg font-bold text-white bg-transparent border-none p-0 focus:outline-none w-full"
+                                                    />
+                                                    <div className="flex items-center gap-3">
+                                                        <select 
+                                                            value={auto.trigger}
+                                                            onChange={(e) => updateAutomation(auto.id, { trigger: e.target.value as any })}
+                                                            className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest focus:outline-none"
+                                                        >
+                                                            <option value="new_lead">New Lead</option>
+                                                            <option value="newsletter_signup">Newsletter Signup</option>
+                                                            <option value="manual">Manual</option>
+                                                        </select>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Delay:</span>
+                                                            <input 
+                                                                type="number"
+                                                                value={auto.delayDays || 0}
+                                                                onChange={(e) => updateAutomation(auto.id, { delayDays: parseInt(e.target.value) })}
+                                                                className="w-12 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[8px] font-bold text-gray-300 focus:outline-none"
+                                                            />
+                                                            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Days</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <button 
-                                                    onClick={() => updateAutomation(auto.id, { isActive: !auto.isActive })}
-                                                    className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                                                        auto.isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-gray-500 border border-white/10'
-                                                    }`}
-                                                >
-                                                    {auto.isActive ? 'Active' : 'Paused'}
-                                                </button>
+                                                <div className="flex items-center gap-3">
+                                                    <button 
+                                                        onClick={() => updateAutomation(auto.id, { isActive: !auto.isActive })}
+                                                        className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                                                            auto.isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-gray-500 border border-white/10'
+                                                        }`}
+                                                    >
+                                                        {auto.isActive ? 'Active' : 'Paused'}
+                                                    </button>
+                                                    <button onClick={() => deleteAutomation(auto.id)} className="text-gray-600 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                </div>
                                             </div>
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
@@ -1198,9 +1457,10 @@ export const AdminPanel: React.FC = () => {
                                     ))}
                                 </div>
                             </section>
+                            )}
 
-                            {/* Mailing Lists */}
-                            <section className="space-y-6">
+                            {automationsTab === 'lists' && (
+                                <section className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-bold text-white flex items-center gap-2"><Users className="text-purple-400" /> Mailing Lists</h3>
                                     <div className="flex items-center gap-3">
@@ -1263,13 +1523,72 @@ export const AdminPanel: React.FC = () => {
                                                     )}
                                                 </div>
                                             </div>
+
+                                            <div className="pt-4 border-t border-white/5 space-y-3">
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Name" 
+                                                        className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                const name = (e.target as HTMLInputElement).value;
+                                                                const emailInput = (e.target as HTMLInputElement).nextElementSibling as HTMLInputElement;
+                                                                const email = emailInput.value;
+                                                                if (name && email) {
+                                                                    addContactToList(list.id, { name, email });
+                                                                    (e.target as HTMLInputElement).value = '';
+                                                                    emailInput.value = '';
+                                                                }
+                                                            }
+                                                        }}
+                                                    />
+                                                    <input 
+                                                        type="email" 
+                                                        placeholder="Email" 
+                                                        className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                const email = (e.target as HTMLInputElement).value;
+                                                                const nameInput = (e.target as HTMLInputElement).previousElementSibling as HTMLInputElement;
+                                                                const name = nameInput.value;
+                                                                if (name && email) {
+                                                                    addContactToList(list.id, { name, email });
+                                                                    (e.target as HTMLInputElement).value = '';
+                                                                    nameInput.value = '';
+                                                                }
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <p className="text-[8px] text-gray-600 uppercase tracking-widest">Or add from CRM:</p>
+                                                    <select 
+                                                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest focus:outline-none max-w-[120px]"
+                                                        onChange={(e) => {
+                                                            const email = e.target.value;
+                                                            const contact = messages.find(m => m.email === email);
+                                                            if (contact) {
+                                                                addContactToList(list.id, { name: contact.name, email: contact.email });
+                                                            }
+                                                            e.target.value = '';
+                                                        }}
+                                                    >
+                                                        <option value="">Select Contact</option>
+                                                        {messages.filter(m => !list.contacts.some(c => c.email === m.email)).map(m => (
+                                                            <option key={m.id} value={m.email}>{m.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </section>
+                            )}
 
-                            {/* Newsletter */}
-                            <section className="space-y-6">
+                            {automationsTab === 'newsletters' && (
+                                <section className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-bold text-white flex items-center gap-2"><Megaphone className="text-blue-400" /> Monthly Newsletters</h3>
                                     <button onClick={addNewsletter} className="px-6 py-2 bg-blue-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center gap-2">
@@ -1394,9 +1713,14 @@ export const AdminPanel: React.FC = () => {
                                                                 <button 
                                                                     onClick={async () => {
                                                                         if (!gmailConfig.isConnected) return alert("Connect Gmail first");
+                                                                        const tokens = localStorage.getItem('gmail_tokens');
                                                                         const res = await fetch('/api/gmail/send', {
                                                                             method: 'POST',
-                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                            headers: { 
+                                                                                'Content-Type': 'application/json',
+                                                                                ...(tokens ? { 'x-gmail-tokens': tokens } : {})
+                                                                            },
+                                                                            credentials: 'include',
                                                                             body: JSON.stringify({
                                                                                 to: 'hello@mavestone.com',
                                                                                 subject: `[TEST] ${news.subject}`,
@@ -1422,11 +1746,12 @@ export const AdminPanel: React.FC = () => {
                                     )}
                                 </div>
                             </section>
-                        </div>
-                    )}
-                    {/* Newsletter Preview Modal */}
-                    <AnimatePresence>
-                        {previewNewsletterId && (
+                        )}
+                    </div>
+                )}
+                {/* Newsletter Preview Modal */}
+                <AnimatePresence>
+                    {previewNewsletterId && (
                             <motion.div 
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -1459,36 +1784,68 @@ export const AdminPanel: React.FC = () => {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    {/* Newsletter Preview Modal */}
+                    {/* Gmail Settings Modal */}
                     <AnimatePresence>
-                        {previewNewsletterId && (
+                        {isGmailSettingsOpen && (
                             <motion.div 
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+                                className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
                             >
                                 <motion.div 
                                     initial={{ scale: 0.9, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0.9, opacity: 0 }}
-                                    className="w-full max-w-4xl bg-[#0F0F11] rounded-3xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh]"
+                                    className="w-full max-w-lg bg-[#0F0F11] rounded-3xl border border-white/10 overflow-hidden"
                                 >
                                     <div className="p-6 border-b border-white/5 flex justify-between items-center">
-                                        <h3 className="text-xl font-bold text-white">Email Preview</h3>
-                                        <button onClick={() => setPreviewNewsletterId(null)} className="p-2 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
+                                        <h3 className="text-xl font-bold text-white flex items-center gap-2"><Mail className="text-red-400" /> Gmail Integration</h3>
+                                        <button onClick={() => setIsGmailSettingsOpen(false)} className="p-2 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto p-8 bg-white">
-                                        <div className="max-w-2xl mx-auto text-black">
-                                            <div className="mb-8 pb-8 border-b border-gray-100">
-                                                <p className="text-xs text-gray-400 uppercase tracking-widest mb-1 text-black">Subject</p>
-                                                <p className="text-lg font-bold text-black">{newsletters.find(n => n.id === previewNewsletterId)?.subject}</p>
+                                    <div className="p-8 space-y-6">
+                                        {gmailConfig.isConnected ? (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                                                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                                        <CheckCircle2 size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest">Connected</p>
+                                                        <p className="text-white font-medium">{gmailConfig.email}</p>
+                                                    </div>
+                                                </div>
+                                                <p className="text-sm text-gray-500">Your Gmail account is linked. You can now send newsletters and automated emails directly from the dashboard.</p>
+                                                <button 
+                                                    onClick={() => {
+                                                        disconnectGmail();
+                                                        setIsGmailSettingsOpen(false);
+                                                    }} 
+                                                    className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                                                >
+                                                    Disconnect Account
+                                                </button>
                                             </div>
-                                            <div 
-                                                className="prose prose-sm max-w-none newsletter-preview text-black"
-                                                dangerouslySetInnerHTML={{ __html: newsletters.find(n => n.id === previewNewsletterId)?.content.replace('{{name}}', 'Liam') || '' }}
-                                            />
-                                        </div>
+                                        ) : (
+                                            <div className="space-y-6 text-center">
+                                                <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto text-gray-600">
+                                                    <Mail size={40} />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <h4 className="text-lg font-bold text-white">Link your Gmail</h4>
+                                                    <p className="text-sm text-gray-500">Connect your account to enable automated welcome emails, newsletters, and client communication tracking.</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => {
+                                                        connectGmail();
+                                                        setIsGmailSettingsOpen(false);
+                                                    }} 
+                                                    className="w-full py-4 bg-white text-black rounded-2xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Link2 size={18} /> Connect Gmail Account
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             </motion.div>

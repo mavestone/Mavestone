@@ -86,7 +86,8 @@ export interface OutboundEmail {
   subject: string;
   timestamp: string;
   status: 'sent' | 'opened' | 'replied';
-  type: 'inbound' | 'outreach'; // New: distinguish lead type
+  type: 'inbound' | 'outreach';
+  threadId?: string; // New: Gmail thread ID
   thread: {
     from: string;
     to: string;
@@ -101,7 +102,8 @@ export interface AutomationEmail {
   subject: string;
   content: string;
   isActive: boolean;
-  trigger: 'new_lead';
+  trigger: 'new_lead' | 'newsletter_signup' | 'manual';
+  delayDays?: number;
 }
 
 export interface MailingList {

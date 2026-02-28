@@ -44,12 +44,17 @@ interface ContentContextType {
   deleteClientWork: (id: string) => void;
   updateProjectConfig: (data: Partial<ProjectHeroConfig>) => void;
   updateAutomation: (id: string, data: Partial<AutomationEmail>) => void;
+  addAutomation: () => void;
+  deleteAutomation: (id: string) => void;
   updateNewsletter: (id: string, data: Partial<Newsletter>) => void;
   addNewsletter: () => void;
   deleteNewsletter: (id: string) => void;
   addMailingList: (name: string, contacts?: { name: string; email: string }[]) => void;
   updateMailingList: (id: string, data: Partial<MailingList>) => void;
   deleteMailingList: (id: string) => void;
+  addContactToList: (listId: string, contact: { name: string; email: string }) => void;
+  deleteContactFromList: (listId: string, email: string) => void;
+  addOutboundEmail: (email: OutboundEmail) => void;
   connectGmail: () => Promise<void>;
   disconnectGmail: () => void;
   saveChanges: () => Promise<void>;
@@ -92,6 +97,39 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [messages, setMessages] = useState<Message[]>([]);
   const [outboundCalls, setOutboundCalls] = useState<OutboundCall[]>([]);
   const [outboundEmails, setOutboundEmails] = useState<OutboundEmail[]>([]);
+
+  const fetchOutboundData = useCallback(async () => {
+    const client = supabase;
+    if (!client) return;
+    
+    const { data: emails } = await client.from('outbound_emails').select('*').order('created_at', { ascending: false });
+    if (emails) {
+      setOutboundEmails(emails.map(e => ({
+        id: e.id,
+        leadId: e.lead_id,
+        leadName: e.lead_name,
+        subject: e.subject,
+        timestamp: e.created_at,
+        status: e.status,
+        type: e.type,
+        threadId: e.thread_id,
+        thread: e.thread
+      })));
+    }
+
+    const { data: calls } = await client.from('outbound_calls').select('*').order('created_at', { ascending: false });
+    if (calls) {
+      setOutboundCalls(calls.map(c => ({
+        id: c.id,
+        leadId: c.lead_id,
+        leadName: c.lead_name,
+        timestamp: c.timestamp,
+        duration: c.duration,
+        status: c.status,
+        transcript: c.transcript
+      })));
+    }
+  }, []);
   const [automations, setAutomations] = useState<AutomationEmail[]>([
     { id: '1', name: 'Welcome Email', subject: 'Welcome to Mavestone Studio', content: 'Hi {{name}}, thanks for reaching out!', isActive: true, trigger: 'new_lead' }
   ]);
@@ -113,13 +151,20 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const handleOAuthMessage = (event: MessageEvent) => {
       if (event.data?.type === 'GMAIL_AUTH_SUCCESS') {
+        if (event.data.tokens) {
+          localStorage.setItem('gmail_tokens', JSON.stringify(event.data.tokens));
+        }
         setGmailConfig({ isConnected: true, email: event.data.email });
       }
     };
     window.addEventListener('message', handleOAuthMessage);
 
     // Check initial status
-    fetch('/api/gmail/status')
+    const tokens = localStorage.getItem('gmail_tokens');
+    fetch('/api/gmail/status', { 
+      credentials: 'include',
+      headers: tokens ? { 'x-gmail-tokens': tokens } : {}
+    })
       .then(res => res.json())
       .then(data => {
         if (data.isConnected) {
@@ -157,6 +202,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (row.key === 'gmail_config') setGmailConfig(row.data);
           });
         }
+        await fetchMessages();
       } catch (e) {
         console.error("Error initializing content:", e);
       } finally {
@@ -208,6 +254,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateProjectConfig = (data: Partial<ProjectHeroConfig>) => setProjectConfig(prev => ({ ...prev, ...data }));
 
   const updateAutomation = (id: string, data: Partial<AutomationEmail>) => setAutomations(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
+  const addAutomation = () => setAutomations(prev => [...prev, {
+    id: Math.random().toString(36).substr(2, 9),
+    name: "New Workflow",
+    subject: "Subject Line",
+    content: "Email Content",
+    isActive: false,
+    trigger: 'new_lead',
+    delayDays: 0
+  }]);
+  const deleteAutomation = (id: string) => setAutomations(prev => prev.filter(a => a.id !== id));
   const updateNewsletter = (id: string, data: Partial<Newsletter>) => setNewsletters(prev => prev.map(n => n.id === id ? { ...n, ...data } : n));
   const addNewsletter = () => setNewsletters(prev => [...prev, {
     id: Math.random().toString(36).substr(2, 9),
@@ -236,6 +292,55 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMailingLists(prev => prev.filter(l => l.id !== id));
   };
 
+  const addContactToList = (listId: string, contact: { name: string; email: string }) => {
+    setMailingLists(prev => prev.map(list => {
+      if (list.id === listId) {
+        if (list.contacts.some(c => c.email === contact.email)) return list;
+        return { ...list, contacts: [...list.contacts, contact] };
+      }
+      return list;
+    }));
+  };
+
+  const deleteContactFromList = (listId: string, email: string) => {
+    setMailingLists(prev => prev.map(list => {
+      if (list.id === listId) {
+        return { ...list, contacts: list.contacts.filter(c => c.email !== email) };
+      }
+      return list;
+    }));
+  };
+
+  const addOutboundEmail = async (email: OutboundEmail) => {
+    const client = supabase;
+    if (!client) {
+      setOutboundEmails(prev => [email, ...prev]);
+      return;
+    }
+
+    const { data, error } = await client.from('outbound_emails').insert([{
+      lead_id: email.leadId,
+      lead_name: email.leadName,
+      subject: email.subject,
+      status: email.status,
+      type: email.type,
+      thread_id: email.threadId,
+      thread: email.thread
+    }]).select();
+
+    if (!error && data?.[0]) {
+      const saved = {
+        ...email,
+        id: data[0].id,
+        timestamp: data[0].created_at
+      };
+      setOutboundEmails(prev => [saved, ...prev]);
+    } else {
+      console.error("Failed to save outbound email:", error);
+      setOutboundEmails(prev => [email, ...prev]);
+    }
+  };
+
   const sendNewsletter = async (newsletterId: string, listId?: string) => {
     const newsletter = newsletters.find(n => n.id === newsletterId);
     if (!newsletter || !gmailConfig.isConnected) return { success: false, count: 0 };
@@ -248,9 +353,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let lastError = '';
     for (const contact of list.contacts) {
       try {
+        const tokens = localStorage.getItem('gmail_tokens');
         const response = await fetch('/api/gmail/send', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(tokens ? { 'x-gmail-tokens': tokens } : {})
+          },
+          credentials: 'include',
           body: JSON.stringify({
             to: contact.email,
             subject: newsletter.subject,
@@ -258,7 +368,28 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           })
         });
         if (response.ok) {
+          const { threadId } = await response.json();
           successCount++;
+          
+          // Try to find matching lead in CRM to get UUID
+          const matchingLead = messages.find(m => m.email === contact.email);
+          
+          addOutboundEmail({
+            id: Math.random().toString(36).substr(2, 9),
+            leadId: matchingLead?.id || contact.email,
+            leadName: contact.name,
+            subject: newsletter.subject,
+            timestamp: new Date().toISOString(),
+            status: 'sent',
+            type: 'outreach',
+            threadId,
+            thread: [{
+              from: 'hello@mavestone.com',
+              to: contact.email,
+              timestamp: new Date().toISOString(),
+              content: newsletter.content.replace('{{name}}', contact.name)
+            }]
+          });
         } else {
           const err = await response.json();
           lastError = err.details || err.error;
@@ -274,7 +405,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
   const connectGmail = async () => {
     try {
-      const response = await fetch('/api/auth/google/url');
+      const response = await fetch('/api/auth/google/url', { credentials: 'include' });
       const { url } = await response.json();
       
       const width = 600;
@@ -293,8 +424,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const disconnectGmail = async () => {
-    await fetch('/api/gmail/disconnect', { method: 'POST' });
-    setGmailConfig({ isConnected: false });
+    try {
+      await fetch('/api/gmail/disconnect', { method: 'POST', credentials: 'include' });
+      localStorage.removeItem('gmail_tokens');
+      setGmailConfig({ isConnected: false });
+    } catch (e) {
+      console.error("Failed to disconnect Gmail:", e);
+    }
   };
 
   const addShort = () => {
@@ -392,88 +528,137 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
 
   const sendMessage = async (data: { name: string; email: string; message: string; phone?: string; company?: string; source?: string }) => {
+    console.log("Attempting to send message:", data);
     const client = supabase;
-    if (!client) return { success: false };
-    const { error } = await client.from('messages').insert([{ ...data, status: 'new', priority: 'medium', lead_type: 'warm' }]);
+    if (!client) {
+      console.error("Supabase client not initialized");
+      return { success: false };
+    }
+    const { data: inserted, error } = await client.from('messages').insert([{ ...data, status: 'new', priority: 'medium', lead_type: 'warm' }]).select();
     
-    if (!error && gmailConfig.isConnected) {
-      // Trigger automation
-      const welcomeEmail = automations.find(a => a.trigger === 'new_lead' && a.isActive);
-      if (welcomeEmail) {
-        try {
-          await fetch('/api/gmail/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: data.email,
-              subject: welcomeEmail.subject,
-              content: welcomeEmail.content.replace('{{name}}', data.name)
-            })
-          });
-        } catch (e) {
-          console.error("Failed to send automated email:", e);
+    if (error) {
+      console.error("Supabase insert error:", error);
+    }
+
+    if (!error && inserted?.[0]) {
+      const newLead = inserted[0];
+      fetchMessages();
+      // Update CRM list automatically
+      addContactToList('all-crm', { name: data.name, email: data.email });
+
+      if (gmailConfig.isConnected) {
+        // Trigger automation
+        const welcomeEmail = automations.find(a => a.trigger === 'new_lead' && a.isActive);
+        if (welcomeEmail) {
+          try {
+            const tokens = localStorage.getItem('gmail_tokens');
+            const subject = welcomeEmail.subject;
+            const content = welcomeEmail.content.replace('{{name}}', data.name);
+            
+            const response = await fetch('/api/gmail/send', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                ...(tokens ? { 'x-gmail-tokens': tokens } : {})
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                to: data.email,
+                subject,
+                content
+              })
+            });
+
+            const { threadId } = await response.json();
+
+            addOutboundEmail({
+              id: Math.random().toString(36).substr(2, 9),
+              leadId: newLead.id, // Use the actual UUID
+              leadName: data.name,
+              subject,
+              timestamp: new Date().toISOString(),
+              status: 'sent',
+              type: 'inbound',
+              threadId,
+              thread: [{
+                from: 'hello@mavestone.com',
+                to: data.email,
+                timestamp: new Date().toISOString(),
+                content
+              }]
+            });
+          } catch (e) {
+            console.error("Failed to send automated email:", e);
+          }
         }
       }
     }
 
     return { success: !error, error };
   };
+  const fetchReplies = useCallback(async () => {
+    if (!gmailConfig.isConnected) return;
+    try {
+      const tokens = localStorage.getItem('gmail_tokens');
+      const response = await fetch('/api/gmail/replies', {
+        headers: { ...(tokens ? { 'x-gmail-tokens': tokens } : {}) },
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const { replies } = await response.json();
+        if (replies.length > 0) {
+          const client = supabase;
+          
+          for (const reply of replies) {
+            const emailToUpdate = outboundEmails.find(e => e.threadId === reply.threadId);
+            if (emailToUpdate && !emailToUpdate.thread.some(m => m.timestamp === reply.timestamp)) {
+              const updatedThread = [...emailToUpdate.thread, {
+                from: reply.from,
+                to: 'hello@mavestone.com',
+                timestamp: reply.timestamp,
+                content: reply.content
+              }];
+              
+              if (client) {
+                await client.from('outbound_emails')
+                  .update({ 
+                    status: 'replied', 
+                    thread: updatedThread,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('thread_id', reply.threadId);
+              }
+
+              setOutboundEmails(prev => prev.map(email => 
+                email.threadId === reply.threadId 
+                  ? { ...email, status: 'replied', thread: updatedThread }
+                  : email
+              ));
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch replies:", e);
+    }
+  }, [gmailConfig.isConnected, outboundEmails]);
+
+  useEffect(() => {
+    if (gmailConfig.isConnected) {
+      const interval = setInterval(fetchReplies, 60000); // Check every minute
+      fetchReplies();
+      return () => clearInterval(interval);
+    }
+  }, [gmailConfig.isConnected, fetchReplies]);
+
   const fetchMessages = useCallback(async () => {
     const client = supabase;
     if (!client) return;
     const { data } = await client.from('messages').select('*').order('created_at', { ascending: false });
     if (data) setMessages(data);
 
-    // Mock Outbound Data
-    setOutboundCalls([
-      {
-        id: '1',
-        leadId: 'lead-1',
-        leadName: 'John Doe',
-        timestamp: new Date().toISOString(),
-        duration: '5:24',
-        status: 'completed',
-        transcript: "Hello, this is John. I'm interested in your video production services for our upcoming product launch. We need something high-energy and cinematic. Can you provide a quote by Friday?"
-      },
-      {
-        id: '2',
-        leadId: 'lead-2',
-        leadName: 'Sarah Smith',
-        timestamp: new Date(Date.now() - 86400000).toISOString(),
-        duration: '0:45',
-        status: 'voicemail',
-        transcript: "Left voicemail regarding the documentary project."
-      }
-    ]);
-
-    setOutboundEmails([
-      {
-        id: '1',
-        leadId: 'lead-1',
-        leadName: 'John Doe',
-        subject: 'Re: Video Production Inquiry',
-        timestamp: new Date().toISOString(),
-        status: 'replied',
-        type: 'inbound',
-        thread: [
-          { from: 'hello@mavestone.com', to: 'john@example.com', timestamp: new Date(Date.now() - 3600000).toISOString(), content: "Hi John, thanks for reaching out! We'd love to help with your product launch. When are you free for a quick discovery call?" },
-          { from: 'john@example.com', to: 'hello@mavestone.com', timestamp: new Date().toISOString(), content: "I'm free tomorrow at 2pm. Looking forward to it!" }
-        ]
-      },
-      {
-        id: '2',
-        leadId: 'lead-cold-1',
-        leadName: 'Cold Prospect',
-        subject: 'Video Strategy for 2024',
-        timestamp: new Date(Date.now() - 172800000).toISOString(),
-        status: 'sent',
-        type: 'outreach',
-        thread: [
-          { from: 'hello@mavestone.com', to: 'prospect@example.com', timestamp: new Date(Date.now() - 172800000).toISOString(), content: "Hi there, I saw your recent campaign and thought our cinematic style would be a great fit..." }
-        ]
-      }
-    ]);
-  }, []);
+    fetchOutboundData();
+  }, [fetchOutboundData]);
 
   const markMessageRead = useCallback(async (id: string) => {
     const client = supabase;
@@ -494,11 +679,25 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const deleteMessage = useCallback(async (id: string) => {
+    console.log("Attempting to delete message with ID:", id);
     const client = supabase;
-    if (!client) return;
-    const { error } = await client.from('messages').delete().eq('id', id);
-    if (!error) {
-      setMessages(prev => prev.filter(m => m.id !== id));
+    if (!client) {
+      alert("Database connection not available.");
+      return;
+    }
+    
+    try {
+      const { error } = await client.from('messages').delete().eq('id', id);
+      if (error) {
+        console.error("Delete error:", error);
+        alert(`Failed to delete lead: ${error.message}`);
+      } else {
+        console.log("Successfully deleted message:", id);
+        setMessages(prev => prev.filter(m => m.id !== id));
+      }
+    } catch (e: any) {
+      console.error("Delete exception:", e);
+      alert(`An error occurred while deleting: ${e.message}`);
     }
   }, []);
 
@@ -515,6 +714,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { key: 'about_data', data: DEFAULT_ABOUT }
     ];
     await client.from('site_content').upsert(updates);
+    
+    // Seed mock messages
+    const mockMessages = [
+      { name: 'John Doe', email: 'john@example.com', message: 'Interested in a cinematic product launch video.', status: 'new' },
+      { name: 'Sarah Smith', email: 'sarah@example.com', message: 'Looking for a documentary style shoot in Sydney.', status: 'read' }
+    ];
+    await client.from('messages').insert(mockMessages);
+
     window.location.reload();
   };
 
@@ -526,8 +733,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
     updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
-    updateAutomation, updateNewsletter, addNewsletter, deleteNewsletter,
-    addMailingList, updateMailingList, deleteMailingList, sendNewsletter,
+    updateAutomation, addAutomation, deleteAutomation, updateNewsletter, addNewsletter, deleteNewsletter,
+    addMailingList, updateMailingList, deleteMailingList, addContactToList, deleteContactFromList, addOutboundEmail, sendNewsletter,
     connectGmail, disconnectGmail,
     saveChanges, uploadImage, login, logout, seedDatabase,
     sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
@@ -539,8 +746,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
     updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
-    updateAutomation, updateNewsletter, addNewsletter, deleteNewsletter,
-    addMailingList, updateMailingList, deleteMailingList, sendNewsletter,
+    updateAutomation, addAutomation, deleteAutomation, updateNewsletter, addNewsletter, deleteNewsletter,
+    addMailingList, updateMailingList, deleteMailingList, addContactToList, deleteContactFromList, addOutboundEmail, sendNewsletter,
     connectGmail, disconnectGmail,
     saveChanges, uploadImage, login, logout, seedDatabase,
     sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage

@@ -154,7 +154,7 @@ const AppContent: React.FC = () => {
   }, [location]);
 
   return (
-    <div className={`bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto ${isAdminOpen ? 'lg:cursor-auto' : 'lg:cursor-none'}`}>
+    <div className={`relative bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto ${isAdminOpen ? 'lg:cursor-auto' : 'lg:cursor-none'}`}>
         {/* Removed Global Grain Overlay */}
         <CustomCursor />
 
