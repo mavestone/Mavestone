@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, PhoneCall, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Megaphone, Zap, Image as ImageIcon, Send, Settings, Link2, FileUp, Eye, Sparkles } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, PhoneCall, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Megaphone, Zap, Image as ImageIcon, Send, Settings, Link2, FileUp, Eye, Sparkles, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
@@ -424,7 +424,52 @@ export const AdminPanel: React.FC = () => {
     isAuthenticated, fetchMessages, messages, outboundEmails, addOutboundEmail, markMessageRead, updateMessage, deleteMessage, logout
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm' | 'communication' | 'automations' | 'agent'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm' | 'communication' | 'automations' | 'agent' | 'production'>('home');
+  
+  // Production State
+  const [productionItems, setProductionItems] = useState<any[]>([
+    {id:1,title:'LinkedIn Monetisation',cat:'education',status:'idea',platforms:['LinkedIn'],date:'',notes:'',comments:[]},
+    {id:2,title:'Why Every Social Media Editor Needs to Step Up Their Game',cat:'education',status:'idea',platforms:['LinkedIn','TikTok','Instagram Reels'],date:'',notes:'',comments:[]},
+    {id:3,title:'Being a Creative in 2025',cat:'lifestyle',status:'idea',platforms:[],date:'',notes:'',comments:[]},
+    {id:4,title:'MAVESTONE BRAND FILM',cat:'brand',status:'idea',platforms:[],date:'',notes:'',comments:[]},
+    {id:5,title:'23 | E01',cat:'documentary',status:'idea',platforms:['Instagram Reels'],date:'',notes:'First episode of the 23 series.',comments:[]},
+    {id:6,title:'Hey Amara — Episode 1',cat:'documentary',status:'scripted',platforms:['YouTube'],date:'2026-03-25',notes:'Harvey intro, Bali office, remote recruitment angle. Open on the traffic noise, not a talking head.',comments:[]},
+  ]);
+  const [productionView, setProductionView] = useState<'kanban' | 'table' | 'calendar'>('kanban');
+  const [activeProductionId, setActiveProductionId] = useState<number | null>(null);
+  const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
+  const [newProductionStatus, setNewProductionStatus] = useState<string>('idea');
+  const [newProductionDate, setNewProductionDate] = useState('');
+  const [newProductionTitle, setNewProductionTitle] = useState('');
+  const [calY, setCalY] = useState(new Date().getFullYear());
+  const [calM, setCalM] = useState(new Date().getMonth());
+  const [productionComment, setProductionComment] = useState('');
+
+  const updateProductionItem = (id: number, data: any) => {
+    setProductionItems(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+  };
+
+  const addProductionItem = () => {
+    if (!newProductionTitle.trim()) return;
+    const newItem = {
+        id: Date.now(),
+        title: newProductionTitle,
+        cat: '',
+        status: newProductionStatus,
+        platforms: [],
+        date: newProductionDate,
+        notes: '',
+        comments: []
+    };
+    setProductionItems(prev => [...prev, newItem]);
+    setIsProductionModalOpen(false);
+    setNewProductionTitle('');
+  };
+
+  const deleteProductionItem = (id: number) => {
+    setProductionItems(prev => prev.filter(item => item.id !== id));
+    setActiveProductionId(null);
+  };
   const [crmView, setCrmView] = useState<'cards' | 'spreadsheet'>('spreadsheet');
   const [outboundFilter, setOutboundFilter] = useState<'all' | 'warm' | 'cold'>('all');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -878,6 +923,7 @@ System: You are Liam from Mavestone. Draft a professional, helpful, and concise 
                                         <NavItem id="communication" label="Communication" icon={PhoneCall} />
                                         <NavItem id="automations" label="Automations" icon={Megaphone} />
                                         <NavItem id="agent" label="Agent" icon={Sparkles} />
+                                        <NavItem id="production" label="Production" icon={FileText} />
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -2313,6 +2359,244 @@ System: You are Liam from Mavestone. Draft a professional, helpful, and concise 
                         />
                     </div>
                 )}
+                {activeTab === 'production' && (
+                    <div className="space-y-8">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h2 className="text-3xl font-bold text-white mb-2">Production</h2>
+                                <p className="text-gray-400 text-sm">Manage your content pipeline from idea to publication.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl">
+                                    <button 
+                                        onClick={() => setProductionView('kanban')}
+                                        className={`p-2 rounded-lg transition-all ${productionView === 'kanban' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-white'}`}
+                                    >
+                                        <Layout size={18} />
+                                    </button>
+                                    <button 
+                                        onClick={() => setProductionView('table')}
+                                        className={`p-2 rounded-lg transition-all ${productionView === 'table' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-white'}`}
+                                    >
+                                        <List size={18} />
+                                    </button>
+                                    <button 
+                                        onClick={() => setProductionView('calendar')}
+                                        className={`p-2 rounded-lg transition-all ${productionView === 'calendar' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-white'}`}
+                                    >
+                                        <Calendar size={18} />
+                                    </button>
+                                </div>
+                                <button 
+                                    onClick={() => setIsProductionModalOpen(true)}
+                                    className="admin-btn-primary"
+                                >
+                                    <Plus size={18} /> Add Item
+                                </button>
+                            </div>
+                        </div>
+
+                        {productionView === 'kanban' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 overflow-x-auto pb-8">
+                                {['idea', 'scripted', 'production', 'post-production', 'done'].map(status => (
+                                    <div key={status} className="flex flex-col gap-4 min-w-[280px]">
+                                        <div className="flex items-center justify-between px-2">
+                                            <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${
+                                                    status === 'idea' ? 'bg-gray-500' :
+                                                    status === 'scripted' ? 'bg-blue-500' :
+                                                    status === 'production' ? 'bg-yellow-500' :
+                                                    status === 'post-production' ? 'bg-purple-500' : 'bg-green-500'
+                                                }`} />
+                                                {status.replace('-', ' ')}
+                                                <span className="ml-1 text-white/20">({productionItems.filter(i => i.status === status).length})</span>
+                                            </h3>
+                                        </div>
+                                        <div className="flex flex-col gap-4 min-h-[500px] p-2 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            {productionItems.filter(item => item.status === status).map(item => (
+                                                <motion.div 
+                                                    key={item.id}
+                                                    layoutId={`prod-${item.id}`}
+                                                    onClick={() => setActiveProductionId(item.id)}
+                                                    className="p-4 rounded-xl bg-[#161618] border border-white/10 hover:border-white/20 transition-all cursor-pointer group"
+                                                >
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest px-2 py-0.5 bg-blue-400/10 rounded-full">
+                                                            {item.cat || 'Uncategorized'}
+                                                        </span>
+                                                        <div className="flex gap-1">
+                                                            {item.platforms?.map((p: string) => (
+                                                                <div key={p} className="text-white/40">
+                                                                    {p === 'YouTube' && <Youtube size={12} />}
+                                                                    {p === 'LinkedIn' && <FileText size={12} />}
+                                                                    {p === 'Instagram Reels' && <ImageIcon size={12} />}
+                                                                    {p === 'TikTok' && <Zap size={12} />}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{item.title}</h4>
+                                                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                                        <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                                            <Clock size={12} />
+                                                            {item.date ? new Date(item.date).toLocaleDateString() : 'No date'}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            {item.comments?.length > 0 && (
+                                                                <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                                                                    <MessageSquare size={12} />
+                                                                    {item.comments.length}
+                                                                </div>
+                                                            )}
+                                                            <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-white/40">
+                                                                {item.title.charAt(0)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                            <button 
+                                                onClick={() => {
+                                                    setNewProductionStatus(status);
+                                                    setIsProductionModalOpen(true);
+                                                }}
+                                                className="w-full py-3 rounded-xl border border-dashed border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs"
+                                            >
+                                                <Plus size={14} /> Add Item
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {productionView === 'table' && (
+                            <div className="admin-card overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-white/5">
+                                                <th className="p-4 admin-label">Title</th>
+                                                <th className="p-4 admin-label">Category</th>
+                                                <th className="p-4 admin-label">Status</th>
+                                                <th className="p-4 admin-label">Platforms</th>
+                                                <th className="p-4 admin-label">Date</th>
+                                                <th className="p-4 admin-label"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {productionItems.map(item => (
+                                                <tr key={item.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                                                    <td className="p-4">
+                                                        <div className="font-medium text-white">{item.title}</div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest px-2 py-1 bg-blue-400/10 rounded-lg">
+                                                            {item.cat || 'N/A'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${
+                                                                item.status === 'idea' ? 'bg-gray-500' :
+                                                                item.status === 'scripted' ? 'bg-blue-500' :
+                                                                item.status === 'production' ? 'bg-yellow-500' :
+                                                                item.status === 'post-production' ? 'bg-purple-500' : 'bg-green-500'
+                                                            }`} />
+                                                            <span className="text-xs text-gray-400 capitalize">{item.status.replace('-', ' ')}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex gap-2">
+                                                            {item.platforms?.map((p: string) => (
+                                                                <div key={p} className="text-white/40" title={p}>
+                                                                    {p === 'YouTube' && <Youtube size={14} />}
+                                                                    {p === 'LinkedIn' && <FileText size={14} />}
+                                                                    {p === 'Instagram Reels' && <ImageIcon size={14} />}
+                                                                    {p === 'TikTok' && <Zap size={14} />}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="text-xs text-gray-500">{item.date || 'TBD'}</div>
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        <button 
+                                                            onClick={() => setActiveProductionId(item.id)}
+                                                            className="p-2 text-gray-500 hover:text-white transition-colors"
+                                                        >
+                                                            <Edit3 size={16} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {productionView === 'calendar' && (
+                            <div className="admin-card p-8">
+                                <div className="flex items-center justify-between mb-8">
+                                    <h3 className="text-xl font-bold text-white">
+                                        {new Date(calY, calM).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                    </h3>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => {
+                                                if (calM === 0) { setCalM(11); setCalY(calY - 1); }
+                                                else setCalM(calM - 1);
+                                            }}
+                                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white"
+                                        >
+                                            <ChevronDown className="rotate-90" size={18} />
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                if (calM === 11) { setCalM(0); setCalY(calY + 1); }
+                                                else setCalM(calM + 1);
+                                            }}
+                                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white"
+                                        >
+                                            <ChevronDown className="-rotate-90" size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-7 gap-px bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
+                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                        <div key={day} className="p-4 text-center admin-label bg-[#161618]">{day}</div>
+                                    ))}
+                                    {Array.from({ length: new Date(calY, calM, 1).getDay() }).map((_, i) => (
+                                        <div key={`empty-${i}`} className="min-h-[120px] bg-[#0F0F11]/50" />
+                                    ))}
+                                    {Array.from({ length: new Date(calY, calM + 1, 0).getDate() }).map((_, i) => {
+                                        const day = i + 1;
+                                        const dateStr = `${calY}-${String(calM + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                        const dayItems = productionItems.filter(item => item.date === dateStr);
+                                        return (
+                                            <div key={day} className="min-h-[120px] p-2 bg-[#0F0F11] border border-white/5 hover:bg-white/[0.02] transition-colors">
+                                                <div className="text-xs font-bold text-white/20 mb-2">{day}</div>
+                                                <div className="flex flex-col gap-1">
+                                                    {dayItems.map(item => (
+                                                        <div 
+                                                            key={item.id}
+                                                            onClick={() => setActiveProductionId(item.id)}
+                                                            className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[9px] text-blue-400 font-medium truncate cursor-pointer hover:bg-blue-500/20 transition-all"
+                                                        >
+                                                            {item.title}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Newsletter Preview Modal */}
                 <AnimatePresence>
@@ -2349,6 +2633,239 @@ System: You are Liam from Mavestone. Draft a professional, helpful, and concise 
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* Production Item Details Modal */}
+                    <AnimatePresence>
+                        {activeProductionId && (
+                            <div className="fixed inset-0 z-[150] flex items-center justify-end p-0 md:p-4 bg-black/60 backdrop-blur-sm">
+                                <motion.div 
+                                    initial={{ x: '100%' }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: '100%' }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    className="w-full max-w-2xl h-full bg-[#0A0A0A] border-l border-white/10 shadow-2xl overflow-hidden flex flex-col"
+                                >
+                                    {(() => {
+                                        const item = productionItems.find(i => i.id === activeProductionId);
+                                        if (!item) return null;
+                                        return (
+                                            <>
+                                                <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                                    <div className="flex items-center gap-4">
+                                                        <button 
+                                                            onClick={() => setActiveProductionId(null)}
+                                                            className="p-2 -ml-2 text-gray-500 hover:text-white transition-colors"
+                                                        >
+                                                            <X size={24} />
+                                                        </button>
+                                                        <div>
+                                                            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest px-2 py-1 bg-blue-400/10 rounded-lg mb-1 inline-block">
+                                                                {item.cat || 'Uncategorized'}
+                                                            </span>
+                                                            <h3 className="text-xl font-bold text-white leading-tight">{item.title}</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => deleteProductionItem(item.id)}
+                                                            className="p-2 text-gray-500 hover:text-red-400 transition-colors"
+                                                        >
+                                                            <Trash2 size={20} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                                    <div className="grid grid-cols-2 gap-6">
+                                                        <div className="space-y-2">
+                                                            <label className="admin-label">Status</label>
+                                                            <select 
+                                                                value={item.status}
+                                                                onChange={(e) => updateProductionItem(item.id, { status: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500/50"
+                                                            >
+                                                                <option value="idea">Idea</option>
+                                                                <option value="scripted">Scripted</option>
+                                                                <option value="production">Production</option>
+                                                                <option value="post-production">Post-Production</option>
+                                                                <option value="done">Done</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <label className="admin-label">Due Date</label>
+                                                            <input 
+                                                                type="date"
+                                                                value={item.date || ''}
+                                                                onChange={(e) => updateProductionItem(item.id, { date: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500/50"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <label className="admin-label">Platforms</label>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {['YouTube', 'LinkedIn', 'Instagram Reels', 'TikTok', 'Twitter'].map(p => (
+                                                                <button 
+                                                                    key={p}
+                                                                    onClick={() => {
+                                                                        const platforms = item.platforms || [];
+                                                                        const newPlatforms = platforms.includes(p) 
+                                                                            ? platforms.filter((pl: string) => pl !== p)
+                                                                            : [...platforms, p];
+                                                                        updateProductionItem(item.id, { platforms: newPlatforms });
+                                                                    }}
+                                                                    className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${
+                                                                        item.platforms?.includes(p)
+                                                                        ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+                                                                        : 'bg-white/5 border-white/10 text-gray-500 hover:text-white'
+                                                                    }`}
+                                                                >
+                                                                    {p}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <label className="admin-label">Notes</label>
+                                                        <textarea 
+                                                            value={item.notes || ''}
+                                                            onChange={(e) => updateProductionItem(item.id, { notes: e.target.value })}
+                                                            placeholder="Add detailed notes about this production..."
+                                                            rows={6}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all resize-none"
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        <label className="admin-label flex items-center gap-2">
+                                                            <MessageSquare size={14} /> Comments ({item.comments?.length || 0})
+                                                        </label>
+                                                        <div className="space-y-4">
+                                                            {item.comments?.map((c: any, idx: number) => (
+                                                                <div key={idx} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                                                    <div className="flex justify-between items-start mb-2">
+                                                                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">You</span>
+                                                                        <span className="text-[9px] text-gray-600">{new Date(c.date).toLocaleString()}</span>
+                                                                    </div>
+                                                                    <p className="text-sm text-gray-300">{c.text}</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <input 
+                                                                type="text"
+                                                                placeholder="Add a comment..."
+                                                                value={productionComment}
+                                                                onChange={(e) => setProductionComment(e.target.value)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter' && productionComment.trim()) {
+                                                                        const newComment = { text: productionComment, date: new Date().toISOString() };
+                                                                        updateProductionItem(item.id, { comments: [...(item.comments || []), newComment] });
+                                                                        setProductionComment('');
+                                                                    }
+                                                                }}
+                                                                className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500/50"
+                                                            />
+                                                            <button 
+                                                                onClick={() => {
+                                                                    if (!productionComment.trim()) return;
+                                                                    const newComment = { text: productionComment, date: new Date().toISOString() };
+                                                                    updateProductionItem(item.id, { comments: [...(item.comments || []), newComment] });
+                                                                    setProductionComment('');
+                                                                }}
+                                                                className="p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                                                            >
+                                                                <Send size={18} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Add Production Item Modal */}
+                    <AnimatePresence>
+                        {isProductionModalOpen && (
+                            <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    className="w-full max-w-lg bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden"
+                                >
+                                    <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                                <Clapperboard size={20} />
+                                            </div>
+                                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">New Production</h3>
+                                        </div>
+                                        <button onClick={() => setIsProductionModalOpen(false)} className="p-2 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
+                                    </div>
+                                    <div className="p-8 space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="admin-label">Project Title</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="e.g. LinkedIn Monetisation Strategy"
+                                                value={newProductionTitle}
+                                                onChange={(e) => setNewProductionTitle(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="admin-label">Initial Status</label>
+                                                <select 
+                                                    value={newProductionStatus}
+                                                    onChange={(e) => setNewProductionStatus(e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all"
+                                                >
+                                                    <option value="idea">Idea</option>
+                                                    <option value="scripted">Scripted</option>
+                                                    <option value="production">Production</option>
+                                                    <option value="post-production">Post-Production</option>
+                                                    <option value="done">Done</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="admin-label">Target Date</label>
+                                                <input 
+                                                    type="date" 
+                                                    value={newProductionDate}
+                                                    onChange={(e) => setNewProductionDate(e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-8 bg-white/[0.02] border-t border-white/5 flex justify-end gap-4">
+                                        <button 
+                                            onClick={() => setIsProductionModalOpen(false)}
+                                            className="px-8 py-3 text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            onClick={addProductionItem}
+                                            disabled={!newProductionTitle.trim()}
+                                            className="px-10 py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-xl shadow-blue-500/20"
+                                        >
+                                            <Plus size={14} /> Create Item
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Gmail Settings Modal */}
                     <AnimatePresence>
                         {isGmailSettingsOpen && (
