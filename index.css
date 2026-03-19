@@ -3,6 +3,199 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── MAVESTONE DESIGN SYSTEM ─────────────────────────────────────────────── */
+:root {
+  --bg-base:       #0A0A0A;
+  --bg-surface:    #111111;
+  --bg-elevated:   #1A1A1A;
+  --border-default: rgba(255,255,255,0.06);
+  --border-hover:   rgba(255,255,255,0.12);
+  --text-primary:   #F0F0F0;
+  --text-secondary: #888888;
+  --text-muted:     #555555;
+  --accent-teal:    #00C9A7;
+  --accent-amber:   #F5A623;
+  --accent-red:     #FF4757;
+  --accent-purple:  #A78BFA;
+  --accent-green:   #2ECC71;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-pill: 999px;
+}
+
+/* ── ADMIN UI PRIMITIVES ─────────────────────────────────────────────────── */
+.admin-surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.admin-surface:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-elevated);
+}
+
+/* Buttons */
+.admin-btn-primary {
+  background: var(--accent-teal);
+  color: #000;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  padding: 9px 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: none;
+  cursor: pointer;
+  transition: opacity 150ms ease, transform 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+}
+.admin-btn-primary:hover { opacity: 0.88; }
+.admin-btn-primary:active { transform: scale(0.97); }
+.admin-btn-primary:focus-visible { outline: 2px solid var(--accent-teal); outline-offset: 2px; }
+
+.admin-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-hover);
+  color: var(--text-primary);
+  border-radius: var(--radius-pill);
+  padding: 9px 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+}
+.admin-btn-ghost:hover { background: rgba(255,255,255,0.04); }
+.admin-btn-ghost:active { transform: scale(0.97); }
+.admin-btn-ghost:focus-visible { outline: 2px solid var(--accent-teal); outline-offset: 2px; }
+
+.admin-btn-destructive {
+  background: rgba(255,71,87,0.12);
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  border-radius: var(--radius-pill);
+  padding: 9px 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+}
+.admin-btn-destructive:hover { background: rgba(255,71,87,0.2); }
+.admin-btn-destructive:active { transform: scale(0.97); }
+
+/* Form inputs */
+.admin-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  width: 100%;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  outline: none;
+}
+.admin-input::placeholder { color: var(--text-muted); }
+.admin-input:focus {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 3px rgba(0,201,167,0.15);
+}
+
+/* Status pills */
+.admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'DM Sans', sans-serif;
+}
+.admin-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.admin-skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, rgba(255,255,255,0.04) 50%, var(--bg-elevated) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Pulse dot for active states */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.admin-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+/* Micro-interactions */
+.admin-card {
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+.admin-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-hover);
+}
+
+/* Table */
+.admin-table-row {
+  transition: background 150ms ease;
+}
+.admin-table-row:hover { background: rgba(255,255,255,0.02); }
+.admin-table-row .row-actions { opacity: 0; transition: opacity 150ms ease; }
+.admin-table-row:hover .row-actions { opacity: 1; }
+
+/* Scrollbar (admin) */
+.admin-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+.admin-scroll::-webkit-scrollbar-track { background: transparent; }
+.admin-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.admin-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Focus visible global override for admin */
+.admin-root *:focus-visible { outline: 2px solid var(--accent-teal); outline-offset: 2px; }
+
+/* Sidebar nav item slide-in accent */
+.admin-nav-item-accent {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 0;
+  border-radius: 1px;
+  transition: height 150ms ease;
+}
+.admin-nav-item.active .admin-nav-item-accent { height: 16px; }
+
 @layer base {
   html {
     /* Enable native smooth scrolling */

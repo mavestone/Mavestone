@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, PhoneCall, Search, ChevronDown, ChevronUp, PanelLeftClose, PanelLeftOpen, Megaphone, Zap, Image as ImageIcon, Send, Settings, Link2, FileUp, Eye, Instagram, Linkedin, Slack } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, PhoneCall, Search, ChevronDown, ChevronUp, PanelLeftClose, PanelLeftOpen, Megaphone, Zap, Image as ImageIcon, Send, Settings, Link2, FileUp, Eye, Instagram, Linkedin, Slack, CalendarDays, Share2, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
+import { ContentPlanner } from './ContentPlanner';
+import { SocialPublisher } from './SocialPublisher';
+import { AnimatedAIChat } from './ui/animated-ai-chat';
 
 const getEmailLink = (email: string, name: string, isConnected: boolean) => {
     if (isConnected) {
@@ -363,7 +366,7 @@ export const AdminPanel: React.FC = () => {
     isAuthenticated, fetchMessages, messages, outboundCalls, outboundEmails, markMessageRead, updateMessage, deleteMessage, logout
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm' | 'communication' | 'automations'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm' | 'communication' | 'automations' | 'content-planner' | 'social' | 'agent'>('home');
   const [crmView, setCrmView] = useState<'cards' | 'spreadsheet'>('spreadsheet');
   const [outboundFilter, setOutboundFilter] = useState<'all' | 'warm' | 'cold'>('all');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -372,6 +375,10 @@ export const AdminPanel: React.FC = () => {
   const [crmSearch, setCrmSearch] = useState('');
   const [dbStatus, setDbStatus] = useState<'checking' | 'ok' | 'error'>('checking');
   const [isSiteChangesOpen, setIsSiteChangesOpen] = useState(true);
+  const [isProductionOpen, setIsProductionOpen] = useState(true);
+  const [isOperationsOpen, setIsOperationsOpen] = useState(true);
+  const [agentMessages, setAgentMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [automationsTab, setAutomationsTab] = useState<'workflows' | 'newsletters' | 'lists'>('workflows');
   const [commApp, setCommApp] = useState<'gmail' | 'whatsapp'>('gmail');
   const [commSearch, setCommSearch] = useState('');
@@ -430,6 +437,70 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const handleAgentSend = async (content: string) => {
+    const userMessage = { role: 'user' as const, content };
+    const newMessages = [...agentMessages, userMessage];
+    setAgentMessages(newMessages);
+    setIsAgentLoading(true);
+    try {
+      const { GoogleGenAI, Type } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey: (import.meta as any).env?.VITE_GEMINI_API_KEY || '' });
+      const tools: any = [{
+        functionDeclarations: [
+          { name: "searchLeads", description: "Search for leads in the CRM by name or email.", parameters: { type: Type.OBJECT, properties: { query: { type: Type.STRING, description: "The name or email to search for." } }, required: ["query"] } },
+          { name: "getLeadDetails", description: "Get detailed information about a specific lead.", parameters: { type: Type.OBJECT, properties: { leadId: { type: Type.STRING, description: "The unique ID of the lead." } }, required: ["leadId"] } },
+          { name: "sendEmail", description: "Send an email to a lead via Gmail.", parameters: { type: Type.OBJECT, properties: { leadId: { type: Type.STRING }, subject: { type: Type.STRING }, body: { type: Type.STRING } }, required: ["leadId", "subject", "body"] } }
+        ]
+      }];
+      const systemInstruction = "You are Ava, a world-class studio assistant for Mavestone. You have CRM access and can search leads, get their details, and send emails. When mentioning a lead, format their name as [Lead Name](lead:lead_id). Be professional, helpful, and concise.";
+      let response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: newMessages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })),
+        config: { tools, systemInstruction }
+      });
+      const functionCalls = response.functionCalls;
+      if (functionCalls) {
+        const functionResponses = [];
+        for (const call of functionCalls) {
+          const args = call.args as any;
+          let result;
+          if (call.name === "searchLeads") {
+            const q = args.query?.toLowerCase() || '';
+            result = messages.filter(m => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)).map(m => ({ id: m.id, name: m.name, email: m.email, status: m.status }));
+          } else if (call.name === "getLeadDetails") {
+            result = messages.find(m => m.id === args.leadId) || { error: "Lead not found" };
+          } else if (call.name === "sendEmail") {
+            const lead = messages.find(m => m.id === args.leadId);
+            if (!lead) { result = { error: "Lead not found" }; } else {
+              const tokens = localStorage.getItem('gmail_tokens');
+              const res = await fetch('/api/gmail/send', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(tokens ? { 'x-gmail-tokens': tokens } : {}) }, body: JSON.stringify({ to: lead.email, subject: args.subject, content: args.body }) });
+              result = res.ok ? { success: true, message: `Email sent to ${lead.name}` } : { error: "Failed to send email" };
+            }
+          }
+          functionResponses.push({ functionResponse: { name: call.name, response: { content: result } } });
+        }
+        const modelTurn = response.candidates?.[0]?.content;
+        if (modelTurn) {
+          response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: [...newMessages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })), modelTurn, { role: 'user', parts: functionResponses }],
+            config: { tools, systemInstruction }
+          });
+        }
+      }
+      setAgentMessages([...newMessages, { role: 'assistant' as const, content: response.text || "Done." }]);
+    } catch (error: any) {
+      setAgentMessages([...newMessages, { role: 'assistant' as const, content: `Error: ${error.message}. Please ensure your Gemini API key is configured.` }]);
+    } finally {
+      setIsAgentLoading(false);
+    }
+  };
+
+  const handleLeadClick = (leadId: string) => {
+    setActiveTab('crm');
+    setHighlightedLeadId(leadId);
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     setSaveError('');
@@ -449,28 +520,65 @@ export const AdminPanel: React.FC = () => {
 
   if (!isAuthenticated && isAdminOpen) return null;
 
-  const NavItem = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
-    <button 
-        onClick={() => setActiveTab(id)}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-            activeTab === id 
-            ? 'bg-white text-black font-bold shadow-lg shadow-white/10' 
-            : 'text-gray-400 hover:bg-white/5 hover:text-white'
-        }`}
-    >
-        <Icon size={18} />
-        <span className="text-sm tracking-wide">{label}</span>
-    </button>
+  const SidebarSection = ({ label, open, onToggle, children }: { label: string; open: boolean; onToggle: () => void; children: React.ReactNode }) => (
+    <div className="space-y-0.5">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600 hover:text-gray-400 transition-colors"
+        aria-expanded={open}
+      >
+        <span>{label}</span>
+        {open ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden space-y-0.5"
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
+
+  const TAB_ACCENTS: Record<string, string> = {
+    home: '#3b82f6', projects: '#3b82f6', shorts: '#3b82f6', about: '#3b82f6',
+    'content-planner': '#a855f7', social: '#a855f7',
+    crm: '#06b6d4', communication: '#06b6d4', automations: '#06b6d4', agent: '#f59e0b',
+  };
+
+  const NavItem = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => {
+    const isActive = activeTab === id;
+    const accent = TAB_ACCENTS[id] || '#ffffff';
+    return (
+      <button
+        onClick={() => setActiveTab(id)}
+        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-150 relative group ${
+          isActive ? 'text-white' : 'text-gray-500 hover:text-gray-200'
+        }`}
+        style={isActive ? { background: `${accent}12` } : {}}
+      >
+        {isActive && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full" style={{ background: accent }} />
+        )}
+        <Icon size={15} className={isActive ? '' : 'opacity-60 group-hover:opacity-100 transition-opacity'} />
+        <span className="text-[13px] font-medium tracking-wide">{label}</span>
+      </button>
+    );
+  };
 
   return (
     <AnimatePresence>
       {isAdminOpen && (
         <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className="fixed inset-0 z-[100] bg-[#050505] flex overflow-hidden font-sans"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#070708] flex overflow-hidden font-sans"
         >
             {/* SIDEBAR */}
             <motion.aside 
@@ -479,67 +587,84 @@ export const AdminPanel: React.FC = () => {
                     width: isSidebarCollapsed ? 0 : 256,
                     x: isSidebarCollapsed ? -256 : 0
                 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="flex-shrink-0 border-r border-white/10 bg-[#0A0A0A] flex flex-col justify-between overflow-hidden z-30"
+                transition={{ type: 'spring', damping: 30, stiffness: 220 }}
+                className="flex-shrink-0 border-r border-white/[0.06] bg-[#09090B] flex flex-col justify-between overflow-hidden z-30"
             >
-                <div className="p-6 space-y-8 min-w-[256px]">
-                    <div className="px-2">
-                        <h2 className="text-xl font-bold tracking-tighter text-white">Mavestone<span className="text-white/40">.</span></h2>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Studio CMS</p>
-                    </div>
-                    <nav className="space-y-4">
-                        <div className="space-y-2">
-                            <button 
-                                onClick={() => setIsSiteChangesOpen(!isSiteChangesOpen)}
-                                className="w-full flex items-center justify-between px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors group"
-                            >
-                                <span className="group-hover:translate-x-1 transition-transform">Site Changes</span>
-                                {isSiteChangesOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                            </button>
-                            <AnimatePresence initial={false}>
-                                {isSiteChangesOpen && (
-                                    <motion.div 
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        className="overflow-hidden space-y-1"
-                                    >
-                                        <NavItem id="home" label="Home" icon={Layout} />
-                                        <NavItem id="projects" label="Projects" icon={Clapperboard} />
-                                        <NavItem id="shorts" label="Shorts" icon={Youtube} />
-                                        <NavItem id="about" label="About" icon={User} />
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                <div className="pt-5 pb-4 px-4 space-y-6 min-w-[240px]">
+                    {/* Brand */}
+                    <div className="px-2 flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shrink-0">
+                            <span className="text-black font-black text-[11px] tracking-tighter">M.</span>
                         </div>
-                        
-                        <div className="pt-4 border-t border-white/5 space-y-1">
+                        <div>
+                            <h2 className="text-sm font-bold text-white leading-none">Mavestone</h2>
+                            <p className="text-[10px] text-gray-600 mt-0.5">Studio OS</p>
+                        </div>
+                    </div>
+
+                    <nav className="space-y-5 overflow-y-auto admin-scroll flex-1">
+                        {/* Site */}
+                        <SidebarSection label="Site" open={isSiteChangesOpen} onToggle={() => setIsSiteChangesOpen(!isSiteChangesOpen)}>
+                            <NavItem id="home" label="Home" icon={Layout} />
+                            <NavItem id="projects" label="Projects" icon={Clapperboard} />
+                            <NavItem id="shorts" label="Shorts" icon={Youtube} />
+                            <NavItem id="about" label="About" icon={User} />
+                        </SidebarSection>
+
+                        {/* Operations — before Production */}
+                        <SidebarSection label="Operations" open={isOperationsOpen} onToggle={() => setIsOperationsOpen(!isOperationsOpen)}>
                             <NavItem id="crm" label="CRM" icon={Users} />
                             <NavItem id="communication" label="Communication" icon={PhoneCall} />
                             <NavItem id="automations" label="Automations" icon={Megaphone} />
-                        </div>
+                        </SidebarSection>
+
+                        {/* Production */}
+                        <SidebarSection label="Production" open={isProductionOpen} onToggle={() => setIsProductionOpen(!isProductionOpen)}>
+                            <NavItem id="content-planner" label="Content Planner" icon={CalendarDays} />
+                            <NavItem id="social" label="Social" icon={Share2} />
+                        </SidebarSection>
                     </nav>
                 </div>
 
-                <div className="p-6 space-y-4 min-w-[256px]">
-                    {saveError && <div className="text-red-400 text-[10px] px-2">{saveError}</div>}
-                    <button onClick={handleSave} className="w-full py-3 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 text-green-400 rounded-xl flex items-center justify-center gap-2 font-medium text-sm transition-all">
-                        {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+                {/* Sidebar bottom */}
+                <div className="px-4 py-4 border-t border-white/[0.06] space-y-2 min-w-[240px]">
+                    {/* Agent — standalone above save bar */}
+                    <button
+                        onClick={() => setActiveTab('agent')}
+                        className={`w-full py-2 rounded-[999px] text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 border ${
+                            activeTab === 'agent'
+                                ? 'bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]'
+                                : 'bg-transparent border-[#00C9A7]/40 text-[#00C9A7]/70 hover:border-[#00C9A7] hover:text-[#00C9A7] hover:bg-[#00C9A7]/10'
+                        }`}
+                        aria-label="Open Agent (Ava AI)"
+                    >
+                        <Sparkles size={13} />
+                        Agent
                     </button>
-                    <div className="pt-4 border-t border-white/5 flex items-center justify-end px-2">
-                        <button onClick={() => { logout(); handleClose(); }} className="text-gray-500 hover:text-red-400 transition-colors flex items-center gap-2 text-xs uppercase tracking-widest font-bold"><LogOut size={16} /> Logout</button>
-                    </div>
-                    <div className="space-y-2 w-full">
-                        <div className="flex items-center justify-end">
-                            <button 
-                                onClick={() => setIsSidebarCollapsed(true)}
-                                className="p-2 text-gray-600 hover:text-white transition-colors"
-                                title="Collapse Sidebar"
-                            >
-                                <PanelLeftClose size={16} />
-                            </button>
-                        </div>
+
+                    {saveError && <p className="text-red-400 text-[10px] px-2 mb-1">{saveError}</p>}
+                    <button
+                        onClick={handleSave}
+                        className="w-full py-2 rounded-lg text-[11px] font-semibold uppercase tracking-widest transition-all flex items-center justify-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] text-gray-400 border border-white/[0.08] font-admin"
+                    >
+                        {isSaving ? <Loader2 className="animate-spin" size={13} /> : <Save size={13} />}
+                        {isSaving ? 'Saving…' : 'Save Changes'}
+                    </button>
+                    <div className="flex items-center justify-between px-1 pt-1">
+                        <button
+                            onClick={() => { logout(); handleClose(); }}
+                            className="text-gray-600 hover:text-red-400 transition-colors flex items-center gap-1.5 text-[11px] font-medium"
+                            aria-label="Logout"
+                        >
+                            <LogOut size={13} /> Logout
+                        </button>
+                        <button
+                            onClick={() => setIsSidebarCollapsed(true)}
+                            className="p-1.5 rounded-md text-gray-700 hover:text-gray-400 hover:bg-white/5 transition-all"
+                            aria-label="Collapse sidebar"
+                        >
+                            <PanelLeftClose size={14} />
+                        </button>
                     </div>
                 </div>
             </motion.aside>
@@ -547,30 +672,36 @@ export const AdminPanel: React.FC = () => {
             {/* EXPAND BUTTON (Visible when collapsed) */}
             <AnimatePresence>
                 {isSidebarCollapsed && (
-                    <motion.button 
-                        initial={{ opacity: 0, x: -20 }}
+                    <motion.button
+                        initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
+                        exit={{ opacity: 0, x: -10 }}
                         onClick={() => setIsSidebarCollapsed(false)}
-                        className="fixed bottom-8 left-8 z-[110] p-2.5 bg-white text-black rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest"
+                        className="fixed bottom-6 left-6 z-[110] px-3 py-2 bg-[#141416] border border-white/10 text-gray-300 rounded-xl shadow-2xl hover:border-white/20 hover:text-white transition-all flex items-center gap-2 text-[11px] font-medium"
                     >
-                        <PanelLeftOpen size={16} />
-                        <span>Show Sidebar</span>
+                        <PanelLeftOpen size={14} />
+                        <span>Menu</span>
                     </motion.button>
                 )}
             </AnimatePresence>
 
             {/* MAIN CONTENT */}
-            <main className="flex-1 overflow-y-auto bg-black relative">
-                <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-md border-b border-white/5 px-8 py-4 flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-white uppercase">{activeTab}</h1>
-                    <div className="flex items-center gap-4">
-                        {processingImage && <span className="flex items-center gap-2 text-blue-400 text-xs font-bold animate-pulse"><Loader2 size={12} className="animate-spin" /> Uploading...</span>}
-                        <button onClick={handleClose} className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"><X size={20} /></button>
+            <main className={`flex-1 bg-[#070708] relative ${activeTab === 'agent' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
+                {/* Topbar */}
+                <div className="sticky top-0 z-20 bg-[#070708]/90 backdrop-blur-xl border-b border-white/[0.06] px-8 py-3.5 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: TAB_ACCENTS[activeTab] || '#ffffff' }} />
+                        <h1 className="text-sm font-semibold text-white tracking-wide">
+                          {activeTab === 'content-planner' ? 'Content Planner' : activeTab === 'social' ? 'Social Publisher' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {processingImage && <span className="flex items-center gap-1.5 text-blue-400 text-[11px] font-medium animate-pulse"><Loader2 size={11} className="animate-spin" /> Uploading…</span>}
+                        <button onClick={handleClose} className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.08] text-gray-500 hover:text-white transition-all border border-white/[0.06]"><X size={14} /></button>
                     </div>
                 </div>
 
-                <div className="p-8 pb-32 max-w-7xl mx-auto">
+                <div className={activeTab === 'agent' ? 'flex-1 overflow-hidden' : 'p-8 pb-32 max-w-6xl mx-auto'}>
                     {/* HOME TAB */}
                     {activeTab === 'home' && (
                         <div className="space-y-8">
@@ -1347,19 +1478,10 @@ export const AdminPanel: React.FC = () => {
 
                     {/* AUTOMATIONS TAB */}
                     {activeTab === 'automations' && (
-                        <div className="space-y-12">
+                        <div className="space-y-8">
                             <header className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-4xl font-bold tracking-tighter text-white uppercase">Automations<span className="text-emerald-500">.</span></h2>
-                                    <button 
-                                        onClick={() => setIsGmailSettingsOpen(true)}
-                                        className="p-3 bg-white/5 border border-white/10 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all"
-                                        title="Gmail Settings"
-                                    >
-                                        <Settings size={20} />
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                                    <div className="flex items-center gap-4 border-b pb-3" style={{ borderColor: 'var(--border-default)', width: '100%' }}>
                                     {[
                                         { id: 'workflows', label: 'Workflows', icon: Zap },
                                         { id: 'newsletters', label: 'Newsletters', icon: Megaphone },
@@ -1367,25 +1489,36 @@ export const AdminPanel: React.FC = () => {
                                     ].map(tab => (
                                         <button
                                             key={tab.id}
+                                            role="tab"
+                                            aria-selected={automationsTab === tab.id}
                                             onClick={() => setAutomationsTab(tab.id as any)}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                                                automationsTab === tab.id 
-                                                ? 'bg-white text-black' 
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                                automationsTab === tab.id
+                                                ? 'bg-white text-black'
                                                 : 'text-gray-500 hover:text-white hover:bg-white/5'
                                             }`}
                                         >
                                             <tab.icon size={14} /> {tab.label}
                                         </button>
                                     ))}
+                                    <button
+                                        onClick={() => setIsGmailSettingsOpen(true)}
+                                        className="ml-auto p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all"
+                                        title="Gmail Settings"
+                                        aria-label="Gmail Settings"
+                                    >
+                                        <Settings size={16} />
+                                    </button>
+                                    </div>
                                 </div>
                             </header>
 
                             {automationsTab === 'workflows' && (
                                 <section className="space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-bold text-white flex items-center gap-2"><Zap className="text-yellow-400" /> Automated Workflows</h3>
-                                    <button onClick={addAutomation} className="px-6 py-2 bg-yellow-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-all flex items-center gap-2">
-                                        <Plus size={14} /> New Workflow
+                                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Automated email sequences and triggers</p>
+                                    <button onClick={addAutomation} className="admin-btn-primary">
+                                        <Plus size={13} /> New Workflow
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1749,6 +1882,23 @@ export const AdminPanel: React.FC = () => {
                         )}
                     </div>
                 )}
+                    {/* CONTENT PLANNER TAB */}
+                    {activeTab === 'content-planner' && <ContentPlanner />}
+
+                    {/* SOCIAL PUBLISHER TAB */}
+                    {activeTab === 'social' && <SocialPublisher />}
+
+                    {/* AGENT TAB */}
+                    {activeTab === 'agent' && (
+                        <AnimatedAIChat
+                            messages={agentMessages}
+                            onSend={handleAgentSend}
+                            isLoading={isAgentLoading}
+                            agentName="Ava"
+                            onLeadClick={handleLeadClick}
+                        />
+                    )}
+
                 {/* Newsletter Preview Modal */}
                 <AnimatePresence>
                     {previewNewsletterId && (

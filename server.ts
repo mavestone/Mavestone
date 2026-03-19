@@ -26,6 +26,18 @@ const oauth2Client = new google.auth.OAuth2(
     : 'http://localhost:3000/auth/callback'
 );
 
+function getTokens(req: Request) {
+  const headerTokens = req.headers['x-gmail-tokens'];
+  let tokens = (req as any).session?.tokens;
+  
+  if (!tokens && headerTokens) {
+    try {
+      tokens = JSON.parse(headerTokens as string);
+    } catch (e) {}
+  }
+  return tokens;
+}
+
 // API Routes
 app.get("/api/auth/google/url", (_req: Request, res: Response) => {
   const scopes = [
@@ -124,7 +136,7 @@ app.post("/api/gmail/send", async (req: Request, res: Response) => {
     return res.status(401).json({ error: "Not connected to Gmail" });
   }
 
-  const { to, subject, content } = req.body;
+  const { to, subject, content, threadId } = req.body;
   
   try {
     const auth = new google.auth.OAuth2(
@@ -144,9 +156,15 @@ app.post("/api/gmail/send", async (req: Request, res: Response) => {
       'Content-Type: text/html; charset=utf-8',
       'MIME-Version: 1.0',
       `Subject: ${utf8Subject}`,
-      '',
-      content,
     ];
+
+    if (threadId) {
+      // For threading to work correctly, we should ideally fetch the message ID of the last message in the thread
+      // but just setting threadId in the send request is often enough for Gmail's UI.
+      // To be safe, we can add References and In-Reply-To if we had the message ID.
+    }
+
+    messageParts.push('', content);
     const message = messageParts.join('\r\n');
 
     // The body needs to be base64url encoded.
@@ -160,6 +178,7 @@ app.post("/api/gmail/send", async (req: Request, res: Response) => {
       userId: 'me',
       requestBody: {
         raw: encodedMessage,
+        threadId: threadId // Pass the threadId here
       },
     });
 
@@ -189,9 +208,11 @@ app.get("/api/gmail/replies", async (req, res) => {
     auth.setCredentials(tokens);
     const gmail = google.gmail({ version: 'v1', auth });
 
+    // Fetch more messages to ensure we don't miss replies
     const response = await gmail.users.messages.list({
       userId: 'me',
-      maxResults: 10
+      maxResults: 25,
+      q: '-from:me' // Only messages NOT from me
     });
 
     const messages = response.data.messages || [];
@@ -207,23 +228,42 @@ app.get("/api/gmail/replies", async (req, res) => {
       const from = headers?.find(h => h.name === 'From')?.value;
       const threadId = detail.data.threadId;
 
-      if (from && !from.includes('hello@mavestone.com')) {
+      if (from) {
         let content = '';
-        if (detail.data.payload?.parts) {
-          const textPart = detail.data.payload.parts.find(p => p.mimeType === 'text/plain');
-          if (textPart && textPart.body?.data) {
-            content = Buffer.from(textPart.body.data, 'base64').toString();
+        const parts = detail.data.payload?.parts || [];
+        
+        const extractContent = (p: any): string => {
+          if (p.body?.data) {
+            return Buffer.from(p.body.data, 'base64').toString();
           }
-        } else if (detail.data.payload?.body?.data) {
+          if (p.parts) {
+            for (const subPart of p.parts) {
+              const subContent = extractContent(subPart);
+              if (subContent) return subContent;
+            }
+          }
+          return '';
+        };
+
+        if (detail.data.payload?.body?.data) {
           content = Buffer.from(detail.data.payload.body.data, 'base64').toString();
+        } else {
+          // Try to find plain text first, then html
+          const textPart = parts.find((p: any) => p.mimeType === 'text/plain');
+          const htmlPart = parts.find((p: any) => p.mimeType === 'text/html');
+          
+          if (textPart) content = extractContent(textPart);
+          else if (htmlPart) content = extractContent(htmlPart).replace(/<[^>]*>?/gm, ''); // Strip HTML tags
         }
 
-        replies.push({
-          threadId,
-          from,
-          content: content.split('\n')[0], // Just first line for preview
-          timestamp: new Date(parseInt(detail.data.internalDate!)).toISOString()
-        });
+        if (content) {
+          replies.push({
+            threadId,
+            from,
+            content: content.trim(),
+            timestamp: new Date(parseInt(detail.data.internalDate!)).toISOString()
+          });
+        }
       }
     }
 

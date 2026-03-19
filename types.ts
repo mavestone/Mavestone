@@ -72,6 +72,7 @@ export interface OutboundCall {
   id: string;
   leadId: string;
   leadName: string;
+  phoneNumber?: string; // New: Phone number for WhatsApp
   timestamp: string;
   duration: string;
   status: 'completed' | 'missed' | 'voicemail';
@@ -146,11 +147,16 @@ export interface Message {
   notes?: string;
   tags?: string[];
   lead_type?: 'warm' | 'cold'; // New: lead categorization
+  lead_number?: number;
 }
 
 declare global {
   interface Window {
     YT: any;
     onYouTubeIframeAPIReady: () => void;
+    aistudio: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
   }
 }

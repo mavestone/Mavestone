@@ -609,39 +609,51 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (replies.length > 0) {
           const client = supabase;
           
-          for (const reply of replies) {
-            const emailToUpdate = outboundEmails.find(e => e.threadId === reply.threadId);
-            if (emailToUpdate && !emailToUpdate.thread.some(m => m.timestamp === reply.timestamp)) {
-              const updatedThread = [...emailToUpdate.thread, {
-                from: reply.from,
+          setOutboundEmails(prev => {
+            let hasChanges = false;
+            const updated = prev.map(email => {
+              const relevantReplies = replies.filter((r: any) => r.threadId === email.threadId);
+              if (relevantReplies.length === 0) return email;
+
+              const newMessages = relevantReplies.filter((r: any) => 
+                !email.thread.some((m: any) => m.timestamp === r.timestamp)
+              );
+
+              if (newMessages.length === 0) return email;
+
+              hasChanges = true;
+              const updatedThread = [...email.thread, ...newMessages.map((r: any) => ({
+                from: r.from,
                 to: 'hello@mavestone.com',
-                timestamp: reply.timestamp,
-                content: reply.content
-              }];
-              
+                timestamp: r.timestamp,
+                content: r.content
+              }))].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+              // Update DB in background
               if (client) {
-                await client.from('outbound_emails')
+                client.from('outbound_emails')
                   .update({ 
                     status: 'replied', 
                     thread: updatedThread,
                     updated_at: new Date().toISOString()
                   })
-                  .eq('thread_id', reply.threadId);
+                  .eq('thread_id', email.threadId)
+                  .then(({ error }) => {
+                    if (error) console.error("Error updating outbound email in DB:", error);
+                  });
               }
 
-              setOutboundEmails(prev => prev.map(email => 
-                email.threadId === reply.threadId 
-                  ? { ...email, status: 'replied', thread: updatedThread }
-                  : email
-              ));
-            }
-          }
+              return { ...email, status: 'replied' as const, thread: updatedThread };
+            });
+
+            return hasChanges ? updated : prev;
+          });
         }
       }
     } catch (e) {
       console.error("Failed to fetch replies:", e);
     }
-  }, [gmailConfig.isConnected, outboundEmails]);
+  }, [gmailConfig.isConnected]);
 
   useEffect(() => {
     if (gmailConfig.isConnected) {

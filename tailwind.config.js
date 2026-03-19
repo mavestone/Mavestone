@@ -13,6 +13,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Manrope', 'sans-serif'],
+        admin: ['"DM Sans"', 'sans-serif'],
+        display: ['Syne', 'sans-serif'],
       },
       colors: {
         charcoal: '#0F0F11',
