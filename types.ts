@@ -57,7 +57,7 @@ export interface InProductionData {
 }
 
 export interface ProjectHeroConfig {
-  heroVideoId: string;
+  heroVideoId?: string;
   label: string;
   featuredFilmId: string;
   logoImage?: string;
@@ -66,68 +66,6 @@ export interface ProjectHeroConfig {
 export interface NavItem {
   label: string;
   href: string;
-}
-
-export interface OutboundCall {
-  id: string;
-  leadId: string;
-  leadName: string;
-  phoneNumber?: string; // New: Phone number for WhatsApp
-  timestamp: string;
-  duration: string;
-  status: 'completed' | 'missed' | 'voicemail';
-  transcript: string;
-  recordingUrl?: string;
-}
-
-export interface OutboundEmail {
-  id: string;
-  leadId: string;
-  leadName: string;
-  subject: string;
-  timestamp: string;
-  status: 'sent' | 'opened' | 'replied';
-  type: 'inbound' | 'outreach';
-  threadId?: string; // New: Gmail thread ID
-  thread: {
-    from: string;
-    to: string;
-    timestamp: string;
-    content: string;
-  }[];
-}
-
-export interface AutomationEmail {
-  id: string;
-  name: string;
-  subject: string;
-  content: string;
-  isActive: boolean;
-  trigger: 'new_lead' | 'newsletter_signup' | 'manual';
-  delayDays?: number;
-}
-
-export interface MailingList {
-  id: string;
-  name: string;
-  contacts: { name: string; email: string }[];
-}
-
-export interface Newsletter {
-  id: string;
-  title: string;
-  subject: string;
-  content: string;
-  scheduledDate?: string;
-  status: 'draft' | 'scheduled' | 'sent';
-  images: string[];
-  targetListId?: string; // New: target a specific list
-}
-
-export interface GmailConfig {
-  isConnected: boolean;
-  email?: string;
-  accessToken?: string;
 }
 
 export interface Message {
@@ -146,7 +84,7 @@ export interface Message {
   source?: string;
   notes?: string;
   tags?: string[];
-  lead_type?: 'warm' | 'cold'; // New: lead categorization
+  lead_type?: 'warm' | 'cold';
   lead_number?: number;
 }
 
