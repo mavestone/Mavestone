@@ -100,6 +100,10 @@ export interface HiringData {
   applicantParagraph: string;
   processSteps: string[];
   callToActionURL: string;
+  heroImage?: string;
+  card1Media?: string;
+  card2Media?: string;
+  card3Media?: string;
 }
 
 declare global {

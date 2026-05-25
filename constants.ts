@@ -21,7 +21,11 @@ export const HIRING_DATA: HiringData = {
     "Edit the footage and craft an engaging reel. Take your time, show your skills.",
     "Upload your finished cut and submit it for review."
   ],
-  callToActionURL: "https://drive.google.com/drive/folders/14TULwn541F9Jh1nV42A0fPf93Qi7Di1R?usp=sharing"
+  callToActionURL: "https://drive.google.com/drive/folders/14TULwn541F9Jh1nV42A0fPf93Qi7Di1R?usp=sharing",
+  heroImage: "",
+  card1Media: "",
+  card2Media: "",
+  card3Media: ""
 };
 
 export const NAV_ITEMS: NavItem[] = [

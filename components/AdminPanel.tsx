@@ -699,9 +699,42 @@ export const AdminPanel: React.FC = () => {
                                         <input type="text" placeholder="Title Line 2 (Highlighted)" value={hiringData.titleLine2} onChange={(e) => updateHiringData({ titleLine2: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-yellow-300 focus:outline-none focus:border-white/20 transition-all font-bold" />
                                         <input type="text" placeholder="Title Line 3" value={hiringData.titleLine3} onChange={(e) => updateHiringData({ titleLine3: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
                                     </div>
+                                    <div className="space-y-2">
+                                        <label className="admin-label block opacity-45">Hero Portrait Photo</label>
+                                        <div className="flex gap-3">
+                                            <input type="text" placeholder="Image URL" value={hiringData.heroImage || ''} onChange={(e) => updateHiringData({ heroImage: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ heroImage: url }))} /></label>
+                                        </div>
+                                    </div>
                                     <textarea rows={3} placeholder="Intro Paragraph 1" value={hiringData.introParagraph1} onChange={(e) => updateHiringData({ introParagraph1: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
                                     <textarea rows={3} placeholder="Intro Paragraph 2" value={hiringData.introParagraph2} onChange={(e) => updateHiringData({ introParagraph2: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
                                     <textarea rows={3} placeholder="Quote" value={hiringData.introParagraph3} onChange={(e) => updateHiringData({ introParagraph3: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-blue-300 italic focus:outline-none focus:border-white/20 transition-all" />
+                                </div>
+                            </div>
+                            <div className="p-8 rounded-2xl admin-glass space-y-8">
+                                <h3 className="admin-label text-blue-400 border-b border-white/5 pb-4">The Kind of Work We Make (Media)</h3>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="admin-label block opacity-45">Card 1 (Travel Films) Media (Image/GIF)</label>
+                                        <div className="flex gap-3">
+                                            <input type="text" placeholder="Media URL" value={hiringData.card1Media || ''} onChange={(e) => updateHiringData({ card1Media: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card1Media: url }))} /></label>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="admin-label block opacity-45">Card 2 (Reels) Media (Image/GIF)</label>
+                                        <div className="flex gap-3">
+                                            <input type="text" placeholder="Media URL" value={hiringData.card2Media || ''} onChange={(e) => updateHiringData({ card2Media: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card2Media: url }))} /></label>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="admin-label block opacity-45">Card 3 (Documentary) Media (Image/GIF)</label>
+                                        <div className="flex gap-3">
+                                            <input type="text" placeholder="Media URL" value={hiringData.card3Media || ''} onChange={(e) => updateHiringData({ card3Media: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card3Media: url }))} /></label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="p-8 rounded-2xl admin-glass space-y-8">
