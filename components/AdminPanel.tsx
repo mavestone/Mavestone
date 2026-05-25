@@ -766,8 +766,40 @@ export const AdminPanel: React.FC = () => {
                                         onChange={(e) => updateHiringData({ processSteps: e.target.value.split('\n') })} 
                                         className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" 
                                     />
-                                    <label className="admin-label block mt-6 opacity-45">Download Footage URL</label>
-                                    <input type="text" placeholder="Google Drive Link" value={hiringData.callToActionURL} onChange={(e) => updateHiringData({ callToActionURL: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                    <div className="pt-6 border-t border-white/5 space-y-4">
+                                        <h4 className="admin-label text-white/80 border-b border-white/5 pb-2">Primary Button</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="admin-label block opacity-45 mb-1">Button Label</label>
+                                                <input type="text" placeholder="e.g. Download Footage" value={hiringData.cta1Label || 'Download Footage'} onChange={(e) => updateHiringData({ cta1Label: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+                                            <div>
+                                                <label className="admin-label block opacity-45 mb-1">Link URL</label>
+                                                <input type="text" placeholder="https://" value={hiringData.cta1URL || hiringData.callToActionURL || ''} onChange={(e) => updateHiringData({ cta1URL: e.target.value, callToActionURL: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+                                            <div>
+                                                <label className="admin-label block opacity-45 mb-1">Button Color (Hex)</label>
+                                                <div className="flex gap-2 items-center">
+                                                    <input type="color" value={hiringData.cta1Color || '#E8A020'} onChange={(e) => updateHiringData({ cta1Color: e.target.value })} className="w-10 h-10 rounded bg-transparent border-0 cursor-pointer p-0" />
+                                                    <input type="text" placeholder="#E8A020" value={hiringData.cta1Color || '#E8A020'} onChange={(e) => updateHiringData({ cta1Color: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-white/20 transition-all uppercase" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="pt-6 border-t border-white/5 space-y-4">
+                                        <h4 className="admin-label text-white/80 border-b border-white/5 pb-2">Secondary Button</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="admin-label block opacity-45 mb-1">Button Label</label>
+                                                <input type="text" placeholder="e.g. Submit Your Edit" value={hiringData.cta2Label || 'Submit Your Edit'} onChange={(e) => updateHiringData({ cta2Label: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+                                            <div>
+                                                <label className="admin-label block opacity-45 mb-1">Link URL (optional)</label>
+                                                <input type="text" placeholder="https://" value={hiringData.cta2URL || ''} onChange={(e) => updateHiringData({ cta2URL: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

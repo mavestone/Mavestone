@@ -22,6 +22,12 @@ export const HIRING_DATA: HiringData = {
     "Upload your finished cut and submit it for review."
   ],
   callToActionURL: "https://drive.google.com/drive/folders/14TULwn541F9Jh1nV42A0fPf93Qi7Di1R?usp=sharing",
+  cta1Label: "Download Footage",
+  cta1URL: "https://drive.google.com/drive/folders/14TULwn541F9Jh1nV42A0fPf93Qi7Di1R?usp=sharing",
+  cta1Color: "#E8A020",
+  cta2Label: "Submit Your Edit",
+  cta2URL: "",
+  cta2Color: "#FFFFFF",
   heroImage: "",
   card1Media: "",
   card2Media: "",

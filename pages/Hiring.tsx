@@ -120,14 +120,14 @@ export const Hiring: React.FC = () => {
                     variants={fadeUpVariant}
                 >
                     {/* INTRO BLOCK */}
-                    <div className="border-t border-white/[0.07] mb-[48px]" />
+                    <div className="border-t border-white/[0.07] mb-[48px] max-w-[800px] mx-auto" />
                     
-                    <div className="max-w-[580px] space-y-6">
+                    <div className="max-w-[800px] mx-auto space-y-6 text-center">
                         <p className="font-sans font-[400] text-[17px] leading-[1.75] text-[#F5F5F7]/85">
                             {hiringData.introParagraph1} {hiringData.introParagraph2}
                         </p>
                         <blockquote 
-                            className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] rounded-[16px] px-[24px] py-[20px] font-sans font-[400] italic text-[17px] leading-[1.6] text-[#F5F5F7]/90 border-l-[3px] !border-l-[#7EB8D4]`}
+                            className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] rounded-[16px] px-[24px] py-[20px] font-sans font-[400] italic text-[17px] leading-[1.6] text-[#F5F5F7]/90 border-l-[3px] !border-l-[#7EB8D4] text-left md:text-center md:border-l-0 md:border-t-[3px] md:!border-t-[#7EB8D4]`}
                             style={{ boxShadow: '0 0 32px rgba(126,184,212,0.06)' }}
                         >
                             {hiringData.introParagraph3 || "If your edits feel like short films instead of 'content', send your work."}
@@ -143,11 +143,11 @@ export const Hiring: React.FC = () => {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-10%" }}
                     variants={staggerContainer}
-                    className="max-w-[800px]"
+                    className="max-w-[800px] mx-auto"
                 >
                     <motion.h2 
                         variants={fadeUpVariant}
-                        className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[40px] flex items-center gap-2"
+                        className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[40px] flex items-center justify-center gap-2"
                     >
                         <span className="text-[#E8A020]">●</span> Must be able to
                     </motion.h2>
@@ -175,10 +175,11 @@ export const Hiring: React.FC = () => {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-10%" }}
                     variants={staggerCards}
+                    className="max-w-[1140px] mx-auto"
                 >
                     <motion.h2 
                         variants={fadeUpVariant}
-                        className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center gap-2"
+                        className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center justify-center gap-2"
                     >
                         <span className="text-[#E8A020]">●</span> The kind of work we make
                     </motion.h2>
@@ -266,15 +267,16 @@ export const Hiring: React.FC = () => {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-10%" }}
                     variants={fadeUpVariant}
+                    className="max-w-[800px] mx-auto"
                 >
-                    <h2 className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center gap-2">
+                    <h2 className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center justify-center gap-2">
                         <span className="text-[#E8A020]">●</span> What makes a great applicant
                     </h2>
                     <div 
                         className={glassCard}
                         style={{ padding: '32px', boxShadow: '0 0 60px rgba(232,160,32,0.05)' }}
                     >
-                        <p className="font-sans font-[400] text-[15px] leading-[1.8] text-[#F5F5F7]/80 whitespace-pre-wrap">
+                        <p className="font-sans font-[400] text-[15px] leading-[1.8] text-[#F5F5F7]/80 whitespace-pre-wrap text-center">
                             {hiringData.applicantParagraph}
                         </p>
                     </div>
@@ -288,8 +290,9 @@ export const Hiring: React.FC = () => {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-10%" }}
                     variants={staggerContainer}
+                    className="max-w-[800px] mx-auto"
                 >
-                    <h2 className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center gap-2">
+                    <h2 className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center justify-center gap-2">
                         <span className="text-[#E8A020]">●</span> The Process
                     </h2>
                     
@@ -334,20 +337,33 @@ export const Hiring: React.FC = () => {
                     </p>
                     
                     <div className="flex flex-col sm:flex-row justify-center gap-[14px] flex-wrap">
-                        <a 
-                            href={hiringData.callToActionURL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="bg-[#E8A020] text-[#050505] font-sans font-[700] text-[13px] uppercase tracking-[0.1em] px-[36px] py-[15px] rounded-[14px] hover:bg-[#FF6B35] transition-all duration-250 ease-out shadow-[0_4px_24px_rgba(232,160,32,0.25)] w-full sm:w-auto"
-                        >
-                            Download Footage
-                        </a>
-                        <button 
-                            onClick={() => alert("Upload form configuration required.")}
-                            className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] shadow-[0_4px_40px_rgba(0,0,0,0.4)] text-[#F5F5F7] font-sans font-[700] text-[13px] uppercase tracking-[0.1em] px-[36px] py-[15px] rounded-[14px] hover:bg-white/[0.07] hover:border-white/25 transition-all duration-250 ease-out w-full sm:w-auto`}
-                        >
-                            Submit Your Edit
-                        </button>
+                        {hiringData.cta1Label && (
+                            <a 
+                                href={hiringData.cta1URL || hiringData.callToActionURL || '#'}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[#050505] font-sans font-[700] text-[13px] uppercase tracking-[0.1em] px-[36px] py-[15px] rounded-[14px] hover:brightness-110 transition-all duration-250 ease-out shadow-[0_4px_24px_rgba(232,160,32,0.15)] w-full sm:w-auto"
+                                style={{ backgroundColor: hiringData.cta1Color || '#E8A020' }}
+                            >
+                                {hiringData.cta1Label}
+                            </a>
+                        )}
+                        {hiringData.cta2Label && (
+                            <a 
+                                href={hiringData.cta2URL || '#'}
+                                target={hiringData.cta2URL ? "_blank" : "_self"}
+                                rel="noreferrer"
+                                onClick={(e) => {
+                                    if (!hiringData.cta2URL) {
+                                        e.preventDefault();
+                                        alert("Upload form configuration required.");
+                                    }
+                                }}
+                                className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] shadow-[0_4px_40px_rgba(0,0,0,0.4)] text-[#F5F5F7] font-sans font-[700] text-[13px] uppercase tracking-[0.1em] px-[36px] py-[15px] rounded-[14px] hover:bg-white/[0.07] hover:border-white/25 transition-all duration-250 ease-out w-full sm:w-auto`}
+                            >
+                                {hiringData.cta2Label}
+                            </a>
+                        )}
                     </div>
                 </motion.section>
                 

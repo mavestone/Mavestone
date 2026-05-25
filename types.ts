@@ -100,6 +100,12 @@ export interface HiringData {
   applicantParagraph: string;
   processSteps: string[];
   callToActionURL: string;
+  cta1Label?: string;
+  cta1URL?: string;
+  cta1Color?: string;
+  cta2Label?: string;
+  cta2URL?: string;
+  cta2Color?: string;
   heroImage?: string;
   card1Media?: string;
   card2Media?: string;
