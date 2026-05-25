@@ -89,6 +89,19 @@ export interface Message {
   lead_number?: number;
 }
 
+export interface HiringData {
+  titleLine1: string;
+  titleLine2: string;
+  titleLine3: string;
+  introParagraph1: string;
+  introParagraph2: string;
+  introParagraph3: string;
+  roleRequirements: string[];
+  applicantParagraph: string;
+  processSteps: string[];
+  callToActionURL: string;
+}
+
 declare global {
   interface Window {
     YT: any;

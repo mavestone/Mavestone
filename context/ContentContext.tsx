@@ -1,8 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial } from '../types';
+import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT, HIRING_DATA } from '../constants';
+import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial, HiringData } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
@@ -11,6 +11,7 @@ interface ContentContextType {
   films: Film[];
   clientWork: Film[];
   aboutData: AboutData;
+  hiringData: HiringData;
   messages: Message[];
   projectConfig: ProjectHeroConfig;
   isAdminOpen: boolean;
@@ -22,6 +23,7 @@ interface ContentContextType {
   updateLatestVideo: (data: Partial<LatestVideoData>) => void;
   updateInProduction: (data: Partial<InProductionData>) => void;
   updateAboutData: (data: Partial<AboutData>) => void;
+  updateHiringData: (data: Partial<HiringData>) => void;
   updateTestimonial: (id: string, data: Partial<Testimonial>) => void;
   addTestimonial: () => void;
   deleteTestimonial: (id: string) => void;
@@ -73,6 +75,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [films, setFilms] = useState<Film[]>(FILMS);
   const [clientWork, setClientWork] = useState<Film[]>(CLIENT_WORK);
   const [aboutData, setAboutData] = useState<AboutData>(DEFAULT_ABOUT);
+  const [hiringData, setHiringData] = useState<HiringData>(HIRING_DATA);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -160,6 +163,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (key === 'client_work') setClientWork(content);
             if (key === 'project_config') setProjectConfig(content);
             if (key === 'about_data') setAboutData(content);
+            if (key === 'hiring_data') setHiringData(content);
           });
         }
         await fetchMessages();
@@ -184,6 +188,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateLatestVideo = (data: Partial<LatestVideoData>) => setLatestVideo(prev => ({ ...prev, ...data }));
   const updateInProduction = (data: Partial<InProductionData>) => setInProduction(prev => ({ ...prev, ...data }));
   const updateAboutData = (data: Partial<AboutData>) => setAboutData(prev => ({ ...prev, ...data }));
+  const updateHiringData = (data: Partial<HiringData>) => setHiringData(prev => ({ ...prev, ...data }));
   const updateTestimonial = (id: string, data: Partial<Testimonial>) => setAboutData(prev => ({
       ...prev,
       testimonials: prev.testimonials.map(t => t.id === id ? { ...t, ...data } : t)
@@ -274,7 +279,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           { id: 'films', data: films },
           { id: 'client_work', data: clientWork },
           { id: 'project_config', data: projectConfig },
-          { id: 'about_data', data: aboutData }
+          { id: 'about_data', data: aboutData },
+          { id: 'hiring_data', data: hiringData }
         ];
 
         const { error } = await supabase
@@ -403,7 +409,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         { id: 'films', data: FILMS },
         { id: 'client_work', data: CLIENT_WORK },
         { id: 'project_config', data: PROJECT_PAGE_CONFIG },
-        { id: 'about_data', data: DEFAULT_ABOUT }
+        { id: 'about_data', data: DEFAULT_ABOUT },
+        { id: 'hiring_data', data: HIRING_DATA }
       ];
 
       await supabase.from('site_content').upsert(updates, { onConflict: 'id' });
@@ -423,19 +430,19 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const contextValue = useMemo(() => ({
-    latestVideo, inProduction, shorts, films, clientWork, aboutData, messages, projectConfig,
+    latestVideo, inProduction, shorts, films, clientWork, aboutData, hiringData, messages, projectConfig,
     isAdminOpen, isAuthenticated, isLoading,
     toggleAdmin, openAdmin, closeAdmin,
-    updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
+    updateLatestVideo, updateInProduction, updateAboutData, updateHiringData, updateTestimonial, addTestimonial, deleteTestimonial,
     updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
     updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
     saveChanges, uploadImage, login, loginWithGoogle, logout, seedDatabase,
     sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
   }), [
-    latestVideo, inProduction, shorts, films, clientWork, aboutData, messages, projectConfig,
+    latestVideo, inProduction, shorts, films, clientWork, aboutData, hiringData, messages, projectConfig,
     isAdminOpen, isAuthenticated, isLoading,
     toggleAdmin, openAdmin, closeAdmin,
-    updateLatestVideo, updateInProduction, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
+    updateLatestVideo, updateInProduction, updateAboutData, updateHiringData, updateTestimonial, addTestimonial, deleteTestimonial,
     updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
     updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
     saveChanges, uploadImage, login, loginWithGoogle, logout, seedDatabase,

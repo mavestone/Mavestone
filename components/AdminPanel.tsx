@@ -347,11 +347,12 @@ export const AdminPanel: React.FC = () => {
     clientWork, updateClientWork, addClientWork, deleteClientWork,
     aboutData, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     projectConfig, updateProjectConfig,
+    hiringData, updateHiringData,
     saveChanges, uploadImage,
     isAuthenticated, fetchMessages, messages, markMessageRead, updateMessage, deleteMessage, logout
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'crm'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'hiring' | 'crm'>('home');
   
   const [crmView, setCrmView] = useState<'cards' | 'spreadsheet'>('spreadsheet');
   const [highlightedLeadId, setHighlightedLeadId] = useState<string | null>(null);
@@ -503,6 +504,7 @@ export const AdminPanel: React.FC = () => {
                                         <NavItem id="projects" label="Projects" icon={Clapperboard} />
                                         <NavItem id="shorts" label="Shorts" icon={Youtube} />
                                         <NavItem id="about" label="About" icon={User} />
+                                        <NavItem id="hiring" label="Hiring" icon={FileText} />
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -683,6 +685,58 @@ export const AdminPanel: React.FC = () => {
                                      ))}
                                  </div>
                              </div>
+                        </div>
+                    )}
+
+                    {/* HIRING TAB */}
+                    {activeTab === 'hiring' && (
+                        <div className="space-y-10">
+                            <div className="p-8 rounded-2xl admin-glass space-y-8">
+                                <h3 className="admin-label text-yellow-400 border-b border-white/5 pb-4">Hiring Details</h3>
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <input type="text" placeholder="Title Line 1" value={hiringData.titleLine1} onChange={(e) => updateHiringData({ titleLine1: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                        <input type="text" placeholder="Title Line 2 (Highlighted)" value={hiringData.titleLine2} onChange={(e) => updateHiringData({ titleLine2: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-yellow-300 focus:outline-none focus:border-white/20 transition-all font-bold" />
+                                        <input type="text" placeholder="Title Line 3" value={hiringData.titleLine3} onChange={(e) => updateHiringData({ titleLine3: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                    </div>
+                                    <textarea rows={3} placeholder="Intro Paragraph 1" value={hiringData.introParagraph1} onChange={(e) => updateHiringData({ introParagraph1: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                    <textarea rows={3} placeholder="Intro Paragraph 2" value={hiringData.introParagraph2} onChange={(e) => updateHiringData({ introParagraph2: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                    <textarea rows={3} placeholder="Quote" value={hiringData.introParagraph3} onChange={(e) => updateHiringData({ introParagraph3: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-blue-300 italic focus:outline-none focus:border-white/20 transition-all" />
+                                </div>
+                            </div>
+                            <div className="p-8 rounded-2xl admin-glass space-y-8">
+                                <h3 className="admin-label text-purple-400 border-b border-white/5 pb-4">Role & Requirements</h3>
+                                <div className="space-y-4">
+                                    <label className="admin-label block opacity-45">Role Requirements (One per line)</label>
+                                    <textarea 
+                                        rows={6} 
+                                        value={hiringData.roleRequirements.join('\n')} 
+                                        onChange={(e) => updateHiringData({ roleRequirements: e.target.value.split('\n') })} 
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" 
+                                    />
+                                    <label className="admin-label block mt-6 opacity-45">What makes a great applicant</label>
+                                    <textarea 
+                                        rows={5} 
+                                        value={hiringData.applicantParagraph} 
+                                        onChange={(e) => updateHiringData({ applicantParagraph: e.target.value })} 
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" 
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-8 rounded-2xl admin-glass space-y-8">
+                                <h3 className="admin-label text-orange-400 border-b border-white/5 pb-4">The Process</h3>
+                                <div className="space-y-4">
+                                    <label className="admin-label block opacity-45">Process Steps (One per line)</label>
+                                    <textarea 
+                                        rows={4} 
+                                        value={hiringData.processSteps.join('\n')} 
+                                        onChange={(e) => updateHiringData({ processSteps: e.target.value.split('\n') })} 
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" 
+                                    />
+                                    <label className="admin-label block mt-6 opacity-45">Download Footage URL</label>
+                                    <input type="text" placeholder="Google Drive Link" value={hiringData.callToActionURL} onChange={(e) => updateHiringData({ callToActionURL: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                </div>
+                            </div>
                         </div>
                     )}
 

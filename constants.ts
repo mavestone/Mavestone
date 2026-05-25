@@ -1,5 +1,28 @@
 
-import { Film, Short, NavItem, InProductionData, ProjectHeroConfig } from './types';
+import { Film, Short, NavItem, InProductionData, ProjectHeroConfig, HiringData } from './types';
+
+export const HIRING_DATA: HiringData = {
+  titleLine1: "I'm hiring a",
+  titleLine2: "cinematic storyteller/editor",
+  titleLine3: "to join the team.",
+  introParagraph1: "I'm Liam, a filmmaker and founder. I'm looking for a monthly retainer video editor to cut reels for my personal brand Instagram @liamcinema.",
+  introParagraph2: "You’ll be working with footage from professional cinema cameras across travel films, reels and documentary content.",
+  introParagraph3: "\"If your edits feel like short films instead of 'content', send your work.\"",
+  roleRequirements: [
+    "Edit high-end travel & documentary style content",
+    "Follow story and pacing, not just make flashy edits",
+    "Colour grade professionally in DaVinci Resolve",
+    "Add motion graphics/text when needed",
+    "Understand cinematic composition, sound design & emotion"
+  ],
+  applicantParagraph: "I hire on attitude and taste as much as technical skill. You should be hungry to make the best work possible, not just clock in and drag clips onto a timeline. If you watch a cut and know it could be 1% better, you make it 1% better before sending it. You communicate clearly, hit deadlines effortlessly, and take pride in the craft.",
+  processSteps: [
+    "Download our raw footage from the Google Drive link below.",
+    "Edit the footage and craft an engaging reel. Take your time, show your skills.",
+    "Upload your finished cut and submit it for review."
+  ],
+  callToActionURL: "https://drive.google.com/drive/folders/14TULwn541F9Jh1nV42A0fPf93Qi7Di1R?usp=sharing"
+};
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '#hero' },
