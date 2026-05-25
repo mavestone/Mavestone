@@ -42,46 +42,85 @@ export const Hiring: React.FC = () => {
     const glassCardHover = "hover:bg-white/[0.07] hover:border-white/[0.15] hover:shadow-[0_8px_48px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out";
 
     return (
-        <div className="min-h-screen bg-[#050505] text-[#F5F5F7] selection:bg-[#E8A020] selection:text-black pt-24 pb-32 overflow-hidden border-box">
+        <div className="min-h-screen bg-[#050505] text-[#F5F5F7] selection:bg-[#E8A020] selection:text-black overflow-hidden border-box">
             
-            <div className="max-w-[1140px] mx-auto px-[24px] lg:px-[48px]">
+            {/* HERO SECTION */}
+            <motion.section 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-10%" }}
+                variants={fadeUpVariant}
+                className="relative w-full min-h-[90vh] bg-[#050505]"
+            >
+                {/* PHOTO (Right align desktop, full cover mobile) */}
+                {hiringData.heroImage ? (
+                    <img 
+                        src={hiringData.heroImage} 
+                        alt="Hero" 
+                        className="absolute top-0 right-0 h-full w-full md:w-[55%] object-cover object-top" 
+                    />
+                ) : (
+                    <div className="absolute top-0 right-0 h-full w-full md:w-[55%] bg-[#0F0F11] flex items-center justify-center border-l border-white/5">
+                        <span className="font-admin text-[11px] uppercase tracking-[0.15em] text-[#F5F5F7] opacity-25">
+                            [ YOUR PHOTO ]
+                        </span>
+                    </div>
+                )}
+
+                {/* Desktop Gradient */}
+                <div 
+                    className="absolute inset-0 hidden md:block pointer-events-none" 
+                    style={{
+                        background: `linear-gradient(to right, #050505 0%, #050505 46%, rgba(5,5,5,0.9) 52%, rgba(5,5,5,0.4) 70%, rgba(5,5,5,0) 100%)`
+                    }}
+                />
+
+                {/* Mobile Gradient */}
+                <div 
+                    className="absolute inset-0 block md:hidden pointer-events-none" 
+                    style={{
+                        background: `linear-gradient(to right, #050505 0%, rgba(5,5,5,0.85) 40%, rgba(5,5,5,0.4) 100%)`
+                    }}
+                />
+
+                {/* Bottom Fade */}
+                <div 
+                    className="absolute bottom-0 left-0 right-0 h-[200px] z-[5] pointer-events-none" 
+                    style={{ background: 'linear-gradient(to top, #050505, transparent)' }} 
+                />
+
+                {/* HEADLINE */}
+                <style>{`
+                    .hero-headline {
+                        font-size: clamp(40px, 9vw, 64px);
+                    }
+                    @media (min-width: 768px) {
+                        .hero-headline {
+                            font-size: clamp(44px, 6.5vw, 90px);
+                        }
+                    }
+                `}</style>
+                <div className="absolute inset-0 flex flex-col justify-center z-10 box-border" style={{ paddingLeft: 'clamp(24px, 5vw, 80px)' }}>
+                    <div className="w-[85%] md:w-[55%]">
+                        <h1 className="hero-headline font-sans font-[800] uppercase leading-[0.95] break-words">
+                            <span className="text-[#F5F5F7] block">{hiringData.titleLine1 || "I'M HIRING A"}</span>
+                            <span className="text-[#E8A020] block">{hiringData.titleLine2 || "CINEMATIC EDITOR"}</span>
+                            <span className="text-[#F5F5F7] block">{hiringData.titleLine3 || "TO JOIN THE TEAM."}</span>
+                        </h1>
+                    </div>
+                </div>
+            </motion.section>
+
+            <div className="max-w-[1140px] mx-auto px-[24px] lg:px-[48px] pb-32 pt-8">
                 
-                {/* HERO SECTION */}
-                <motion.section 
+                <motion.section
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-10%" }}
                     variants={fadeUpVariant}
                 >
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-                        {/* Left: Headline */}
-                        <div className="w-full lg:col-span-7 xl:col-span-8">
-                            <h1 
-                                className="font-sans font-[800] uppercase leading-[0.95] break-words"
-                                style={{ fontSize: 'clamp(44px, 6vw, 92px)', wordBreak: 'break-word' }}
-                            >
-                                {hiringData.titleLine1 || "I'M HIRING A"}<br />
-                                <span className="text-[#E8A020] block my-2">{hiringData.titleLine2 || "CINEMATIC STORYTELLER/EDITOR"}</span>
-                                {hiringData.titleLine3 || "TO JOIN THE TEAM."}
-                            </h1>
-                        </div>
-                        
-                        {/* Right: Portrait Placeholder */}
-                        <div className="w-full lg:col-span-5 xl:col-span-4 shrink-0 min-w-0">
-                            <div className={`${glassCard} flex items-center justify-center relative overflow-hidden aspect-[16/9] lg:aspect-[3/4] w-full lg:max-h-[460px] rounded-[16px] xl:rounded-[20px] bg-black`}>
-                                {hiringData.heroImage ? (
-                                    <img src={hiringData.heroImage} alt="Hero" className="absolute inset-0 w-full h-full object-cover rounded-[inherit]" />
-                                ) : (
-                                    <span className="font-admin text-[11px] uppercase tracking-[0.15em] text-[#F5F5F7] opacity-25">
-                                        [ YOUR PHOTO ]
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
                     {/* INTRO BLOCK */}
-                    <div className="border-t border-white/[0.07] my-[48px]" />
+                    <div className="border-t border-white/[0.07] mb-[48px]" />
                     
                     <div className="max-w-[580px] space-y-6">
                         <p className="font-sans font-[400] text-[17px] leading-[1.75] text-[#F5F5F7]/85">
