@@ -1,13 +1,62 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Component, ErrorInfo, ReactNode } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ContentProvider, useContent } from './context/ContentContext';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
 import { Projects } from './pages/Projects';
+import { Hiring } from './pages/Hiring';
 import { AdminPanel } from './components/AdminPanel';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = {
+    hasError: false,
+    error: null
+  };
+
+  public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#050505] flex items-center justify-center p-12 text-center">
+          <div className="max-w-md w-full space-y-6">
+            <h1 className="text-4xl font-black text-white px-2">APPLICATION<br/><span className="text-white/40">CRASHED.</span></h1>
+            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-left overflow-auto max-h-[300px]">
+              <p className="text-red-400 font-mono text-xs whitespace-pre-wrap">{this.state.error?.toString()}</p>
+              <p className="text-white/40 font-mono text-[10px] mt-4">Check the browser console for details. Ensure all environment variables are set in Vercel.</p>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-8 py-4 bg-white text-black font-black uppercase text-xs tracking-widest rounded-full hover:bg-white/80 transition-all"
+            >
+              Restart Experience
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const CustomCursor: React.FC = () => {
   const { isAdminOpen } = useContent();
@@ -163,6 +212,7 @@ const AppContent: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/hiring" element={<Hiring />} />
         </Routes>
         
         <AdminPanel />
@@ -172,9 +222,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ContentProvider>
-      <AppContent />
-    </ContentProvider>
+    <ErrorBoundary>
+      <ContentProvider>
+        <AppContent />
+      </ContentProvider>
+    </ErrorBoundary>
   );
 };
 

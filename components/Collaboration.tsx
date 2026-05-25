@@ -91,7 +91,7 @@ export const Collaboration: React.FC = () => {
                         </h2>
                     </div>
 
-                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 font-light leading-relaxed tracking-tight max-w-xl">
+                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 font-light leading-relaxed tracking-tight max-w-xl whitespace-pre-wrap">
                         {description}
                     </p>
 

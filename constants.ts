@@ -52,7 +52,8 @@ export const PROJECT_PAGE_CONFIG: ProjectHeroConfig = {
   heroVideoId: "jfopjfSYLcM",
   label: "Original",
   featuredFilmId: "1", // Default to Vantage Point
-  logoImage: DEFAULT_LOGO_IMAGE 
+  logoImage: DEFAULT_LOGO_IMAGE,
+  customLogoSvg: ""
 };
 
 export const LATEST_VIDEO = {

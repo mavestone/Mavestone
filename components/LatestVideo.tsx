@@ -116,7 +116,7 @@ export const LatestVideo: React.FC = () => {
                     <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-auto md:max-w-xl transform translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-200">
                          <div className="glass-panel p-5 md:p-8 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/60 text-left shadow-2xl">
                             <h3 className="text-xl md:text-3xl font-black text-white mb-2 leading-tight tracking-tight">{latestVideo.title}</h3>
-                            <p className="text-gray-300 text-xs md:text-sm md:text-base leading-relaxed font-light line-clamp-3">{latestVideo.description}</p>
+                            <p className="text-gray-300 text-xs md:text-sm md:text-base leading-relaxed font-light line-clamp-3 whitespace-pre-wrap">{latestVideo.description}</p>
                          </div>
                     </div>
                 </div>

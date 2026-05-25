@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
 
@@ -30,7 +30,8 @@ const CRMLeadItem: React.FC<{
         setIsAiDrafting(true);
         try {
             const { GoogleGenerativeAI } = await import("@google/generative-ai");
-            const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+            const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
+            const ai = new GoogleGenerativeAI(apiKey);
             const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent({
                 contents: [{
@@ -696,13 +697,59 @@ export const AdminPanel: React.FC = () => {
                                         <select value={projectConfig?.featuredFilmId} onChange={(e) => updateProjectConfig({ featuredFilmId: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all">
                                             {films.map(f => <option key={f.id} value={f.id}>{f.title}</option>)}
                                         </select>
-                                        <input type="text" placeholder="Label (e.g. M ORIGINAL)" value={projectConfig.label} onChange={(e) => updateProjectConfig({ label: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
                                     </div>
                                     <div className="space-y-6">
-                                        <label className="admin-label opacity-45 ml-1">Overlay Logo Image</label>
+                                        <label className="admin-label opacity-45 ml-1">Overlay Logo Image (Full Lockup)</label>
                                         <div className="flex gap-3">
                                             <input type="text" placeholder="Logo Image URL" value={projectConfig.logoImage || ''} onChange={(e) => updateProjectConfig({ logoImage: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
-                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateProjectConfig({ logoImage: url }))} /></label>
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.svg" onChange={(e) => handleImageUpload(e, (url) => updateProjectConfig({ logoImage: url }))} /></label>
+                                        </div>
+                                        
+                                        <div className="space-y-3 pt-4 border-t border-white/5">
+                                            <label className="admin-label opacity-45 ml-1">Custom "M" Logo (Upload SVG)</label>
+                                            <p className="text-[10px] text-gray-500 mb-4">Upload a custom SVG file to replace the default 'M' logo. This allows for clean vector scaling.</p>
+                                            
+                                            <div className="flex flex-col gap-4">
+                                                <label className="flex items-center justify-center gap-3 p-6 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer group">
+                                                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        <Upload size={20} className="text-white/60" />
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <p className="text-xs font-bold text-white uppercase tracking-widest">Select SVG File</p>
+                                                        <p className="text-[10px] text-gray-500">Vector graphics work best (.svg)</p>
+                                                    </div>
+                                                    <input 
+                                                        type="file" 
+                                                        className="hidden" 
+                                                        accept=".svg" 
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (!file) return;
+                                                            const reader = new FileReader();
+                                                            reader.onload = (ev) => {
+                                                                const content = ev.target?.result as string;
+                                                                updateProjectConfig({ customLogoSvg: content });
+                                                            };
+                                                            reader.readAsText(file);
+                                                        }} 
+                                                    />
+                                                </label>
+
+                                                {projectConfig.customLogoSvg && (
+                                                    <div className="p-4 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 flex items-center justify-center text-red-500" dangerouslySetInnerHTML={{ __html: projectConfig.customLogoSvg }} />
+                                                            <span className="text-[10px] text-gray-400 uppercase tracking-widest">Current SVG Active</span>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => updateProjectConfig({ customLogoSvg: '' })}
+                                                            className="text-[10px] text-red-400 font-bold uppercase tracking-widest hover:text-red-300 transition-colors"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

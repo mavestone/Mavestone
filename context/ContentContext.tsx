@@ -119,25 +119,37 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   useEffect(() => {
+    let subscription: { unsubscribe: () => void } | null = null;
+
     const init = async () => {
       try {
+        const env = (import.meta as any).env || {};
+        const isConfigured = env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY;
+        
+        if (!isConfigured) {
+          console.warn("Supabase not configured - using local constants only. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.");
+          setIsLoading(false);
+          return;
+        }
+
         // Check Auth
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
+        const { data: authData } = await supabase.auth.getSession();
+        setIsAuthenticated(!!authData.session);
 
         // Listen for Auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
           setIsAuthenticated(!!session);
         });
+        subscription = data.subscription;
 
         // Fetch Site Content
         const { data: contentData, error: contentError } = await supabase
           .from('site_content')
           .select('*');
         
-        if (contentError) throw contentError;
-
-        if (contentData && contentData.length > 0) {
+        if (contentError) {
+          console.error("Content fetch error:", contentError);
+        } else if (contentData && contentData.length > 0) {
           contentData.forEach((item: any) => {
             const key = item.id;
             const content = item.data;
@@ -151,8 +163,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           });
         }
         await fetchMessages();
-
-        return () => subscription.unsubscribe();
       } catch (e) {
         console.error("Error initializing content:", e);
       } finally {
@@ -161,6 +171,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     init();
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
   }, [fetchMessages]);
 
   const toggleAdmin = () => setIsAdminOpen(prev => !prev);

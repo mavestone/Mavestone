@@ -40,7 +40,7 @@ export const InProduction: React.FC = () => {
             {/* Text Box Underneath */}
             <div className="max-w-2xl text-left">
                 <h3 className="text-xl md:text-3xl font-bold text-white mb-4">{inProduction.title}</h3>
-                <p className="text-sm md:text-lg text-gray-400 leading-relaxed font-light">
+                <p className="text-sm md:text-lg text-gray-400 leading-relaxed font-light whitespace-pre-wrap">
                     {inProduction.description}
                 </p>
             </div>

@@ -61,6 +61,7 @@ export interface ProjectHeroConfig {
   label: string;
   featuredFilmId: string;
   logoImage?: string;
+  customLogoSvg?: string;
 }
 
 export interface NavItem {

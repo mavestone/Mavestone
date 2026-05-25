@@ -148,7 +148,7 @@ export const Projects: React.FC = () => {
                                 <span>New Release</span>
                                 {activeItem.year && <span className="text-gray-500 font-normal">{activeItem.year}</span>}
                             </div>
-                            <p className="text-gray-300 leading-relaxed text-lg">
+                            <p className="text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
                                 {activeItem.description || activeItem.tagline || "No description available for this project."}
                             </p>
                         </div>
@@ -199,7 +199,14 @@ export const Projects: React.FC = () => {
                             
                             {/* Logo or Text Label */}
                             <div className="mb-4">
-                                {logoImage ? (
+                                {projectConfig?.customLogoSvg ? (
+                                    <div className="flex items-center">
+                                        <div 
+                                            className="h-4 md:h-5 w-auto flex items-center [&>svg]:h-full [&>svg]:w-auto [&>svg]:fill-red-600"
+                                            dangerouslySetInnerHTML={{ __html: projectConfig.customLogoSvg }}
+                                        />
+                                    </div>
+                                ) : logoImage ? (
                                     <img src={logoImage} alt="Original Series" className="h-6 md:h-8 object-contain" />
                                 ) : (
                                     <div className="flex items-center gap-2">
@@ -220,7 +227,7 @@ export const Projects: React.FC = () => {
                                 <span className="text-gray-400">{featured.duration || "4K"}</span>
                             </div>
 
-                            <p className="text-base md:text-lg text-white drop-shadow-md mb-8 line-clamp-3 font-medium">
+                            <p className="text-base md:text-lg text-white drop-shadow-md mb-8 line-clamp-3 font-medium whitespace-pre-wrap">
                                 {featured.description || featured.tagline}
                             </p>
 
@@ -303,7 +310,7 @@ export const Projects: React.FC = () => {
                             <div className="text-red-500 font-bold tracking-widest text-xs uppercase mb-3">Next Release</div>
                             <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-none">{inProduction.title}</h3>
                             <div className="w-12 h-1 bg-white/20 mb-6 group-hover:w-20 group-hover:bg-white/50 transition-all duration-500"></div>
-                            <p className="text-sm md:text-base text-gray-300 leading-relaxed font-light line-clamp-3 group-hover:text-white transition-colors duration-300">
+                            <p className="text-sm md:text-base text-gray-300 leading-relaxed font-light line-clamp-3 group-hover:text-white transition-colors duration-300 whitespace-pre-wrap">
                                 {inProduction.description}
                             </p>
                         </div>
