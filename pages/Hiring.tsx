@@ -123,14 +123,19 @@ export const Hiring: React.FC = () => {
                     <div className="border-t border-white/[0.07] mb-[48px] max-w-[800px] mx-auto" />
                     
                     <div className="max-w-[800px] mx-auto space-y-6 text-center">
-                        <p className="font-sans font-[400] text-[17px] leading-[1.75] text-[#F5F5F7]/85">
-                            {hiringData.introParagraph1} {hiringData.introParagraph2}
-                        </p>
+                        <div className="font-sans font-[400] text-[17px] leading-[1.75] text-[#F5F5F7]/85 space-y-4 [&_a]:text-[#E8A020] [&_a]:underline [&_a]:decoration-white/30 hover:[&_a]:decoration-[#E8A020]">
+                            <div dangerouslySetInnerHTML={{ __html: hiringData.introParagraph1 }} />
+                            <div dangerouslySetInnerHTML={{ __html: hiringData.introParagraph2 }} />
+                        </div>
                         <blockquote 
-                            className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] rounded-[16px] px-[24px] py-[20px] font-sans font-[400] italic text-[17px] leading-[1.6] text-[#F5F5F7]/90 border-l-[3px] !border-l-[#7EB8D4] text-left md:text-center md:border-l-0 md:border-t-[3px] md:!border-t-[#7EB8D4]`}
+                            className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] rounded-[16px] px-[24px] py-[20px] font-sans font-[400] italic text-[17px] leading-[1.6] text-[#F5F5F7]/90 border-l-[3px] !border-l-[#7EB8D4] text-left md:text-center md:border-l-0 md:border-t-[3px] md:!border-t-[#7EB8D4] [&_a]:text-[#7EB8D4] [&_a]:underline hover:[&_a]:decoration-[#7EB8D4]`}
                             style={{ boxShadow: '0 0 32px rgba(126,184,212,0.06)' }}
                         >
-                            {hiringData.introParagraph3 || "If your edits feel like short films instead of 'content', send your work."}
+                            {hiringData.introParagraph3 ? (
+                                <div dangerouslySetInnerHTML={{ __html: hiringData.introParagraph3 }} />
+                            ) : (
+                                "If your edits feel like short films instead of 'content', send your work."
+                            )}
                         </blockquote>
                     </div>
                 </motion.section>
@@ -276,9 +281,10 @@ export const Hiring: React.FC = () => {
                         className={glassCard}
                         style={{ padding: '32px', boxShadow: '0 0 60px rgba(232,160,32,0.05)' }}
                     >
-                        <p className="font-sans font-[400] text-[15px] leading-[1.8] text-[#F5F5F7]/80 whitespace-pre-wrap text-center">
-                            {hiringData.applicantParagraph}
-                        </p>
+                        <div 
+                            className="font-sans font-[400] text-[15px] leading-[1.8] text-[#F5F5F7]/80 text-center space-y-4 [&_a]:text-[#E8A020] [&_a]:underline [&_a]:decoration-[#E8A020]/30 hover:[&_a]:decoration-[#E8A020]"
+                            dangerouslySetInnerHTML={{ __html: hiringData.applicantParagraph }} 
+                        />
                     </div>
                 </motion.section>
 

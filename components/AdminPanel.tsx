@@ -5,6 +5,8 @@ import { useContent } from '../context/ContentContext';
 import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const getLeadNumber = (id: string) => {
     let hash = 0;
@@ -706,9 +708,32 @@ export const AdminPanel: React.FC = () => {
                                             <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ heroImage: url }))} /></label>
                                         </div>
                                     </div>
-                                    <textarea rows={3} placeholder="Intro Paragraph 1" value={hiringData.introParagraph1} onChange={(e) => updateHiringData({ introParagraph1: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
-                                    <textarea rows={3} placeholder="Intro Paragraph 2" value={hiringData.introParagraph2} onChange={(e) => updateHiringData({ introParagraph2: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
-                                    <textarea rows={3} placeholder="Quote" value={hiringData.introParagraph3} onChange={(e) => updateHiringData({ introParagraph3: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-blue-300 italic focus:outline-none focus:border-white/20 transition-all" />
+                                    <div className="space-y-4">
+                                        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden [&_.ql-toolbar]:bg-white/10 [&_.ql-toolbar]:border-none [&_.ql-container]:border-none [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:text-white [&_.ql-picker]:text-white/80 [&_.ql-stroke]:stroke-white/80 [&_.ql-fill]:fill-white/80">
+                                            <ReactQuill 
+                                                theme="snow"
+                                                value={hiringData.introParagraph1} 
+                                                onChange={(val) => updateHiringData({ introParagraph1: val })} 
+                                                placeholder="Intro Paragraph 1"
+                                            />
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden [&_.ql-toolbar]:bg-white/10 [&_.ql-toolbar]:border-none [&_.ql-container]:border-none [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:text-white [&_.ql-picker]:text-white/80 [&_.ql-stroke]:stroke-white/80 [&_.ql-fill]:fill-white/80">
+                                            <ReactQuill 
+                                                theme="snow"
+                                                value={hiringData.introParagraph2} 
+                                                onChange={(val) => updateHiringData({ introParagraph2: val })} 
+                                                placeholder="Intro Paragraph 2"
+                                            />
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden [&_.ql-toolbar]:bg-white/10 [&_.ql-toolbar]:border-none [&_.ql-container]:border-none [&_.ql-editor]:min-h-[100px] [&_.ql-editor]:text-blue-300 [&_.ql-editor]:italic [&_.ql-picker]:text-white/80 [&_.ql-stroke]:stroke-white/80 [&_.ql-fill]:fill-white/80">
+                                            <ReactQuill 
+                                                theme="snow"
+                                                value={hiringData.introParagraph3} 
+                                                onChange={(val) => updateHiringData({ introParagraph3: val })} 
+                                                placeholder="Quote"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="p-8 rounded-2xl admin-glass space-y-8">
@@ -748,12 +773,14 @@ export const AdminPanel: React.FC = () => {
                                         className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" 
                                     />
                                     <label className="admin-label block mt-6 opacity-45">What makes a great applicant</label>
-                                    <textarea 
-                                        rows={5} 
-                                        value={hiringData.applicantParagraph} 
-                                        onChange={(e) => updateHiringData({ applicantParagraph: e.target.value })} 
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" 
-                                    />
+                                    <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden [&_.ql-toolbar]:bg-white/10 [&_.ql-toolbar]:border-none [&_.ql-container]:border-none [&_.ql-editor]:min-h-[150px] [&_.ql-editor]:text-white [&_.ql-picker]:text-white/80 [&_.ql-stroke]:stroke-white/80 [&_.ql-fill]:fill-white/80">
+                                        <ReactQuill 
+                                            theme="snow"
+                                            value={hiringData.applicantParagraph} 
+                                            onChange={(val) => updateHiringData({ applicantParagraph: val })} 
+                                            placeholder="What makes a great applicant..."
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="p-8 rounded-2xl admin-glass space-y-8">
