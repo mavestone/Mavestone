@@ -702,10 +702,10 @@ export const AdminPanel: React.FC = () => {
                                         <input type="text" placeholder="Title Line 3" value={hiringData.titleLine3} onChange={(e) => updateHiringData({ titleLine3: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="admin-label block opacity-45">Hero Portrait Photo</label>
+                                        <label className="admin-label block opacity-45">Hero Portrait Photo or Video</label>
                                         <div className="flex gap-3">
                                             <input type="text" placeholder="Image URL" value={hiringData.heroImage || ''} onChange={(e) => updateHiringData({ heroImage: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
-                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ heroImage: url }))} /></label>
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif,video/*" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ heroImage: url }))} /></label>
                                         </div>
                                     </div>
                                     <div className="space-y-4">
@@ -740,24 +740,24 @@ export const AdminPanel: React.FC = () => {
                                 <h3 className="admin-label text-blue-400 border-b border-white/5 pb-4">The Kind of Work We Make (Media)</h3>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="admin-label block opacity-45">Card 1 (Travel Films) Media (Image/GIF)</label>
+                                        <label className="admin-label block opacity-45">Card 1 (Travel Films) Media (Image/GIF/Video)</label>
                                         <div className="flex gap-3">
                                             <input type="text" placeholder="Media URL" value={hiringData.card1Media || ''} onChange={(e) => updateHiringData({ card1Media: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
-                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card1Media: url }))} /></label>
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif,video/*" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card1Media: url }))} /></label>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="admin-label block opacity-45">Card 2 (Reels) Media (Image/GIF)</label>
+                                        <label className="admin-label block opacity-45">Card 2 (Reels) Media (Image/GIF/Video)</label>
                                         <div className="flex gap-3">
                                             <input type="text" placeholder="Media URL" value={hiringData.card2Media || ''} onChange={(e) => updateHiringData({ card2Media: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
-                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card2Media: url }))} /></label>
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif,video/*" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card2Media: url }))} /></label>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="admin-label block opacity-45">Card 3 (Documentary) Media (Image/GIF)</label>
+                                        <label className="admin-label block opacity-45">Card 3 (Documentary) Media (Image/GIF/Video)</label>
                                         <div className="flex gap-3">
                                             <input type="text" placeholder="Media URL" value={hiringData.card3Media || ''} onChange={(e) => updateHiringData({ card3Media: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
-                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card3Media: url }))} /></label>
+                                            <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*,.gif,video/*" onChange={(e) => handleImageUpload(e, (url) => updateHiringData({ card3Media: url }))} /></label>
                                         </div>
                                     </div>
                                 </div>
@@ -824,6 +824,7 @@ export const AdminPanel: React.FC = () => {
                                             <div>
                                                 <label className="admin-label block opacity-45 mb-1">Link URL (optional)</label>
                                                 <input type="text" placeholder="https://" value={hiringData.cta2URL || ''} onChange={(e) => updateHiringData({ cta2URL: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                                <p className="text-[11px] text-white/40 mt-2">Pro tip: Link to a Google Form with a "File Upload" field to receive video files directly in your Google Drive.</p>
                                             </div>
                                         </div>
                                     </div>

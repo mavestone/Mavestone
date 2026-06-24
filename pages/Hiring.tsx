@@ -1,382 +1,451 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import { useContent } from '../context/ContentContext';
 
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
-};
+const MediaRenderer = ({ src, alt, className, style }: { src?: string; alt?: string; className?: string; style?: React.CSSProperties }) => {
+  if (!src) return <div style={{...style, background: '#111'}} className={className}>[ MEDIA ]</div>;
+  
+  const cleanUrl = src.split('?')[0].toLowerCase();
+  const isVideo = cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.mov') || src.includes('video');
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05
-    }
+  if (isVideo) {
+    return <video src={src} autoPlay loop muted playsInline className={className} style={style} />;
   }
-};
-
-const staggerCards = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08
-    }
-  }
+  return <img src={src} alt={alt || 'Media'} className={className} style={style} />;
 };
 
 export const Hiring: React.FC = () => {
-    const { hiringData } = useContent();
+  const { hiringData } = useContent();
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        document.title = "Hiring - Liam Cinema";
-    }, []);
+  const [ticked, setTicked] = useState<boolean[]>([]);
 
-    if (!hiringData) return null;
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.title = "Hiring - Liam Cinema";
+  }, []);
 
-    // Common "glass card" class matching the specified system
-    const glassCard = "bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] shadow-[0_4px_40px_rgba(0,0,0,0.4)] rounded-[20px]";
-    const glassCardHover = "hover:bg-white/[0.07] hover:border-white/[0.15] hover:shadow-[0_8px_48px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out";
+  useEffect(() => {
+    if (hiringData && hiringData.roleRequirements) {
+      setTicked(new Array(hiringData.roleRequirements.length).fill(false));
+    }
+  }, [hiringData]);
 
-    return (
-        <div className="min-h-screen bg-[#050505] text-[#F5F5F7] selection:bg-[#E8A020] selection:text-black overflow-hidden border-box">
-            
-            {/* HERO SECTION */}
-            <motion.section 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-10%" }}
-                variants={fadeUpVariant}
-                className="relative w-full min-h-[90vh] bg-[#050505]"
-            >
-                {/* PHOTO (Right align desktop, full cover mobile) */}
-                {hiringData.heroImage ? (
-                    <img 
-                        src={hiringData.heroImage} 
-                        alt="Hero" 
-                        className="absolute top-0 right-0 h-full w-full md:w-[55%] object-cover object-top" 
-                    />
-                ) : (
-                    <div className="absolute top-0 right-0 h-full w-full md:w-[55%] bg-[#0F0F11] flex items-center justify-center border-l border-white/5">
-                        <span className="font-admin text-[11px] uppercase tracking-[0.15em] text-[#F5F5F7] opacity-25">
-                            [ YOUR PHOTO ]
-                        </span>
-                    </div>
-                )}
+  // Handle intersection observer for reveals
+  useEffect(() => {
+    const reveal = (el: HTMLElement, delay = 0) => {
+      const anim = el.getAttribute("data-anim");
+      el.style.transitionDelay = delay + "ms";
+      if (anim === "quote") {
+        el.style.transition = "clip-path 1.05s cubic-bezier(.16,1,.3,1)";
+        el.style.clipPath = "inset(0 0 0 0)";
+        el.style.opacity = "1";
+      } else {
+        el.style.transition = "opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1)";
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      }
+    };
+    const hide = (el: HTMLElement) => {
+      if (el.getAttribute("data-anim") === "quote") {
+        el.style.clipPath = "inset(0 100% 0 0)";
+        el.style.opacity = "1";
+      } else {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(26px)";
+      }
+    };
 
-                {/* Desktop Gradient */}
-                <div 
-                    className="absolute inset-0 hidden md:block pointer-events-none" 
-                    style={{
-                        background: `linear-gradient(to right, #050505 0%, #050505 46%, rgba(5,5,5,0.9) 52%, rgba(5,5,5,0.4) 70%, rgba(5,5,5,0) 100%)`
-                    }}
-                />
+    const sections = Array.from(document.querySelectorAll("[data-reveal]")) as HTMLElement[];
+    sections.forEach(hide);
 
-                {/* Mobile Gradient */}
-                <div 
-                    className="absolute inset-0 block md:hidden pointer-events-none" 
-                    style={{
-                        background: `linear-gradient(to right, #050505 0%, rgba(5,5,5,0.85) 40%, rgba(5,5,5,0.4) 100%)`
-                    }}
-                />
+    if (!("IntersectionObserver" in window)) { 
+        sections.forEach((s) => reveal(s)); 
+        return; 
+    }
 
-                {/* Bottom Fade */}
-                <div 
-                    className="absolute bottom-0 left-0 right-0 h-[200px] z-[5] pointer-events-none" 
-                    style={{ background: 'linear-gradient(to top, #050505, transparent)' }} 
-                />
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          reveal(e.target as HTMLElement);
+          e.target.querySelectorAll("[data-reveal-child]").forEach((k, i) => {
+            const child = k as HTMLElement;
+            child.style.opacity = "0"; 
+            child.style.transform = "translateY(18px)";
+            requestAnimationFrame(() => reveal(child, 90 + i * 80));
+          });
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: "0px 0px -7% 0px" });
+    
+    sections.forEach((s) => io.observe(s));
+    
+    const timeoutId = setTimeout(() => sections.forEach((s) => {
+      if (s.style.opacity === "0" || s.style.clipPath === "inset(0px 100% 0px 0px)" || s.style.clipPath === "inset(0 100% 0 0)") reveal(s);
+    }), 2200);
 
-                {/* HEADLINE */}
-                <style>{`
-                    .hero-headline {
-                        font-size: clamp(40px, 9vw, 64px);
-                    }
-                    @media (min-width: 768px) {
-                        .hero-headline {
-                            font-size: clamp(44px, 6.5vw, 90px);
-                        }
-                    }
-                `}</style>
-                <div className="absolute inset-0 flex flex-col justify-center z-10 box-border" style={{ paddingLeft: 'clamp(24px, 5vw, 80px)' }}>
-                    <div className="w-[85%] md:w-[55%]">
-                        <h1 className="hero-headline font-sans font-[800] uppercase leading-[0.95] break-words">
-                            <span className="text-[#F5F5F7] block">{hiringData.titleLine1 || "I'M HIRING A"}</span>
-                            <span className="text-[#E8A020] block">{hiringData.titleLine2 || "CINEMATIC EDITOR"}</span>
-                            <span className="text-[#F5F5F7] block">{hiringData.titleLine3 || "TO JOIN THE TEAM."}</span>
-                        </h1>
-                    </div>
-                </div>
-            </motion.section>
+    return () => {
+        io.disconnect();
+        clearTimeout(timeoutId);
+    };
+  }, [hiringData]);
 
-            <div className="max-w-[1140px] mx-auto px-[24px] lg:px-[48px] pb-32 pt-8">
-                
-                <motion.section
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-10%" }}
-                    variants={fadeUpVariant}
-                >
-                    {/* INTRO BLOCK */}
-                    <div className="border-t border-white/[0.07] mb-[48px] max-w-[800px] mx-auto" />
-                    
-                    <div className="max-w-[800px] mx-auto space-y-6 text-center">
-                        <div className="font-sans font-[400] text-[17px] leading-[1.75] text-[#F5F5F7]/85 space-y-4 [&_a]:text-[#E8A020] [&_a]:underline [&_a]:decoration-white/30 hover:[&_a]:decoration-[#E8A020]">
-                            <div dangerouslySetInnerHTML={{ __html: hiringData.introParagraph1 }} />
-                            <div dangerouslySetInnerHTML={{ __html: hiringData.introParagraph2 }} />
-                        </div>
-                        <blockquote 
-                            className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] rounded-[16px] px-[24px] py-[20px] font-sans font-[400] italic text-[17px] leading-[1.6] text-[#F5F5F7]/90 border-l-[3px] !border-l-[#7EB8D4] text-left md:text-center md:border-l-0 md:border-t-[3px] md:!border-t-[#7EB8D4] [&_a]:text-[#7EB8D4] [&_a]:underline hover:[&_a]:decoration-[#7EB8D4]`}
-                            style={{ boxShadow: '0 0 32px rgba(126,184,212,0.06)' }}
-                        >
-                            {hiringData.introParagraph3 ? (
-                                <div dangerouslySetInnerHTML={{ __html: hiringData.introParagraph3 }} />
-                            ) : (
-                                "If your edits feel like short films instead of 'content', send your work."
-                            )}
-                        </blockquote>
-                    </div>
-                </motion.section>
+  // Scopes canvas logic
+  useEffect(() => {
+    let scopeRaf: number;
+    const canvases = Array.from(document.querySelectorAll("canvas[data-scope]")) as HTMLCanvasElement[];
+    if (!canvases.length) return;
+    const colors: Record<string, number[]> = { r: [229, 72, 77], g: [80, 200, 120], b: [95, 160, 208] };
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const items = canvases.map((cv) => ({
+      cv,
+      ctx: cv.getContext("2d"),
+      col: colors[cv.getAttribute("data-scope") || ''] || [233, 162, 59],
+      seeds: Array.from({ length: 96 }, () => Math.random()),
+      phase: Math.random() * 6.28
+    }));
+    let t = 0;
+    const frame = () => {
+      t += 0.016;
+      for (const o of items) {
+        const { cv, ctx, col, seeds, phase } = o;
+        if (!ctx) continue;
+        const cw = cv.clientWidth, chh = cv.clientHeight;
+        if (!cw || !chh) continue;
+        if (cv.width !== Math.round(cw * dpr)) { 
+            cv.width = Math.round(cw * dpr); 
+            cv.height = Math.round(chh * dpr); 
+        }
+        const W = cv.width, H = cv.height;
+        ctx.clearRect(0, 0, W, H);
+        ctx.strokeStyle = "rgba(236,231,221,0.05)";
+        ctx.lineWidth = 1;
+        for (const p of [0.25, 0.5, 0.75]) { 
+            ctx.beginPath(); 
+            ctx.moveTo(0, H * p); 
+            ctx.lineTo(W, H * p); 
+            ctx.stroke(); 
+        }
+        const N = 78, bw = W / N;
+        for (let i = 0; i < N; i++) {
+          const x = i * bw;
+          const s = seeds[i % seeds.length];
+          const env = Math.sin((i / (N - 1)) * Math.PI);
+          const wob = Math.sin(t * 1.6 + i * 0.32 + phase) * 0.10 + Math.sin(t * 0.8 + s * 6.28) * 0.07;
+          let v = env * 0.6 + 0.2 + wob + (s - 0.5) * 0.14;
+          v = Math.max(0.04, Math.min(1, v));
+          const y = H - v * H;
+          const grd = ctx.createLinearGradient(0, y, 0, H);
+          grd.addColorStop(0, "rgba(" + col[0] + "," + col[1] + "," + col[2] + ",0.9)");
+          grd.addColorStop(1, "rgba(" + col[0] + "," + col[1] + "," + col[2] + ",0.04)");
+          ctx.fillStyle = grd;
+          ctx.fillRect(x, y, bw * 0.72, H - y);
+        }
+      }
+      scopeRaf = requestAnimationFrame(frame);
+    };
+    frame();
+    return () => {
+        cancelAnimationFrame(scopeRaf);
+    };
+  }, [hiringData]);
 
-                <div className="mb-[52px] md:mb-[72px]" />
+  if (!hiringData) return null;
 
-                {/* MUST BE ABLE TO */}
-                <motion.section 
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-10%" }}
-                    variants={staggerContainer}
-                    className="max-w-[800px] mx-auto"
-                >
-                    <motion.h2 
-                        variants={fadeUpVariant}
-                        className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[40px] flex items-center justify-center gap-2"
-                    >
-                        <span className="text-[#E8A020]">●</span> Must be able to
-                    </motion.h2>
-                    <div className="space-y-[16px]">
-                        {hiringData.roleRequirements.map((req, i) => (
-                            <motion.div 
-                                key={i} 
-                                variants={fadeUpVariant}
-                                className="flex items-center bg-[#0C0C0C] border border-white/[0.04] rounded-[16px] px-[24px] py-[20px] transition-all duration-300 hover:border-white/[0.08] hover:bg-[#111111] relative overflow-hidden"
-                            >
-                                <div className="absolute left-0 top-[10%] bottom-[10%] w-[4px] bg-[#E8A020] rounded-r-full opacity-60"></div>
-                                <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[1.4] text-[#F5F5F7]">
-                                    {req}
-                                </p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </motion.section>
+  const toggleReq = (index: number) => {
+    const newTicked = [...ticked];
+    newTicked[index] = !newTicked[index];
+    setTicked(newTicked);
+  };
 
-                <div className="mb-[52px] md:mb-[72px]" />
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        body { margin: 0; background: #0B0B0C; }
+        img { display: block; }
+        ::selection { background: #E9A23B; color: #0B0B0C; }
+        @keyframes blink { 0%,55% { opacity:1 } 56%,100% { opacity:0.15 } }
+        @keyframes grainShift { 0%{transform:translate(0,0)} 100%{transform:translate(-80px,-60px)} }
+        
+        .req-row:hover { background: rgba(233,162,59,0.05); padding-left: 18px !important; }
+        .card-zoom:hover { transform: scale(1.045); z-index: 3; }
+        .btn-primary:hover { filter: brightness(1.08); transform: translateY(-2px); }
+        .btn-secondary:hover { border-color: #E9A23B !important; background: rgba(233,162,59,0.08) !important; }
+      ` }} />
 
-                {/* THE KIND OF WORK WE MAKE */}
-                <motion.section 
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-10%" }}
-                    variants={staggerCards}
-                    className="max-w-[1140px] mx-auto"
-                >
-                    <motion.h2 
-                        variants={fadeUpVariant}
-                        className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center justify-center gap-2"
-                    >
-                        <span className="text-[#E8A020]">●</span> The kind of work we make
-                    </motion.h2>
+      <div style={{ position: 'relative', background: '#0B0B0C', color: '#ECE7DD', fontFamily: "'Archivo', sans-serif", WebkitFontSmoothing: 'antialiased', overflow: 'hidden' }}>
 
-                    <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-[16px] pb-[16px] md:pb-0 snap-x snap-mandatory hide-scrollbars">
-                        
-                        {/* Card 1 */}
-                        <motion.div 
-                            variants={fadeUpVariant}
-                            className={`shrink-0 w-[80vw] md:w-auto snap-start ${glassCard} ${glassCardHover} hover:shadow-[0_8px_48px_rgba(0,0,0,0.5),_0_0_60px_rgba(232,160,32,0.05)] flex flex-col overflow-hidden`}
-                        >
-                            <div className="w-full aspect-[16/9] bg-white/[0.03] border-b border-white/[0.06] flex items-center justify-center relative bg-black">
-                                {hiringData.card1Media ? (
-                                    <img src={hiringData.card1Media} alt="Travel Films" className="absolute inset-0 w-full h-full object-cover" />
-                                ) : (
-                                    <span className="font-admin text-[11px] uppercase tracking-[0.15em] text-[#F5F5F7] opacity-20">
-                                        [ EXAMPLE EDIT ]
-                                    </span>
-                                )}
-                            </div>
-                            <div className="p-[20px]">
-                                <h3 className="font-sans font-[700] uppercase tracking-[0.12em] text-[12px] text-[#E8A020] mb-[8px]">Travel Films</h3>
-                                <p className="font-sans font-[400] text-[13px] leading-[1.6] text-[#F5F5F7]/50">
-                                    Cinematic long-form docs. Slow burn. Emotional payoff.
-                                </p>
-                            </div>
-                        </motion.div>
+        {/* film grain */}
+        <div style={{ position: 'fixed', inset: '-80px', zIndex: 9000, pointerEvents: 'none', opacity: 0.045, mixBlendMode: 'screen', backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"140\" height=\"140\"><filter id=\"n\"><feTurbulence type=\"fractalNoise\" baseFrequency=\"0.85\" numOctaves=\"2\"/></filter><rect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\"/></svg>')", backgroundSize: '160px 160px', animation: 'grainShift 1.6s steps(3) infinite' }}></div>
 
-                        {/* Card 2 */}
-                        <motion.div 
-                            variants={fadeUpVariant}
-                            className={`shrink-0 w-[80vw] md:w-auto snap-start ${glassCard} ${glassCardHover} hover:shadow-[0_8px_48px_rgba(0,0,0,0.5),_0_0_60px_rgba(255,107,53,0.05)] flex flex-col overflow-hidden`}
-                        >
-                            <div className="w-full aspect-[16/9] bg-white/[0.03] border-b border-white/[0.06] flex items-center justify-center relative bg-black">
-                                {hiringData.card2Media ? (
-                                    <img src={hiringData.card2Media} alt="Reels" className="absolute inset-0 w-full h-full object-cover" />
-                                ) : (
-                                    <span className="font-admin text-[11px] uppercase tracking-[0.15em] text-[#F5F5F7] opacity-20">
-                                        [ EXAMPLE EDIT ]
-                                    </span>
-                                )}
-                            </div>
-                            <div className="p-[20px]">
-                                <h3 className="font-sans font-[700] uppercase tracking-[0.12em] text-[12px] text-[#FF6B35] mb-[8px]">Reels</h3>
-                                <p className="font-sans font-[400] text-[13px] leading-[1.6] text-[#F5F5F7]/50">
-                                    Punchy. Story-first. Never just a highlight reel.
-                                </p>
-                            </div>
-                        </motion.div>
-
-                        {/* Card 3 */}
-                        <motion.div 
-                            variants={fadeUpVariant}
-                            className={`shrink-0 w-[80vw] md:w-auto snap-start ${glassCard} ${glassCardHover} hover:shadow-[0_8px_48px_rgba(0,0,0,0.5),_0_0_60px_rgba(126,184,212,0.05)] flex flex-col overflow-hidden`}
-                        >
-                            <div className="w-full aspect-[16/9] bg-white/[0.03] border-b border-white/[0.06] flex items-center justify-center relative bg-black">
-                                {hiringData.card3Media ? (
-                                    <img src={hiringData.card3Media} alt="Documentary" className="absolute inset-0 w-full h-full object-cover" />
-                                ) : (
-                                    <span className="font-admin text-[11px] uppercase tracking-[0.15em] text-[#F5F5F7] opacity-20">
-                                        [ EXAMPLE EDIT ]
-                                    </span>
-                                )}
-                            </div>
-                            <div className="p-[20px]">
-                                <h3 className="font-sans font-[700] uppercase tracking-[0.12em] text-[12px] text-[#7EB8D4] mb-[8px]">Documentary</h3>
-                                <p className="font-sans font-[400] text-[13px] leading-[1.6] text-[#F5F5F7]/50">
-                                    Real people, real moments. No polish over truth.
-                                </p>
-                            </div>
-                        </motion.div>
-
-                    </div>
-                    <style>{`
-                        .hide-scrollbars::-webkit-scrollbar { display: none; }
-                        .hide-scrollbars { -ms-overflow-style: none; scrollbar-width: none; }
-                    `}</style>
-                </motion.section>
-
-                <div className="mb-[52px] md:mb-[72px]" />
-
-                {/* WHAT MAKES A GREAT APPLICANT */}
-                <motion.section 
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-10%" }}
-                    variants={fadeUpVariant}
-                    className="max-w-[800px] mx-auto"
-                >
-                    <h2 className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center justify-center gap-2">
-                        <span className="text-[#E8A020]">●</span> What makes a great applicant
-                    </h2>
-                    <div 
-                        className={glassCard}
-                        style={{ padding: '32px', boxShadow: '0 0 60px rgba(232,160,32,0.05)' }}
-                    >
-                        <div 
-                            className="font-sans font-[400] text-[15px] leading-[1.8] text-[#F5F5F7]/80 text-center space-y-4 [&_a]:text-[#E8A020] [&_a]:underline [&_a]:decoration-[#E8A020]/30 hover:[&_a]:decoration-[#E8A020]"
-                            dangerouslySetInnerHTML={{ __html: hiringData.applicantParagraph }} 
-                        />
-                    </div>
-                </motion.section>
-
-                <div className="mb-[52px] md:mb-[72px]" />
-
-                {/* THE PROCESS */}
-                <motion.section 
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-10%" }}
-                    variants={staggerContainer}
-                    className="max-w-[800px] mx-auto"
-                >
-                    <h2 className="font-admin text-[11px] uppercase tracking-[0.18em] text-[#F5F5F7]/60 mb-[28px] flex items-center justify-center gap-2">
-                        <span className="text-[#E8A020]">●</span> The Process
-                    </h2>
-                    
-                    <div className="space-y-[12px]">
-                        {hiringData.processSteps.map((step, i) => (
-                            <motion.div 
-                                key={i}
-                                variants={fadeUpVariant}
-                                className={`${glassCard} flex items-center gap-[28px] px-[20px] py-[20px] md:px-[28px] md:py-[24px] rounded-[16px]`}
-                            >
-                                <span 
-                                    className="font-sans font-[800] leading-none min-w-[56px] text-[48px] md:text-[64px]"
-                                    style={{ 
-                                        color: i === 0 ? '#E8A020' : i === 1 ? 'rgba(232,160,32,0.6)' : 'rgba(232,160,32,0.4)' 
-                                    }}
-                                >
-                                    {i + 1}
-                                </span>
-                                <p className="font-sans font-[400] text-[15px] leading-[1.6] text-[#F5F5F7]">
-                                    {step}
-                                </p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </motion.section>
-
-                {/* CTA SECTION */}
-                <motion.section 
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-10%" }}
-                    variants={fadeUpVariant}
-                    className="py-[64px] text-center"
-                >
-                    <div className="border-t border-white/[0.07] mb-[64px]" />
-                    
-                    <h2 className="font-sans font-[800] text-[38px] uppercase tracking-[-0.01em] mb-[12px]">
-                        Ready to cut?
-                    </h2>
-                    <p className="font-admin text-[13px] opacity-35 mb-[36px]">
-                        No rush. Take your time, show your skills.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row justify-center gap-[14px] flex-wrap">
-                        {hiringData.cta1Label && (
-                            <a 
-                                href={hiringData.cta1URL || hiringData.callToActionURL || '#'}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-[#050505] font-sans font-[700] text-[13px] uppercase tracking-[0.1em] px-[36px] py-[15px] rounded-[14px] hover:brightness-110 transition-all duration-250 ease-out shadow-[0_4px_24px_rgba(232,160,32,0.15)] w-full sm:w-auto"
-                                style={{ backgroundColor: hiringData.cta1Color || '#E8A020' }}
-                            >
-                                {hiringData.cta1Label}
-                            </a>
-                        )}
-                        {hiringData.cta2Label && (
-                            <a 
-                                href={hiringData.cta2URL || '#'}
-                                target={hiringData.cta2URL ? "_blank" : "_self"}
-                                rel="noreferrer"
-                                onClick={(e) => {
-                                    if (!hiringData.cta2URL) {
-                                        e.preventDefault();
-                                        alert("Upload form configuration required.");
-                                    }
-                                }}
-                                className={`bg-white/[0.04] backdrop-blur-[24px] border border-white/[0.09] shadow-[0_4px_40px_rgba(0,0,0,0.4)] text-[#F5F5F7] font-sans font-[700] text-[13px] uppercase tracking-[0.1em] px-[36px] py-[15px] rounded-[14px] hover:bg-white/[0.07] hover:border-white/25 transition-all duration-250 ease-out w-full sm:w-auto`}
-                            >
-                                {hiringData.cta2Label}
-                            </a>
-                        )}
-                    </div>
-                </motion.section>
-                
-            </div>
+        {/* ============ STATUS STRIP ============ */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '11px clamp(20px,5vw,64px)', borderBottom: '1px solid rgba(236,231,221,0.13)', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.6)' }}>
+          <span>Liam&nbsp;Cinema&nbsp;<span style={{ color: 'rgba(236,231,221,0.3)' }}>/</span>&nbsp;Editorial&nbsp;Dept.</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '9px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#E5484D', animation: 'blink 1.4s steps(1) infinite' }}></span>REC&nbsp;&nbsp;01:06:47:26</span>
         </div>
-    );
+
+        {/* ============ HERO ============ */}
+        <section data-screen-label="Hero" style={{ position: 'relative', padding: 'clamp(34px,5vw,60px) clamp(20px,5vw,64px) 0' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+
+            {/* top letterbox label */}
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', marginBottom: 'clamp(24px,4vw,46px)' }}>Aspect 2.39:1 &nbsp;·&nbsp; 24 FPS &nbsp;·&nbsp; LOG-C &nbsp;·&nbsp; Take 01</div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,60px)', alignItems: 'center' }} className="md:grid-cols-2 grid-cols-1">
+
+              {/* headline */}
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#E9A23B', marginBottom: '22px' }}>[ Position Open — Cinematic Editor ]</div>
+                <h1 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', lineHeight: 0.86, letterSpacing: '0.005em' }}>
+                  <span style={{ display: 'block', fontSize: 'clamp(30px,4vw,52px)', color: 'rgba(236,231,221,0.92)' }}>{hiringData.titleLine1 || "I'm hiring a"}</span>
+                  <span style={{ display: 'block', fontSize: 'clamp(64px,10vw,148px)', color: '#E9A23B', margin: '0.02em 0' }} dangerouslySetInnerHTML={{ __html: hiringData.titleLine2 || "Cinematic<br>Editor" }}></span>
+                  <span style={{ display: 'block', fontSize: 'clamp(30px,4vw,52px)', color: 'rgba(236,231,221,0.92)' }}>{hiringData.titleLine3 || "to join the team."}</span>
+                </h1>
+              </div>
+
+              {/* monitor */}
+              <div style={{ position: 'relative' }}>
+                <div style={{ position: 'relative', background: '#000', border: '1px solid rgba(236,231,221,0.18)', padding: '8px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <MediaRenderer src={hiringData.heroImage} alt="Hero" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }} />
+                    {/* monitor overlay HUD */}
+                    <div style={{ position: 'absolute', top: '9px', left: '10px', display: 'flex', alignItems: 'center', gap: '7px', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.12em', color: 'rgba(236,231,221,0.85)', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}><span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#E5484D', animation: 'blink 1.4s steps(1) infinite' }}></span>REC</div>
+                    <div style={{ position: 'absolute', bottom: '9px', right: '10px', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.1em', color: 'rgba(236,231,221,0.85)', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>01:06:47:26</div>
+                    {/* corner ticks */}
+                    <div style={{ position: 'absolute', top: '6px', left: '6px', width: '14px', height: '14px', borderTop: '2px solid rgba(236,231,221,0.7)', borderLeft: '2px solid rgba(236,231,221,0.7)' }}></div>
+                    <div style={{ position: 'absolute', top: '6px', right: '6px', width: '14px', height: '14px', borderTop: '2px solid rgba(236,231,221,0.7)', borderRight: '2px solid rgba(236,231,221,0.7)' }}></div>
+                    <div style={{ position: 'absolute', bottom: '6px', left: '6px', width: '14px', height: '14px', borderBottom: '2px solid rgba(236,231,221,0.7)', borderLeft: '2px solid rgba(236,231,221,0.7)' }}></div>
+                    <div style={{ position: 'absolute', bottom: '6px', right: '6px', width: '14px', height: '14px', borderBottom: '2px solid rgba(236,231,221,0.7)', borderRight: '2px solid rgba(236,231,221,0.7)' }}></div>
+                  </div>
+                </div>
+                {/* live RGB waveform scopes */}
+                <div style={{ marginTop: '8px', border: '1px solid rgba(236,231,221,0.14)', background: '#070708', padding: '8px 8px 9px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.45)', marginBottom: '7px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3DD68C', animation: 'blink 1.4s steps(1) infinite' }}></span>RGB Parade · Live</span>
+                    <span>WFM</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px' }}>
+                    <div style={{ position: 'relative' }}>
+                      <canvas data-scope="r" style={{ width: '100%', height: '60px', display: 'block' }}></canvas>
+                      <span style={{ position: 'absolute', top: '4px', left: '5px', fontFamily: "'JetBrains Mono', monospace", fontSize: '8.5px', letterSpacing: '0.1em', color: 'rgba(229,72,77,0.95)' }}>R</span>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <canvas data-scope="g" style={{ width: '100%', height: '60px', display: 'block' }}></canvas>
+                      <span style={{ position: 'absolute', top: '4px', left: '5px', fontFamily: "'JetBrains Mono', monospace", fontSize: '8.5px', letterSpacing: '0.1em', color: 'rgba(80,200,120,0.95)' }}>G</span>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <canvas data-scope="b" style={{ width: '100%', height: '60px', display: 'block' }}></canvas>
+                      <span style={{ position: 'absolute', top: '4px', left: '5px', fontFamily: "'JetBrains Mono', monospace", fontSize: '8.5px', letterSpacing: '0.1em', color: 'rgba(95,160,208,0.95)' }}>B</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* call sheet strip */}
+            <div style={{ marginTop: 'clamp(34px,5vw,64px)', borderTop: '1px solid rgba(236,231,221,0.13)', borderBottom: '1px solid rgba(236,231,221,0.13)', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }} className="grid-cols-2 md:grid-cols-4 [&>div:nth-child(2)]:border-r-0 md:[&>div:nth-child(2)]:border-r-[1px] md:[&>div:nth-child(2)]:border-solid md:[&>div:nth-child(2)]:border-white/10">
+              <div style={{ padding: '18px clamp(14px,2vw,24px) 18px 0', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Role</div>
+                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Cinematic Editor</div>
+              </div>
+              <div style={{ padding: '18px clamp(14px,2vw,24px)', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Engagement</div>
+                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Monthly Retainer</div>
+              </div>
+              <div style={{ padding: '18px clamp(14px,2vw,24px)', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Output</div>
+                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Reels · Travel · Docs</div>
+              </div>
+              <div style={{ padding: '18px 0 18px clamp(14px,2vw,24px)' }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Brand</div>
+                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600, color: '#E9A23B' }}>@liamcinema</div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ============ THE BRIEF ============ */}
+        <section data-reveal data-screen-label="Brief" style={{ padding: 'clamp(64px,9vw,120px) clamp(20px,5vw,64px) 0' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,0.3fr) minmax(0,0.7fr)', gap: 'clamp(24px,4vw,56px)' }} className="md:grid-cols-2 grid-cols-1">
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.5)' }}>
+              <div style={{ color: '#E9A23B' }}>Reel 01</div>
+              <div style={{ marginTop: '6px' }}>The Brief</div>
+              <div style={{ marginTop: '18px', color: 'rgba(236,231,221,0.32)' }}>00:00:14:08</div>
+            </div>
+            <div className="[&_a]:text-[#E9A23B] [&_a]:no-underline [&_a]:border-b [&_a]:border-[#E9A23B]/45">
+              <div style={{ margin: '0 0 20px', fontSize: 'clamp(19px,2vw,26px)', lineHeight: 1.5, fontWeight: 500, color: 'rgba(236,231,221,0.92)' }} dangerouslySetInnerHTML={{ __html: hiringData.introParagraph1 || "I'm Liam — a filmmaker and founder. I'm looking for a monthly retainer editor to cut reels for my personal brand, <a href=\"#\" style=\"color:#E9A23B;text-decoration:none;border-bottom:1px solid rgba(233,162,59,0.45);\">@liamcinema</a>." }} />
+              <div style={{ margin: 0, fontSize: 'clamp(15px,1.4vw,18px)', lineHeight: 1.7, color: 'rgba(236,231,221,0.6)', maxWidth: '60ch' }} dangerouslySetInnerHTML={{ __html: hiringData.introParagraph2 || "You'll be working with footage from professional cinema cameras — travel films, reels and documentary content. The cut matters more than the trend." }} />
+            </div>
+          </div>
+        </section>
+
+        {/* ============ PULL QUOTE ============ */}
+        <section data-reveal data-anim="quote" data-screen-label="Quote" style={{ padding: 'clamp(40px,5vw,72px) clamp(20px,5vw,64px) 0' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', borderTop: '1px solid rgba(236,231,221,0.13)', paddingTop: 'clamp(32px,4vw,52px)' }}>
+            <div style={{ display: 'flex', gap: 'clamp(16px,2vw,28px)', alignItems: 'flex-start' }}>
+              <span style={{ fontFamily: "'Anton', sans-serif", fontSize: 'clamp(60px,8vw,120px)', lineHeight: 0.7, color: '#E9A23B' }}>“</span>
+              <div style={{ margin: 0, fontFamily: "'Archivo', sans-serif", fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(24px,3.4vw,46px)', lineHeight: 1.18, letterSpacing: '-0.01em', color: '#ECE7DD' }} dangerouslySetInnerHTML={{ __html: hiringData.introParagraph3 || "If your edits feel like short films instead of <span style=\"color:rgba(236,231,221,0.45);\">'content'</span>, send your work." }} />
+            </div>
+          </div>
+        </section>
+
+        {/* ============ MUST BE ABLE TO ============ */}
+        <section data-reveal data-screen-label="Requirements" style={{ padding: 'clamp(64px,9vw,120px) clamp(20px,5vw,64px) 0' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', borderBottom: '1px solid rgba(236,231,221,0.13)', paddingBottom: '18px', marginBottom: '6px' }}>
+              <h2 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '0.01em', lineHeight: 0.9 }}>Must be able to</h2>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', whiteSpace: 'nowrap', textAlign: 'right', lineHeight: 1.7 }}>Reel 02 — Spec Sheet<br/><span style={{ color: 'rgba(236,231,221,0.3)' }}>Tap a line to tick ✓</span></span>
+            </div>
+
+            <div>
+              {hiringData.roleRequirements.map((req, i) => (
+                <div key={i} data-reveal-child className="req-row" onClick={() => toggleReq(i)} style={{ display: 'grid', gridTemplateColumns: '28px 50px minmax(0,1fr) auto', alignItems: 'center', gap: 'clamp(14px,2.2vw,34px)', padding: 'clamp(20px,2.4vw,30px) 8px', borderBottom: '1px solid rgba(236,231,221,0.1)', transition: 'background .25s, padding-left .25s', position: 'relative', cursor: 'pointer', userSelect: 'none' }}>
+                  {ticked[i] ? (
+                    <span style={{ width: '27px', height: '27px', background: '#E9A23B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0B0B0C', fontSize: '16px', fontWeight: 700, lineHeight: 1 }}>✓</span>
+                  ) : (
+                    <span style={{ width: '27px', height: '27px', border: '1.5px solid rgba(236,231,221,0.28)', transition: 'border-color .2s' }}></span>
+                  )}
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(13px,1.2vw,15px)', color: '#E9A23B', letterSpacing: '0.06em' }}>R0{i + 1}</span>
+                  <span style={{ fontFamily: "'Anton', sans-serif", textTransform: 'uppercase', fontWeight: 400, fontSize: 'clamp(18px,2.4vw,34px)', lineHeight: 1.04, letterSpacing: '0.01em', color: '#ECE7DD' }}>{req}</span>
+                  {ticked[i] ? (
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#E9A23B', border: '1px solid rgba(233,162,59,0.5)', padding: '5px 9px', whiteSpace: 'nowrap' }}>✓ Noted</span>
+                  ) : (
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', border: '1px solid rgba(236,231,221,0.18)', padding: '5px 9px', whiteSpace: 'nowrap' }}>Required</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ============ CONTACT SHEET ============ */}
+        <section data-reveal data-screen-label="Work" style={{ padding: 'clamp(64px,9vw,120px) clamp(20px,5vw,64px) 0' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', marginBottom: 'clamp(22px,3vw,34px)' }}>
+              <h2 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '0.01em', lineHeight: 0.9 }}>The kind of work<br/>we make</h2>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', whiteSpace: 'nowrap' }}>Reel 03 — Contact Sheet</span>
+            </div>
+
+            {/* filmstrip */}
+            <div style={{ background: '#0e0e10', border: '1px solid rgba(236,231,221,0.13)' }}>
+              <div style={{ height: '16px', backgroundColor: '#050505', backgroundImage: 'radial-gradient(circle at center, #d8d3c6 36%, transparent 40%)', backgroundSize: '30px 16px' }}></div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '5px', padding: '5px', background: '#050505' }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }} className="card-zoom">
+                    <MediaRenderer src={hiringData.card1Media} alt="Travel" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }} className="card-zoom">
+                    <MediaRenderer src={hiringData.card2Media} alt="Reels" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }} className="card-zoom">
+                    <MediaRenderer src={hiringData.card3Media} alt="Doc" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+              </div>
+              <div style={{ height: '16px', backgroundColor: '#050505', backgroundImage: 'radial-gradient(circle at center, #d8d3c6 36%, transparent 40%)', backgroundSize: '30px 16px' }}></div>
+            </div>
+
+            {/* captions */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '5px', marginTop: '18px' }}>
+              <div data-reveal-child>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', marginBottom: '11px' }}>Frame 037 &nbsp;·&nbsp; 00:00:41:12</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#E9A23B', marginBottom: '8px' }}>Travel Films</div>
+                <p className="hidden md:block" style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: 'rgba(236,231,221,0.62)' }}>Cinematic long-form docs. Slow burn. Emotional payoff.</p>
+              </div>
+              <div data-reveal-child>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', marginBottom: '11px' }}>Frame 041 &nbsp;·&nbsp; 00:01:06:47</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#E5684A', marginBottom: '8px' }}>Reels</div>
+                <p className="hidden md:block" style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: 'rgba(236,231,221,0.62)' }}>Punchy. Story-first. Never just a highlight reel.</p>
+              </div>
+              <div data-reveal-child>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', marginBottom: '11px' }}>Frame 045 &nbsp;·&nbsp; 00:02:14:03</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5FA0D0', marginBottom: '8px' }}>Documentary</div>
+                <p className="hidden md:block" style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: 'rgba(236,231,221,0.62)' }}>Real people, real moments. No polish over truth.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ DIRECTOR'S NOTE ============ */}
+        <section data-reveal data-screen-label="Applicant" style={{ marginTop: 'clamp(64px,9vw,120px)', background: '#EAE4D8', color: '#16140F', padding: 'clamp(56px,8vw,104px) clamp(20px,5vw,64px)' }}>
+          <div style={{ maxWidth: '980px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(22,20,15,0.55)', marginBottom: 'clamp(26px,3vw,40px)' }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16140F' }}></span>
+              Director's Note — What makes a great applicant
+            </div>
+            <div style={{ margin: 0, fontFamily: "'Archivo', sans-serif", fontWeight: 500, fontSize: 'clamp(22px,3vw,40px)', lineHeight: 1.32, letterSpacing: '-0.015em' }} dangerouslySetInnerHTML={{ __html: hiringData.applicantParagraph || "I care more about <em style=\"font-style:italic;\">attitude</em> than a perfect showreel. Technical skill develops; <span style=\"color:#B9762A;\">taste is harder to find.</span> I'm looking for someone who watches a cut back and genuinely can't send it out knowing something's off — not because it's their job, but because they care. If that's how you work, we'll get along fine." }} className="[&_em]:font-style-italic [&_p]:m-0" />
+            <div style={{ marginTop: 'clamp(30px,4vw,48px)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '48px', height: '1px', background: '#16140F' }}></div>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontStyle: 'italic', fontSize: 'clamp(18px,2vw,24px)', fontWeight: 600 }}>Liam</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(22,20,15,0.5)' }}>Founder · Liam Cinema</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ THE PROCESS ============ */}
+        <section data-reveal data-screen-label="Process" style={{ padding: 'clamp(64px,9vw,120px) clamp(20px,5vw,64px) 0' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', marginBottom: 'clamp(40px,5vw,64px)' }}>
+              <h2 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '0.01em', lineHeight: 0.9 }}>The process</h2>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', whiteSpace: 'nowrap' }}>Reel 04 — Timeline</span>
+            </div>
+
+            {/* track with markers */}
+            <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', alignItems: 'center', height: '34px', marginBottom: '26px' }} className="before:content-[''] before:absolute before:left-0 before:right-0 before:top-1/2 before:h-[2px] before:bg-white/10">
+              <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: '#E9A23B', transform: 'rotate(45deg)' }}></div></div>
+              <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: 'rgba(233,162,59,0.55)', transform: 'rotate(45deg)' }}></div></div>
+              <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: '#0B0B0C', border: '2px solid #E9A23B', transform: 'rotate(45deg)' }}></div></div>
+            </div>
+
+            {/* step content */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'clamp(20px,3vw,48px)' }}>
+              {hiringData.processSteps.map((step, i) => (
+                  <div key={i} data-reveal-child>
+                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', color: 'rgba(236,231,221,0.45)', marginBottom: '10px' }}>
+                        {i === 0 ? "00:00:00 — IN" : i === 1 ? "00:01:30 — EDIT" : "00:03:00 — OUT"}
+                    </div>
+                    <h3 style={{ margin: '0 0 12px', fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', fontSize: 'clamp(22px,2.4vw,32px)', color: i === 0 ? '#E9A23B' : i === 1 ? 'rgba(233,162,59,0.7)' : 'rgba(233,162,59,0.5)' }}>
+                        {i === 0 ? "Pull footage" : i === 1 ? "Make the cut" : "Submit"}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.65, color: 'rgba(236,231,221,0.62)' }}>{step}</p>
+                  </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ============ CTA ============ */}
+        <section data-reveal data-screen-label="CTA" style={{ padding: 'clamp(80px,11vw,160px) clamp(20px,5vw,64px) clamp(40px,5vw,64px)' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '18px' }}>End Of Reel — Your Move</div>
+            <h2 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', fontSize: 'clamp(64px,13vw,200px)', lineHeight: 0.82, letterSpacing: '0.01em' }}>Ready<br/><span style={{ color: '#E9A23B' }}>to cut?</span></h2>
+            <p style={{ margin: '26px 0 40px', fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', letterSpacing: '0.05em', color: 'rgba(236,231,221,0.45)' }}>No rush. Take your time, show your skills.</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+              <a href={hiringData.cta1URL || "https://drive.google.com/drive/folders/14TULwn541F9Jh1nV42A0fPf93Qi7Di1R?usp=drive_link"} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '11px', background: hiringData.cta1Color || '#E9A23B', color: '#0B0B0C', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '18px 34px', textDecoration: 'none', transition: 'filter .25s, transform .25s' }}>
+                <span style={{ fontSize: '11px' }}>▶</span> {hiringData.cta1Label || "Download footage"}
+              </a>
+              <a href={hiringData.cta2URL || "#"} onClick={(e) => {
+                  if (!hiringData.cta2URL) {
+                      e.preventDefault();
+                      alert("Upload form configuration required. Please link a Google Form or upload link.");
+                  }
+              }} target="_blank" rel="noreferrer" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '11px', background: 'transparent', border: '1px solid rgba(236,231,221,0.28)', color: '#ECE7DD', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '18px 34px', textDecoration: 'none', transition: 'border-color .25s, background .25s' }}>
+                {hiringData.cta2Label || "Submit your cut"}
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* footer status */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '14px clamp(20px,5vw,64px)', borderTop: '1px solid rgba(236,231,221,0.13)', fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.38)' }}>
+          <span>© Liam Cinema</span>
+          <span>TC 01:06:47:26 / 24FPS</span>
+          <span>EOF</span>
+        </div>
+
+      </div>
+    </>
+  );
 };
 
 export default Hiring;
-
