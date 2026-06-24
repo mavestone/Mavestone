@@ -180,9 +180,9 @@ export const Hiring: React.FC = () => {
         <div style={{ position: 'fixed', inset: '-80px', zIndex: 9000, pointerEvents: 'none', opacity: 0.045, mixBlendMode: 'screen', backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"140\" height=\"140\"><filter id=\"n\"><feTurbulence type=\"fractalNoise\" baseFrequency=\"0.85\" numOctaves=\"2\"/></filter><rect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\"/></svg>')", backgroundSize: '160px 160px', animation: 'grainShift 1.6s steps(3) infinite' }}></div>
 
         {/* ============ STATUS STRIP ============ */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '11px clamp(20px,5vw,64px)', borderBottom: '1px solid rgba(236,231,221,0.13)', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.6)' }}>
-          <span>Liam&nbsp;Cinema&nbsp;<span style={{ color: 'rgba(236,231,221,0.3)' }}>/</span>&nbsp;Editorial&nbsp;Dept.</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '9px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#E5484D', animation: 'blink 1.4s steps(1) infinite' }}></span>REC&nbsp;&nbsp;01:06:47:26</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '11px clamp(12px,4vw,64px)', borderBottom: '1px solid rgba(236,231,221,0.13)', fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(9px, 2.2vw, 11px)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.6)' }}>
+          <span className="truncate">Liam&nbsp;Cinema&nbsp;<span style={{ color: 'rgba(236,231,221,0.3)' }} className="hidden sm:inline">/&nbsp;Editorial&nbsp;Dept.</span></span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#E5484D', animation: 'blink 1.4s steps(1) infinite' }}></span>REC&nbsp;<span className="hidden xs:inline">01:06:47:26</span></span>
         </div>
 
         {/* ============ HERO ============ */}
@@ -192,15 +192,15 @@ export const Hiring: React.FC = () => {
             {/* top letterbox label */}
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', marginBottom: 'clamp(24px,4vw,46px)' }}>Aspect 2.39:1 &nbsp;·&nbsp; 24 FPS &nbsp;·&nbsp; LOG-C &nbsp;·&nbsp; Take 01</div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,60px)', alignItems: 'center' }} className="md:grid-cols-2 grid-cols-1">
+            <div style={{ display: 'grid', gap: 'clamp(28px,4vw,60px)', alignItems: 'center' }} className="grid-cols-1 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
 
               {/* headline */}
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#E9A23B', marginBottom: '22px' }}>[ Position Open — Cinematic Editor ]</div>
-                <h1 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', lineHeight: 0.86, letterSpacing: '0.005em' }}>
-                  <span style={{ display: 'block', fontSize: 'clamp(30px,4vw,52px)', color: 'rgba(236,231,221,0.92)' }}>{hiringData.titleLine1 || "I'm hiring a"}</span>
-                  <span style={{ display: 'block', fontSize: 'clamp(64px,10vw,148px)', color: '#E9A23B', margin: '0.02em 0' }} dangerouslySetInnerHTML={{ __html: hiringData.titleLine2 || "Cinematic<br>Editor" }}></span>
-                  <span style={{ display: 'block', fontSize: 'clamp(30px,4vw,52px)', color: 'rgba(236,231,221,0.92)' }}>{hiringData.titleLine3 || "to join the team."}</span>
+                <h1 style={{ margin: 0, fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.005em' }} className="leading-[1.1] md:leading-[0.86]">
+                  <span style={{ display: 'block', fontSize: 'clamp(24px,5vw,52px)', color: 'rgba(236,231,221,0.92)' }}>{hiringData.titleLine1 || "I'm hiring a"}</span>
+                  <span style={{ display: 'block', fontSize: 'clamp(46px,12vw,148px)', color: '#E9A23B', margin: '0.02em 0' }} className="leading-[0.95] md:leading-[0.86]" dangerouslySetInnerHTML={{ __html: hiringData.titleLine2 || "Cinematic<br>Editor" }}></span>
+                  <span style={{ display: 'block', fontSize: 'clamp(24px,5vw,52px)', color: 'rgba(236,231,221,0.92)' }}>{hiringData.titleLine3 || "to join the team."}</span>
                 </h1>
               </div>
 
@@ -244,22 +244,22 @@ export const Hiring: React.FC = () => {
             </div>
 
             {/* call sheet strip */}
-            <div style={{ marginTop: 'clamp(34px,5vw,64px)', borderTop: '1px solid rgba(236,231,221,0.13)', borderBottom: '1px solid rgba(236,231,221,0.13)', display: 'grid' }} className="grid-cols-2 md:grid-cols-4 [&>div:nth-child(2)]:border-r-0 md:[&>div:nth-child(2)]:border-r-[1px] md:[&>div:nth-child(2)]:border-solid md:[&>div:nth-child(2)]:border-white/10">
-              <div style={{ padding: '18px clamp(14px,2vw,24px) 18px 0', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
+            <div style={{ marginTop: 'clamp(34px,5vw,64px)', borderTop: '1px solid rgba(236,231,221,0.13)', borderBottom: '1px solid rgba(236,231,221,0.13)', display: 'grid' }} className="grid-cols-2 md:grid-cols-4 [&>div]:border-white/10 [&>div:nth-child(1)]:border-r [&>div:nth-child(1)]:border-b md:[&>div:nth-child(1)]:border-b-0 [&>div:nth-child(2)]:border-b md:[&>div:nth-child(2)]:border-b-0 md:[&>div:nth-child(2)]:border-r [&>div:nth-child(3)]:border-r">
+              <div style={{ padding: '16px clamp(8px,2vw,24px) 16px 0' }} className="min-w-0">
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Role</div>
-                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Cinematic Editor</div>
+                <div style={{ fontSize: 'clamp(13px,1.3vw,17px)', fontWeight: 600, wordWrap: 'break-word' }}>Cinematic Editor</div>
               </div>
-              <div style={{ padding: '18px clamp(14px,2vw,24px)', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
+              <div style={{ padding: '16px clamp(8px,2vw,24px)' }} className="min-w-0">
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Engagement</div>
-                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Monthly Retainer</div>
+                <div style={{ fontSize: 'clamp(13px,1.3vw,17px)', fontWeight: 600, wordWrap: 'break-word' }}>Monthly Retainer</div>
               </div>
-              <div style={{ padding: '18px clamp(14px,2vw,24px)', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
+              <div style={{ padding: '16px clamp(8px,2vw,24px)' }} className="min-w-0">
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Output</div>
-                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Reels · Travel · Docs</div>
+                <div style={{ fontSize: 'clamp(13px,1.3vw,17px)', fontWeight: 600, wordWrap: 'break-word' }}>Reels · Travel · Docs</div>
               </div>
-              <div style={{ padding: '18px 0 18px clamp(14px,2vw,24px)' }}>
+              <div style={{ padding: '16px 0 16px clamp(8px,2vw,24px)' }} className="min-w-0">
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Brand</div>
-                <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600, color: '#E9A23B' }}>@liamcinema</div>
+                <div style={{ fontSize: 'clamp(13px,1.3vw,17px)', fontWeight: 600, color: '#E9A23B', wordWrap: 'break-word' }}>@liamcinema</div>
               </div>
             </div>
 
@@ -391,21 +391,21 @@ export const Hiring: React.FC = () => {
             </div>
 
             {/* track with markers */}
-            <div style={{ position: 'relative', alignItems: 'center', height: '34px', marginBottom: '26px' }} className="hidden md:grid grid-cols-3 before:content-[''] before:absolute before:left-0 before:right-0 before:top-1/2 before:h-[2px] before:bg-white/10">
-              <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: '#E9A23B', transform: 'rotate(45deg)' }}></div></div>
-              <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: 'rgba(233,162,59,0.55)', transform: 'rotate(45deg)' }}></div></div>
-              <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: '#0B0B0C', border: '2px solid #E9A23B', transform: 'rotate(45deg)' }}></div></div>
+            <div style={{ position: 'relative', alignItems: 'center', height: '34px', marginBottom: '26px' }} className={`hidden md:grid ${{ 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6' }[Math.max(1, Math.min(6, hiringData.processSteps.filter(s => s.trim().length > 0).length))] || 'md:grid-cols-3'} before:content-[''] before:absolute before:left-0 before:right-0 before:top-1/2 before:h-[2px] before:bg-white/10`}>
+              {hiringData.processSteps.filter(s => s.trim().length > 0).map((_, i) => (
+                  <div key={i} style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: i === 0 ? '#E9A23B' : i === 1 ? 'rgba(233,162,59,0.55)' : '#0B0B0C', border: i >= 2 ? '2px solid #E9A23B' : 'none', transform: 'rotate(45deg)' }}></div></div>
+              ))}
             </div>
 
             {/* step content */}
-            <div style={{ gap: 'clamp(20px,3vw,48px)' }} className="grid grid-cols-1 md:grid-cols-3">
-              {hiringData.processSteps.map((step, i) => (
+            <div style={{ gap: 'clamp(20px,3vw,48px)' }} className={`grid grid-cols-1 ${{ 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6' }[Math.max(1, Math.min(6, hiringData.processSteps.filter(s => s.trim().length > 0).length))] || 'md:grid-cols-3'}`}>
+              {hiringData.processSteps.filter(s => s.trim().length > 0).map((step, i) => (
                   <div key={i} data-reveal-child>
                     <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', color: 'rgba(236,231,221,0.45)', marginBottom: '10px' }}>
-                        {i === 0 ? "00:00:00 — IN" : i === 1 ? "00:01:30 — EDIT" : "00:03:00 — OUT"}
+                        {i === 0 ? "00:00:00 — IN" : i === 1 ? "00:01:30 — EDIT" : `00:0${Math.min(i + 1, 9)}:00 — OUT`}
                     </div>
                     <h3 style={{ margin: '0 0 12px', fontFamily: "'Anton', sans-serif", fontWeight: 400, textTransform: 'uppercase', fontSize: 'clamp(22px,2.4vw,32px)', color: i === 0 ? '#E9A23B' : i === 1 ? 'rgba(233,162,59,0.7)' : 'rgba(233,162,59,0.5)' }}>
-                        {i === 0 ? "Pull footage" : i === 1 ? "Make the cut" : "Submit"}
+                        {i === 0 ? "Pull footage" : i === 1 ? "Make the cut" : i === 2 ? "Submit" : i === 3 ? "Review" : i === 4 ? "Payment" : `Step ${i + 1}`}
                     </h3>
                     <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.65, color: 'rgba(236,231,221,0.62)' }}>{step}</p>
                   </div>
