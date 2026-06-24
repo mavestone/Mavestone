@@ -244,7 +244,7 @@ export const Hiring: React.FC = () => {
             </div>
 
             {/* call sheet strip */}
-            <div style={{ marginTop: 'clamp(34px,5vw,64px)', borderTop: '1px solid rgba(236,231,221,0.13)', borderBottom: '1px solid rgba(236,231,221,0.13)', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }} className="grid-cols-2 md:grid-cols-4 [&>div:nth-child(2)]:border-r-0 md:[&>div:nth-child(2)]:border-r-[1px] md:[&>div:nth-child(2)]:border-solid md:[&>div:nth-child(2)]:border-white/10">
+            <div style={{ marginTop: 'clamp(34px,5vw,64px)', borderTop: '1px solid rgba(236,231,221,0.13)', borderBottom: '1px solid rgba(236,231,221,0.13)', display: 'grid' }} className="grid-cols-2 md:grid-cols-4 [&>div:nth-child(2)]:border-r-0 md:[&>div:nth-child(2)]:border-r-[1px] md:[&>div:nth-child(2)]:border-solid md:[&>div:nth-child(2)]:border-white/10">
               <div style={{ padding: '18px clamp(14px,2vw,24px) 18px 0', borderRight: '1px solid rgba(236,231,221,0.1)' }}>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.42)', marginBottom: '7px' }}>Role</div>
                 <div style={{ fontSize: 'clamp(14px,1.3vw,17px)', fontWeight: 600 }}>Cinematic Editor</div>
@@ -268,7 +268,7 @@ export const Hiring: React.FC = () => {
 
         {/* ============ THE BRIEF ============ */}
         <section data-reveal data-screen-label="Brief" style={{ padding: 'clamp(64px,9vw,120px) clamp(20px,5vw,64px) 0' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,0.3fr) minmax(0,0.7fr)', gap: 'clamp(24px,4vw,56px)' }} className="md:grid-cols-2 grid-cols-1">
+          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gap: 'clamp(24px,4vw,56px)' }} className="grid-cols-1 md:grid-cols-[minmax(0,0.3fr)_minmax(0,0.7fr)]">
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.5)' }}>
               <div style={{ color: '#E9A23B' }}>Reel 01</div>
               <div style={{ marginTop: '6px' }}>The Brief</div>
@@ -301,13 +301,13 @@ export const Hiring: React.FC = () => {
 
             <div>
               {hiringData.roleRequirements.map((req, i) => (
-                <div key={i} data-reveal-child className="req-row" onClick={() => toggleReq(i)} style={{ display: 'grid', gridTemplateColumns: '28px 50px minmax(0,1fr) auto', alignItems: 'center', gap: 'clamp(14px,2.2vw,34px)', padding: 'clamp(20px,2.4vw,30px) 8px', borderBottom: '1px solid rgba(236,231,221,0.1)', transition: 'background .25s, padding-left .25s', position: 'relative', cursor: 'pointer', userSelect: 'none' }}>
+                <div key={i} data-reveal-child className="req-row grid grid-cols-[28px_minmax(0,1fr)_auto] md:grid-cols-[28px_50px_minmax(0,1fr)_auto]" onClick={() => toggleReq(i)} style={{ alignItems: 'center', gap: 'clamp(14px,2.2vw,34px)', padding: 'clamp(20px,2.4vw,30px) 8px', borderBottom: '1px solid rgba(236,231,221,0.1)', transition: 'background .25s, padding-left .25s', position: 'relative', cursor: 'pointer', userSelect: 'none' }}>
                   {ticked[i] ? (
                     <span style={{ width: '27px', height: '27px', background: '#E9A23B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0B0B0C', fontSize: '16px', fontWeight: 700, lineHeight: 1 }}>✓</span>
                   ) : (
                     <span style={{ width: '27px', height: '27px', border: '1.5px solid rgba(236,231,221,0.28)', transition: 'border-color .2s' }}></span>
                   )}
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(13px,1.2vw,15px)', color: '#E9A23B', letterSpacing: '0.06em' }}>R0{i + 1}</span>
+                  <span className="hidden md:block" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(13px,1.2vw,15px)', color: '#E9A23B', letterSpacing: '0.06em' }}>R0{i + 1}</span>
                   <span style={{ fontFamily: "'Anton', sans-serif", textTransform: 'uppercase', fontWeight: 400, fontSize: 'clamp(18px,2.4vw,34px)', lineHeight: 1.04, letterSpacing: '0.01em', color: '#ECE7DD' }}>{req}</span>
                   {ticked[i] ? (
                     <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#E9A23B', border: '1px solid rgba(233,162,59,0.5)', padding: '5px 9px', whiteSpace: 'nowrap' }}>✓ Noted</span>
@@ -331,7 +331,7 @@ export const Hiring: React.FC = () => {
             {/* filmstrip */}
             <div style={{ background: '#0e0e10', border: '1px solid rgba(236,231,221,0.13)' }}>
               <div style={{ height: '16px', backgroundColor: '#050505', backgroundImage: 'radial-gradient(circle at center, #d8d3c6 36%, transparent 40%)', backgroundSize: '30px 16px' }}></div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '5px', padding: '5px', background: '#050505' }}>
+              <div style={{ gap: '5px', padding: '5px', background: '#050505' }} className="grid grid-cols-1 md:grid-cols-3">
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }} className="card-zoom">
                     <MediaRenderer src={hiringData.card1Media} alt="Travel" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
@@ -346,7 +346,7 @@ export const Hiring: React.FC = () => {
             </div>
 
             {/* captions */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '5px', marginTop: '18px' }}>
+            <div style={{ gap: '5px', marginTop: '18px' }} className="grid grid-cols-1 md:grid-cols-3">
               <div data-reveal-child>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(236,231,221,0.4)', marginBottom: '11px' }}>Frame 037 &nbsp;·&nbsp; 00:00:41:12</div>
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#E9A23B', marginBottom: '8px' }}>Travel Films</div>
@@ -391,14 +391,14 @@ export const Hiring: React.FC = () => {
             </div>
 
             {/* track with markers */}
-            <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', alignItems: 'center', height: '34px', marginBottom: '26px' }} className="before:content-[''] before:absolute before:left-0 before:right-0 before:top-1/2 before:h-[2px] before:bg-white/10">
+            <div style={{ position: 'relative', alignItems: 'center', height: '34px', marginBottom: '26px' }} className="hidden md:grid grid-cols-3 before:content-[''] before:absolute before:left-0 before:right-0 before:top-1/2 before:h-[2px] before:bg-white/10">
               <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: '#E9A23B', transform: 'rotate(45deg)' }}></div></div>
               <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: 'rgba(233,162,59,0.55)', transform: 'rotate(45deg)' }}></div></div>
               <div style={{ justifySelf: 'center', position: 'relative', zIndex: 2 }}><div style={{ width: '16px', height: '16px', background: '#0B0B0C', border: '2px solid #E9A23B', transform: 'rotate(45deg)' }}></div></div>
             </div>
 
             {/* step content */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'clamp(20px,3vw,48px)' }}>
+            <div style={{ gap: 'clamp(20px,3vw,48px)' }} className="grid grid-cols-1 md:grid-cols-3">
               {hiringData.processSteps.map((step, i) => (
                   <div key={i} data-reveal-child>
                     <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.16em', color: 'rgba(236,231,221,0.45)', marginBottom: '10px' }}>
