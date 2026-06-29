@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
-import { Shield, ArrowRight, Download, Facebook, Twitter, MessageCircle, Mail, Link as LinkIcon, Check, Lock } from 'lucide-react';
+import { ArrowRight, Download, Facebook, Twitter, MessageCircle, Mail, Link as LinkIcon, Check, Lock } from 'lucide-react';
 
 export const ClientPortalPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -252,19 +252,7 @@ export const ClientPortalPage: React.FC = () => {
         <div className={`transition-all duration-1000 ease-out transform ${revealPortal ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           
           {/* HEADER */}
-          <header className={`max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-between border-b ${styles.border} relative z-10`}>
-            <div className="flex items-center gap-2.5">
-              <Shield size={14} className="text-[#C9A96E]" />
-              <div className="flex flex-col">
-                <span className={`text-[10px] font-bold uppercase tracking-[0.25em] ${isDark ? 'text-white/80' : 'text-[#1A1A1A]/80'} font-sans`}>
-                  Client Workspace
-                </span>
-                <span className={`text-[8px] uppercase tracking-[0.2em] ${styles.textMuted} font-mono mt-0.5`}>
-                  Secure Delivery Portal
-                </span>
-              </div>
-            </div>
-            
+          <header className={`max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-center border-b ${styles.border} relative z-10`}>
             <a href="/" className={`text-xl font-bold tracking-tighter ${styles.logoText} cursor-pointer hover:opacity-80 transition-opacity font-manrope select-none`}>
               Mavestone<span className="text-[#C9A96E]">.</span>
             </a>

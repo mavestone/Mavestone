@@ -169,21 +169,7 @@ export function generatePortalHtml(project: ClientPortal): string {
   <div id="portal-content" class="opacity-0 translate-y-4 transition-all duration-1000 ease-out">
     
     <!-- HEADER -->
-    <header class="max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-between border-b ${styles.border} relative z-10">
-      <div class="flex items-center gap-2.5">
-        <svg class="w-3.5 h-3.5 text-[#C9A96E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path>
-        </svg>
-        <div class="flex flex-col">
-          <span class="text-[10px] font-bold uppercase tracking-[0.25em] ${isDark ? 'text-white/80' : 'text-[#1A1A1A]/80'} font-sans">
-            Client Workspace
-          </span>
-          <span class="text-[8px] uppercase tracking-[0.2em] ${styles.textMuted} font-mono mt-0.5">
-            Secure Delivery Portal
-          </span>
-        </div>
-      </div>
-      
+    <header class="max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-center border-b ${styles.border} relative z-10">
       <a href="/" class="text-xl font-bold tracking-tighter ${styles.logoText} cursor-pointer hover:opacity-80 transition-opacity font-manrope select-none">
         Mavestone<span class="text-[#C9A96E]">.</span>
       </a>
