@@ -11,7 +11,7 @@ export function generatePortalHtml(project: ClientPortal): string {
 
   // Define styling variables based on theme
   const styles = {
-    bg: isDark ? 'bg-[#050505]' : 'bg-[#FAF9F6]',
+    bg: isDark ? 'bg-[#121212]' : 'bg-[#FAF9F6]',
     text: isDark ? 'text-[#F5F5F7]' : 'text-[#1A1A1A]',
     textMuted: isDark ? 'text-white/40' : 'text-[#1A1A1A]/40',
     textBodyMuted: isDark ? 'text-white/60' : 'text-[#1A1A1A]/70',

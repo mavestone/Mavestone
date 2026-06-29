@@ -102,7 +102,7 @@ export const ClientPortalPage: React.FC = () => {
 
   // Define styling variables based on theme
   const styles = {
-    bg: isDark ? 'bg-[#050505]' : 'bg-[#FAF9F6]',
+    bg: isDark ? 'bg-[#121212]' : 'bg-[#FAF9F6]',
     text: isDark ? 'text-[#F5F5F7]' : 'text-[#1A1A1A]',
     textMuted: isDark ? 'text-white/40' : 'text-[#1A1A1A]/40',
     textBodyMuted: isDark ? 'text-white/60' : 'text-[#1A1A1A]/70',
@@ -138,7 +138,7 @@ export const ClientPortalPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen ${isDark ? 'bg-[#050505] text-[#F5F5F7]' : 'bg-[#FAF9F6] text-[#1A1A1A]'} flex items-center justify-center font-sans`}>
+      <div className={`min-h-screen ${isDark ? 'bg-[#121212] text-[#F5F5F7]' : 'bg-[#FAF9F6] text-[#1A1A1A]'} flex items-center justify-center font-sans`}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
           <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-[#1A1A1A]/40'} font-mono`}>Securing Connection...</p>
@@ -149,7 +149,7 @@ export const ClientPortalPage: React.FC = () => {
 
   if (!portal) {
     return (
-      <div className="min-h-screen bg-[#050505] text-[#F5F5F7] flex flex-col items-center justify-center font-sans p-6 text-center">
+      <div className="min-h-screen bg-[#121212] text-[#F5F5F7] flex flex-col items-center justify-center font-sans p-6 text-center">
         <h1 className="text-4xl font-light font-serif tracking-tight text-[#C9A96E] mb-4">404</h1>
         <p className="text-lg font-serif italic text-white/70 max-w-md mb-8">This private delivery workspace could not be found or has expired.</p>
         <p className="text-xs uppercase tracking-widest text-white/40 font-mono">Redirecting to Mavestone...</p>
