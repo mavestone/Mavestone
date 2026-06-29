@@ -61,10 +61,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
 const CustomCursor: React.FC = () => {
   const { isAdminOpen } = useContent();
+  const location = useLocation();
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isOverVideo, setIsOverVideo] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  
+  const isClientPortal = location.pathname !== '/' && 
+                         location.pathname !== '/login' && 
+                         location.pathname !== '/admin' && 
+                         location.pathname !== '/projects' && 
+                         location.pathname !== '/hiring';
   
   // Mouse position values (MotionValues for performance)
   const mouseX = useMotionValue(-100);
@@ -128,7 +135,7 @@ const CustomCursor: React.FC = () => {
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
-    if (isAdminOpen) {
+    if (isAdminOpen || isClientPortal) {
       setIsVisible(false);
       return;
     }
@@ -144,9 +151,9 @@ const CustomCursor: React.FC = () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [mouseX, mouseY, isVisible, isDesktop, isAdminOpen]);
+  }, [mouseX, mouseY, isVisible, isDesktop, isAdminOpen, isClientPortal]);
 
-  if (!isDesktop || isAdminOpen) return null;
+  if (!isDesktop || isAdminOpen || isClientPortal) return null;
 
   const shouldHideBlob = !isVisible || isOverVideo;
 
@@ -198,13 +205,19 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const { isAdminOpen } = useContent();
 
+  const isClientPortal = location.pathname !== '/' && 
+                         location.pathname !== '/login' && 
+                         location.pathname !== '/admin' && 
+                         location.pathname !== '/projects' && 
+                         location.pathname !== '/hiring';
+
   // Reset scroll position on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
 
   return (
-    <div className={`relative bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto ${isAdminOpen ? 'lg:cursor-auto' : 'lg:cursor-none'}`}>
+    <div className={`relative bg-black min-h-screen text-white font-sans selection:bg-white/20 selection:text-white cursor-auto ${isAdminOpen || isClientPortal ? 'lg:cursor-auto' : 'lg:cursor-none'}`}>
         {/* Removed Global Grain Overlay */}
         <CustomCursor />
 
