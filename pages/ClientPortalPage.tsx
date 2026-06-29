@@ -98,43 +98,50 @@ export const ClientPortalPage: React.FC = () => {
   };
 
   const isClean = portal?.stylingType === 'clean';
+  const isDark = portal?.themeMode === 'dark' || (portal?.themeMode !== 'light' && isClean);
 
   // Define styling variables based on theme
   const styles = {
-    bg: isClean ? 'bg-[#050505]' : 'bg-[#FAF9F6]',
-    text: isClean ? 'text-[#F5F5F7]' : 'text-[#1A1A1A]',
-    textMuted: isClean ? 'text-white/40' : 'text-[#1A1A1A]/40',
-    textBodyMuted: isClean ? 'text-white/60' : 'text-[#1A1A1A]/70',
-    textMainMuted: isClean ? 'text-white/80' : 'text-[#1A1A1A]/80',
-    border: isClean ? 'border-white/10' : 'border-[#1A1A1A]/10',
-    borderLight: isClean ? 'border-white/5' : 'border-[#1A1A1A]/5',
-    logoText: isClean ? 'text-white' : 'text-[#1A1A1A]',
+    bg: isDark ? 'bg-[#050505]' : 'bg-[#FAF9F6]',
+    text: isDark ? 'text-[#F5F5F7]' : 'text-[#1A1A1A]',
+    textMuted: isDark ? 'text-white/40' : 'text-[#1A1A1A]/40',
+    textBodyMuted: isDark ? 'text-white/60' : 'text-[#1A1A1A]/70',
+    textMainMuted: isDark ? 'text-white/80' : 'text-[#1A1A1A]/80',
+    border: isDark ? 'border-white/10' : 'border-[#1A1A1A]/10',
+    borderLight: isDark ? 'border-white/5' : 'border-[#1A1A1A]/5',
+    logoText: isDark ? 'text-white' : 'text-[#1A1A1A]',
     fontDisplay: isClean ? 'font-manrope font-bold' : 'font-light font-serif',
     fontBody: isClean ? 'font-sans' : 'font-serif',
     rounded: isClean ? 'rounded-xl' : 'rounded-none',
     button: isClean 
-      ? 'bg-[#C9A96E] hover:bg-white text-black font-semibold rounded-xl' 
-      : 'bg-[#1A1A1A] hover:bg-[#C9A96E] text-white rounded-none',
-    input: isClean
-      ? 'bg-white/5 border border-white/15 focus:border-[#C9A96E] text-white placeholder-white/30 rounded-xl font-sans'
-      : 'bg-white border border-[#C9A96E]/20 focus:border-[#C9A96E] text-[#1A1A1A] placeholder-[#1A1A1A]/30 rounded-none font-mono',
-    cardBg: isClean ? 'bg-white/5 border border-white/10' : 'bg-white border-[#C9A96E]/30',
-    downloadBtn: isClean
-      ? 'bg-white text-black hover:bg-[#C9A96E] hover:text-white rounded-xl'
-      : 'bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-white rounded-none',
-    shareBtn: isClean
+      ? (isDark ? 'bg-[#C9A96E] hover:bg-white text-black font-semibold rounded-xl' : 'bg-[#1A1A1A] hover:bg-[#C9A96E] text-white font-semibold rounded-xl')
+      : (isDark ? 'bg-[#C9A96E] hover:bg-white text-black rounded-none' : 'bg-[#1A1A1A] hover:bg-[#C9A96E] text-white rounded-none'),
+    input: isDark
+      ? (isClean 
+          ? 'bg-white/5 border border-white/15 focus:border-[#C9A96E] text-white placeholder-white/30 rounded-xl font-sans'
+          : 'bg-white/5 border border-white/15 focus:border-[#C9A96E] text-white placeholder-white/30 rounded-none font-mono')
+      : (isClean
+          ? 'bg-white border border-[#1A1A1A]/10 focus:border-[#C9A96E] text-[#1A1A1A] placeholder-[#1A1A1A]/30 rounded-xl font-sans'
+          : 'bg-white border border-[#C9A96E]/20 focus:border-[#C9A96E] text-[#1A1A1A] placeholder-[#1A1A1A]/30 rounded-none font-mono'),
+    cardBg: isDark 
+      ? (isClean ? 'bg-white/5 border border-white/10' : 'bg-white/5 border border-[#C9A96E]/30')
+      : (isClean ? 'bg-white border border-black/5' : 'bg-white border-[#C9A96E]/30'),
+    downloadBtn: isDark
+      ? (isClean ? 'bg-white text-black hover:bg-[#C9A96E] hover:text-white rounded-xl' : 'bg-[#C9A96E] text-black hover:bg-white rounded-none')
+      : (isClean ? 'bg-[#1A1A1A] text-white hover:bg-[#C9A96E] rounded-xl' : 'bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-white rounded-none'),
+    shareBtn: isDark
       ? 'bg-white/5 border border-white/10 text-white hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full'
       : 'bg-white border border-black/5 text-[#1A1A1A] hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full',
-    grainOpacity: isClean ? 'opacity-[0.025]' : 'opacity-[0.045]',
-    grainBlend: isClean ? 'mix-blend-screen' : 'mix-blend-multiply',
+    grainOpacity: isDark ? 'opacity-[0.025]' : 'opacity-[0.045]',
+    grainBlend: isDark ? 'mix-blend-screen' : 'mix-blend-multiply',
   };
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen ${isClean ? 'bg-[#050505] text-[#F5F5F7]' : 'bg-[#FAF9F6] text-[#1A1A1A]'} flex items-center justify-center font-sans`}>
+      <div className={`min-h-screen ${isDark ? 'bg-[#050505] text-[#F5F5F7]' : 'bg-[#FAF9F6] text-[#1A1A1A]'} flex items-center justify-center font-sans`}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
-          <p className={`text-xs uppercase tracking-widest ${isClean ? 'text-white/40' : 'text-[#1A1A1A]/40'} font-mono`}>Securing Connection...</p>
+          <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-[#1A1A1A]/40'} font-mono`}>Securing Connection...</p>
         </div>
       </div>
     );
@@ -237,8 +244,7 @@ export const ClientPortalPage: React.FC = () => {
             
             {/* HERO SECTION */}
             <section className="space-y-6">
-              <div className={`flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] ${styles.textMuted}`}>
-                <span>Client: {portal.clientName}</span>
+              <div className={`flex items-center justify-end gap-4 text-xs font-mono uppercase tracking-[0.15em] ${styles.textMuted}`}>
                 <span>{portal.deliveryDate}</span>
               </div>
               
@@ -253,9 +259,6 @@ export const ClientPortalPage: React.FC = () => {
                 <div className="pt-4 max-w-xl">
                   <p className={`text-lg sm:text-xl ${isClean ? styles.textMainMuted + ' font-light' : 'font-serif italic text-[#1A1A1A]/80 font-light'} leading-relaxed`}>
                     "{portal.message}"
-                  </p>
-                  <p className={`text-sm text-[#C9A96E] mt-3 ${isClean ? 'font-sans uppercase tracking-wider text-[10px]' : 'font-serif italic'}`}>
-                    — Mavestone
                   </p>
                 </div>
               )}

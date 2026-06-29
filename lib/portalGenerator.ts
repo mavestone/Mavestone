@@ -7,35 +7,42 @@ import { ClientPortal } from '../types';
 export function generatePortalHtml(project: ClientPortal): string {
   const jsonConfig = JSON.stringify(project, null, 2);
   const isClean = project.stylingType === 'clean';
+  const isDark = project.themeMode === 'dark' || (project.themeMode !== 'light' && isClean);
 
   // Define styling variables based on theme
   const styles = {
-    bg: isClean ? 'bg-[#050505]' : 'bg-[#FAF9F6]',
-    text: isClean ? 'text-[#F5F5F7]' : 'text-[#1A1A1A]',
-    textMuted: isClean ? 'text-white/40' : 'text-[#1A1A1A]/40',
-    textBodyMuted: isClean ? 'text-white/60' : 'text-[#1A1A1A]/70',
-    textMainMuted: isClean ? 'text-white/80' : 'text-[#1A1A1A]/80',
-    border: isClean ? 'border-white/10' : 'border-[#1A1A1A]/10',
-    borderLight: isClean ? 'border-white/5' : 'border-[#1A1A1A]/5',
-    logoText: isClean ? 'text-white' : 'text-[#1A1A1A]',
+    bg: isDark ? 'bg-[#050505]' : 'bg-[#FAF9F6]',
+    text: isDark ? 'text-[#F5F5F7]' : 'text-[#1A1A1A]',
+    textMuted: isDark ? 'text-white/40' : 'text-[#1A1A1A]/40',
+    textBodyMuted: isDark ? 'text-white/60' : 'text-[#1A1A1A]/70',
+    textMainMuted: isDark ? 'text-white/80' : 'text-[#1A1A1A]/80',
+    border: isDark ? 'border-white/10' : 'border-[#1A1A1A]/10',
+    borderLight: isDark ? 'border-white/5' : 'border-[#1A1A1A]/5',
+    logoText: isDark ? 'text-white' : 'text-[#1A1A1A]',
     fontDisplay: isClean ? 'font-manrope font-bold' : 'font-light font-serif',
     fontBody: isClean ? 'font-sans' : 'font-serif',
     rounded: isClean ? 'rounded-xl' : 'rounded-none',
     button: isClean 
-      ? 'bg-[#C9A96E] hover:bg-white text-black font-semibold rounded-xl' 
-      : 'bg-[#1A1A1A] hover:bg-[#C9A96E] text-white rounded-none',
-    input: isClean
-      ? 'bg-white/5 border border-white/15 focus:border-[#C9A96E] text-white placeholder-white/30 rounded-xl font-sans'
-      : 'bg-white border border-[#C9A96E]/20 focus:border-[#C9A96E] text-[#1A1A1A] placeholder-[#1A1A1A]/30 rounded-none font-mono',
-    cardBg: isClean ? 'bg-white/5 border-white/10' : 'bg-white border-[#C9A96E]/30',
-    downloadBtn: isClean
-      ? 'bg-white text-black hover:bg-[#C9A96E] hover:text-white rounded-xl'
-      : 'bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-white rounded-none',
-    shareBtn: isClean
+      ? (isDark ? 'bg-[#C9A96E] hover:bg-white text-black font-semibold rounded-xl' : 'bg-[#1A1A1A] hover:bg-[#C9A96E] text-white font-semibold rounded-xl')
+      : (isDark ? 'bg-[#C9A96E] hover:bg-white text-black rounded-none' : 'bg-[#1A1A1A] hover:bg-[#C9A96E] text-white rounded-none'),
+    input: isDark
+      ? (isClean 
+          ? 'bg-white/5 border border-white/15 focus:border-[#C9A96E] text-white placeholder-white/30 rounded-xl font-sans'
+          : 'bg-white/5 border border-white/15 focus:border-[#C9A96E] text-white placeholder-white/30 rounded-none font-mono')
+      : (isClean
+          ? 'bg-white border border-[#1A1A1A]/10 focus:border-[#C9A96E] text-[#1A1A1A] placeholder-[#1A1A1A]/30 rounded-xl font-sans'
+          : 'bg-white border border-[#C9A96E]/20 focus:border-[#C9A96E] text-[#1A1A1A] placeholder-[#1A1A1A]/30 rounded-none font-mono'),
+    cardBg: isDark 
+      ? (isClean ? 'bg-white/5 border border-white/10' : 'bg-white/5 border border-[#C9A96E]/30')
+      : (isClean ? 'bg-white border border-black/5' : 'bg-white border-[#C9A96E]/30'),
+    downloadBtn: isDark
+      ? (isClean ? 'bg-white text-black hover:bg-[#C9A96E] hover:text-white rounded-xl' : 'bg-[#C9A96E] text-black hover:bg-white rounded-none')
+      : (isClean ? 'bg-[#1A1A1A] text-white hover:bg-[#C9A96E] rounded-xl' : 'bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-white rounded-none'),
+    shareBtn: isDark
       ? 'p-3 bg-white/5 border border-white/10 text-white hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full'
       : 'p-3 bg-white border border-black/5 text-[#1A1A1A] hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full',
-    grainOpacity: isClean ? 'opacity-[0.025]' : 'opacity-[0.045]',
-    grainBlend: isClean ? 'mix-blend-screen' : 'mix-blend-multiply',
+    grainOpacity: isDark ? 'opacity-[0.025]' : 'opacity-[0.045]',
+    grainBlend: isDark ? 'mix-blend-screen' : 'mix-blend-multiply',
   };
 
   return `<!DOCTYPE html>
@@ -127,7 +134,7 @@ export function generatePortalHtml(project: ClientPortal): string {
       <form id="passcode-form" onsubmit="submitPasscode(event)" class="space-y-6">
         <div class="space-y-2 text-center">
           <p class="text-xs uppercase tracking-[0.2em] ${styles.textMuted} font-mono">Private Access Only</p>
-          <p class="text-sm ${isClean ? 'text-white/70 font-sans' : 'italic font-serif text-[#1A1A1A]/70'}">Delivery portal for ${project.clientName}</p>
+          <p class="text-sm ${isClean ? 'font-sans' : 'italic font-serif'} ${isDark ? 'text-white/70' : 'text-[#1A1A1A]/70'}">Delivery portal for ${project.clientName}</p>
         </div>
 
         <div id="input-wrapper" class="relative">
@@ -168,7 +175,7 @@ export function generatePortalHtml(project: ClientPortal): string {
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path>
         </svg>
         <div class="flex flex-col">
-          <span class="text-[10px] font-bold uppercase tracking-[0.25em] ${isClean ? 'text-white/80' : 'text-[#1A1A1A]/80'} font-sans">
+          <span class="text-[10px] font-bold uppercase tracking-[0.25em] ${isDark ? 'text-white/80' : 'text-[#1A1A1A]/80'} font-sans">
             Client Workspace
           </span>
           <span class="text-[8px] uppercase tracking-[0.2em] ${styles.textMuted} font-mono mt-0.5">
@@ -186,8 +193,7 @@ export function generatePortalHtml(project: ClientPortal): string {
       
       <!-- HERO SECTION -->
       <section class="space-y-6">
-        <div class="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] ${styles.textMuted}">
-          <span>Client: ${project.clientName}</span>
+        <div class="flex items-center justify-end gap-4 text-xs font-mono uppercase tracking-[0.15em] ${styles.textMuted}">
           <span>${project.deliveryDate}</span>
         </div>
         
@@ -202,9 +208,6 @@ export function generatePortalHtml(project: ClientPortal): string {
         <div class="pt-4 max-w-xl">
           <p class="text-lg sm:text-xl ${isClean ? styles.textMainMuted + ' font-light font-sans' : 'font-serif italic text-[#1A1A1A]/80 font-light'} leading-relaxed">
             "${project.message}"
-          </p>
-          <p class="text-sm text-[#C9A96E] mt-3 ${isClean ? 'font-sans uppercase tracking-wider text-[10px]' : 'font-serif italic'}">
-            — Mavestone
           </p>
         </div>` : ''}
       </section>
@@ -224,7 +227,7 @@ export function generatePortalHtml(project: ClientPortal): string {
           </div>
 
           <!-- Vimeo Video Embed Container -->
-          <div class="relative aspect-video bg-[#111111] overflow-hidden ${styles.rounded} border ${isClean ? 'border-white/5' : 'border-black/5'} hover:border-[#C9A96E]/30 transition-all duration-300 shadow-xl">
+          <div class="relative aspect-video bg-[#111111] overflow-hidden ${styles.rounded} border ${isDark ? 'border-white/5' : 'border-black/5'} hover:border-[#C9A96E]/30 transition-all duration-300 shadow-xl">
             ${video.vimeoId ? `
             <iframe
               src="https://player.vimeo.com/video/${video.vimeoId}?color=C9A96E&title=0&byline=0&portrait=0&badge=0"
@@ -239,7 +242,7 @@ export function generatePortalHtml(project: ClientPortal): string {
             </div>`}
           </div>
         </div>`).join('\n') : `
-        <div class="text-center py-12 border border-dashed ${isClean ? 'border-white/10' : 'border-[#C9A96E]/20'} ${styles.rounded} p-6">
+        <div class="text-center py-12 border border-dashed ${isDark ? 'border-white/10' : 'border-[#C9A96E]/20'} ${styles.rounded} p-6">
           <p class="italic text-base ${styles.textBodyMuted} ${styles.fontBody}">No delivery films loaded yet.</p>
         </div>`}
       </section>
@@ -247,7 +250,7 @@ export function generatePortalHtml(project: ClientPortal): string {
       <!-- SHARE SECTION -->
       <section class="pt-8 border-t ${styles.border} space-y-6">
         <div class="text-center space-y-2">
-          <h3 class="text-xl ${isClean ? 'font-manrope font-bold text-white' : 'font-serif italic text-[#C9A96E]'}">
+          <h3 class="text-xl ${isClean ? 'font-manrope font-bold' : 'font-serif italic'} ${isDark ? 'text-white' : 'text-[#C9A96E]'}">
             Share Your Story
           </h3>
           <p class="text-xs ${styles.textBodyMuted} font-sans max-w-md mx-auto">
@@ -296,7 +299,7 @@ export function generatePortalHtml(project: ClientPortal): string {
           <button
             onclick="copyLinkToClipboard()"
             id="copy-btn"
-            class="flex items-center gap-2 px-4 py-2.5 transition-all shadow-sm text-xs font-mono active:scale-95 ${isClean ? 'bg-white/5 border border-white/10 text-white hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full' : 'bg-white border border-black/5 text-[#1A1A1A] hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full'}"
+            class="flex items-center gap-2 px-4 py-2.5 transition-all shadow-sm text-xs font-mono active:scale-95 ${isDark ? 'bg-white/5 border border-white/10 text-white hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full' : 'bg-white border border-black/5 text-[#1A1A1A] hover:border-[#C9A96E] hover:text-[#C9A96E] rounded-full'}"
             title="Copy Link to Clipboard"
           >
             <svg id="copy-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
@@ -309,7 +312,7 @@ export function generatePortalHtml(project: ClientPortal): string {
       ${project.downloadLink && project.downloadLink.trim() !== '' ? `
       <section class="pt-8 sm:pt-12">
         <div class="border p-8 sm:p-10 text-center space-y-6 relative overflow-hidden shadow-sm ${styles.cardBg} ${styles.rounded}">
-          ${!isClean ? `<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/50 to-transparent"></div>` : ''}
+          ${!isDark ? `<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/50 to-transparent"></div>` : ''}
           <div class="max-w-md mx-auto space-y-3">
             <h3 class="text-2xl ${styles.fontDisplay} ${isClean ? 'text-white' : 'text-[#C9A96E]'}">
               Master Deliverables
@@ -338,7 +341,7 @@ export function generatePortalHtml(project: ClientPortal): string {
     </main>
 
     <!-- PORTAL FOOTER -->
-    <footer class="py-16 text-center text-[10px] uppercase tracking-[0.3em] ${isClean ? 'text-white/20' : 'text-[#1A1A1A]/30'} relative z-10">
+    <footer class="py-16 text-center text-[10px] uppercase tracking-[0.3em] ${isDark ? 'text-white/20' : 'text-[#1A1A1A]/30'} relative z-10">
       <span>© 2026 Mavestone · All Rights Reserved</span>
     </footer>
   </div>

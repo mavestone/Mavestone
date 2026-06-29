@@ -289,7 +289,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       ],
       downloadLink: "",
-      stylingType: "traditional"
+      stylingType: "traditional",
+      themeMode: "light"
     }]);
   };
 

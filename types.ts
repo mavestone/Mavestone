@@ -129,6 +129,7 @@ export interface ClientPortal {
   videos: ClientPortalVideo[];
   downloadLink: string;
   stylingType?: 'traditional' | 'clean';
+  themeMode?: 'light' | 'dark';
 }
 
 declare global {

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload, Share2, Globe, Copy, ExternalLink, Code, DownloadCloud, Check } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload, Share2, Globe, Copy, ExternalLink, Code, DownloadCloud, Check, Sun, Moon } from 'lucide-react';
 import { generatePortalHtml } from '../lib/portalGenerator';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
@@ -1584,6 +1584,53 @@ export const AdminPanel: React.FC = () => {
                                                                         Chic dark aesthetic, clean typography, rounded corners, modern responsive structure.
                                                                     </div>
                                                                 </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-3 pt-4 border-t border-white/5">
+                                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                                <div>
+                                                                    <label className="admin-label opacity-45">Workspace Color Mode</label>
+                                                                    <div className="text-[10px] text-white/40 font-sans mt-0.5">
+                                                                        Choose between soft editorial light mode or cinematic deep-dark theme.
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div className="flex items-center gap-2 self-start sm:self-center bg-white/5 border border-white/10 rounded-full p-1 relative select-none">
+                                                                    <div 
+                                                                        className={`absolute top-1 bottom-1 w-[46%] bg-[#C9A96E] rounded-full transition-all duration-300 ${
+                                                                            (portal.themeMode === 'dark' || (!portal.themeMode && portal.stylingType === 'clean')) 
+                                                                                ? 'translate-x-[110%]' 
+                                                                                : 'translate-x-0'
+                                                                        }`}
+                                                                    />
+                                                                    
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => updateClientPortal(portal.id, { themeMode: 'light' })}
+                                                                        className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold transition-all duration-300 ${
+                                                                            !(portal.themeMode === 'dark' || (!portal.themeMode && portal.stylingType === 'clean'))
+                                                                                ? 'text-black'
+                                                                                : 'text-white/60 hover:text-white'
+                                                                        }`}
+                                                                    >
+                                                                        <Sun size={12} className={!(portal.themeMode === 'dark' || (!portal.themeMode && portal.stylingType === 'clean')) ? 'text-black' : 'text-white/60'} />
+                                                                        <span>Light</span>
+                                                                    </button>
+                                                                    
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => updateClientPortal(portal.id, { themeMode: 'dark' })}
+                                                                        className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold transition-all duration-300 ${
+                                                                            (portal.themeMode === 'dark' || (!portal.themeMode && portal.stylingType === 'clean'))
+                                                                                ? 'text-black'
+                                                                                : 'text-white/60 hover:text-white'
+                                                                        }`}
+                                                                    >
+                                                                        <Moon size={12} className={(portal.themeMode === 'dark' || (!portal.themeMode && portal.stylingType === 'clean')) ? 'text-black' : 'text-white/60'} />
+                                                                        <span>Dark</span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
