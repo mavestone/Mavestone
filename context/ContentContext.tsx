@@ -288,7 +288,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           vimeoId: "123456789"
         }
       ],
-      downloadLink: ""
+      downloadLink: "",
+      stylingType: "traditional"
     }]);
   };
 

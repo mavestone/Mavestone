@@ -1552,6 +1552,40 @@ export const AdminPanel: React.FC = () => {
                                                                 />
                                                             </div>
                                                         </div>
+
+                                                        <div className="space-y-3 pt-2">
+                                                            <label className="admin-label opacity-45">Workspace Styling Theme</label>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => updateClientPortal(portal.id, { stylingType: 'traditional' })}
+                                                                    className={`p-4 rounded-xl border text-left transition-all duration-300 ${
+                                                                        portal.stylingType !== 'clean'
+                                                                            ? 'bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]'
+                                                                            : 'bg-white/5 border-white/5 hover:bg-white/8 text-white/60 hover:text-white'
+                                                                    }`}
+                                                                >
+                                                                    <div className="font-bold text-xs uppercase tracking-wider font-manrope">Traditional Ivory</div>
+                                                                    <div className="text-[10px] opacity-70 font-sans mt-1">
+                                                                        Luxurious, soft-ivory, warm gold tones, elegant serif display, sharp editorial corners.
+                                                                    </div>
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => updateClientPortal(portal.id, { stylingType: 'clean' })}
+                                                                    className={`p-4 rounded-xl border text-left transition-all duration-300 ${
+                                                                        portal.stylingType === 'clean'
+                                                                            ? 'bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]'
+                                                                            : 'bg-white/5 border-white/5 hover:bg-white/8 text-white/60 hover:text-white'
+                                                                    }`}
+                                                                >
+                                                                    <div className="font-bold text-xs uppercase tracking-wider font-manrope">Clean Modern</div>
+                                                                    <div className="text-[10px] opacity-70 font-sans mt-1">
+                                                                        Chic dark aesthetic, clean typography, rounded corners, modern responsive structure.
+                                                                    </div>
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
 
                                                     {/* DELIVERABLE FILMS */}

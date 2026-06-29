@@ -128,6 +128,7 @@ export interface ClientPortal {
   passcode: string;
   videos: ClientPortalVideo[];
   downloadLink: string;
+  stylingType?: 'traditional' | 'clean';
 }
 
 declare global {
