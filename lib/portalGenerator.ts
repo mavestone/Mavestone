@@ -12,7 +12,7 @@ export function generatePortalHtml(project: ClientPortal): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${project.projectTitle} — ${project.clientName} | Mavestone Media</title>
+  <title>${project.projectTitle} — ${project.clientName} | Mavestone</title>
   
   <!-- Google Fonts: Cormorant Garamond & DM Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,8 +41,8 @@ export function generatePortalHtml(project: ClientPortal): string {
       inset: -80px;
       z-index: 9999;
       pointer-events: none;
-      opacity: 0.035;
-      mix-blend-mode: screen;
+      opacity: 0.045;
+      mix-blend-mode: multiply;
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
       background-size: 160px 160px;
       animation: grainShift 1.6s steps(3) infinite;
@@ -66,36 +66,31 @@ export function generatePortalHtml(project: ClientPortal): string {
     .animate-shake {
       animation: shake 0.4s ease-in-out;
     }
-
-    /* Soft light glow for display titles */
-    .text-glow {
-      text-shadow: 0 0 30px rgba(255, 255, 255, 0.08);
-    }
   </style>
 </head>
-<body class="bg-[#0A0A0A] text-[#F0EDE8] min-h-screen relative overflow-x-hidden selection:bg-[#C9A96E]/20 selection:text-white font-sans">
+<body class="bg-[#FAF9F6] text-[#1A1A1A] min-h-screen relative overflow-x-hidden selection:bg-[#C9A96E]/20 selection:text-black font-sans">
 
   <!-- Grain Overlay -->
   <div class="grain"></div>
 
   <!-- PASSCODE GATE (Lock Screen) -->
-  <div id="passcode-gate" class="fixed inset-0 bg-[#0A0A0A] flex items-center justify-center p-6 z-50 transition-all duration-700">
+  <div id="passcode-gate" class="fixed inset-0 bg-[#FAF9F6] flex items-center justify-center p-6 z-50 transition-all duration-700">
     <div class="max-w-sm w-full space-y-10 text-center">
       <!-- Logo Wordmark -->
       <div class="space-y-1">
-        <h2 class="text-[28px] sm:text-[34px] font-extralight tracking-[0.2em] uppercase font-serif text-[#F0EDE8] leading-tight">
-          Mavestone
+        <h2 class="text-[34px] font-bold tracking-tighter text-[#1A1A1A] font-manrope leading-tight">
+          Mavestone<span class="text-[#C9A96E]">.</span>
         </h2>
-        <p class="text-[10px] uppercase tracking-[0.4em] text-[#C9A96E] font-sans font-light">
-          Media
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[#1A1A1A]/40 font-sans font-medium">
+          Private Delivery Portal
         </p>
       </div>
 
       <!-- Passcode Form -->
       <form id="passcode-form" onsubmit="submitPasscode(event)" class="space-y-6">
         <div class="space-y-2 text-center">
-          <p class="text-xs uppercase tracking-[0.2em] text-[#F0EDE8]/40 font-mono">Private Access Only</p>
-          <p class="text-sm italic font-serif text-[#F0EDE8]/70">Delivery portal for ${project.clientName}</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-[#1A1A1A]/40 font-mono">Private Access Only</p>
+          <p class="text-sm italic font-serif text-[#1A1A1A]/70">Delivery portal for ${project.clientName}</p>
         </div>
 
         <div id="input-wrapper" class="relative">
@@ -103,23 +98,23 @@ export function generatePortalHtml(project: ClientPortal): string {
             id="password-input"
             type="password"
             placeholder="Enter Passcode"
-            class="w-full bg-[#111111]/80 border border-[#C9A96E]/20 hover:border-[#C9A96E]/40 focus:border-[#C9A96E] rounded-none py-3.5 px-5 text-center text-sm text-[#F0EDE8] placeholder-[#F0EDE8]/30 tracking-widest focus:outline-none transition-all font-mono"
+            class="w-full bg-white border border-[#C9A96E]/20 hover:border-[#C9A96E]/40 focus:border-[#C9A96E] rounded-none py-3.5 px-5 text-center text-sm text-[#1A1A1A] placeholder-[#1A1A1A]/30 tracking-widest focus:outline-none transition-all font-mono"
             required
             autoFocus
           >
         </div>
 
-        <p id="error-message" class="text-xs text-red-400/80 tracking-widest uppercase font-mono hidden">
+        <p id="error-message" class="text-xs text-red-500/80 tracking-widest uppercase font-mono hidden">
           Incorrect passcode
         </p>
 
         <button
           type="submit"
-          class="w-full group bg-transparent border border-[#C9A96E] text-[#C9A96E] hover:bg-[#C9A96E] hover:text-[#0A0A0A] font-sans text-xs uppercase tracking-[0.2em] py-3.5 px-8 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98]"
+          class="w-full group bg-[#1A1A1A] hover:bg-[#C9A96E] text-white hover:text-white font-sans text-xs uppercase tracking-[0.2em] py-3.5 px-8 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] shadow-sm hover:shadow-md"
         >
           <span>Access Workspace</span>
-          <svg class="w-3.5 h-3.5 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          <svg class="w-3.5 h-3.5 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
         </button>
       </form>
@@ -130,34 +125,47 @@ export function generatePortalHtml(project: ClientPortal): string {
   <div id="portal-content" class="opacity-0 translate-y-4 transition-all duration-1000 ease-out">
     
     <!-- HEADER -->
-    <header class="max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-between border-b border-[#F0EDE8]/10 relative z-10">
-      <div class="flex flex-col">
-        <span class="font-serif italic text-base sm:text-lg text-[#C9A96E] tracking-tight">
-          Mavestone Media
-        </span>
-        <span class="text-[9px] uppercase tracking-[0.3em] text-[#F0EDE8]/30 font-sans mt-0.5">
-          Client Workspace
-        </span>
-      </div>
-      <div class="flex items-center gap-2 text-[#C9A96E]/60 text-[10px] uppercase tracking-widest font-mono">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+    <header class="max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-between border-b border-[#1A1A1A]/10 relative z-10">
+      <div class="flex items-center gap-2.5">
+        <svg class="w-3.5 h-3.5 text-[#C9A96E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path>
         </svg>
-        <span>Secure Link</span>
+        <div class="flex flex-col">
+          <span class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#1A1A1A]/80 font-sans">
+            Client Workspace
+          </span>
+          <span class="text-[8px] uppercase tracking-[0.2em] text-[#1A1A1A]/40 font-mono mt-0.5">
+            Secure Delivery Portal
+          </span>
+        </div>
       </div>
+      
+      <a href="/" class="text-xl font-bold tracking-tighter text-[#1A1A1A] cursor-pointer hover:opacity-80 transition-opacity font-manrope select-none">
+        Mavestone<span class="text-[#C9A96E]">.</span>
+      </a>
     </header>
 
     <main class="max-w-4xl mx-auto px-6 sm:px-12 py-16 sm:py-24 relative z-10 space-y-16 sm:space-y-24">
       
+      <!-- CINEMATIC COVER BANNER -->
+      <div class="relative aspect-[21/9] w-full bg-[#1A1A1A] overflow-hidden border border-[#C9A96E]/20 shadow-lg group">
+        <img
+          src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1600&h=900&q=80"
+          alt="Cinematic Cover"
+          class="w-full h-full object-cover opacity-90 transition-transform duration-700 ease-out"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+      </div>
+
       <!-- HERO SECTION -->
       <section class="space-y-6">
-        <div class="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] text-[#F0EDE8]/40">
+        <div class="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] text-[#1A1A1A]/40">
           <span>Client: ${project.clientName}</span>
           <span>${project.deliveryDate}</span>
         </div>
         
         <div class="space-y-2">
-          <h1 class="text-4xl sm:text-6xl font-light font-serif tracking-tight text-[#F0EDE8] leading-tight">
+          <h1 class="text-4xl sm:text-6xl font-light font-serif tracking-tight text-[#1A1A1A] leading-tight">
             ${project.projectTitle}
           </h1>
           <div class="h-[1px] w-full bg-gradient-to-r from-[#C9A96E] via-[#C9A96E]/20 to-transparent"></div>
@@ -165,11 +173,11 @@ export function generatePortalHtml(project: ClientPortal): string {
 
         ${project.message ? `
         <div class="pt-4 max-w-xl">
-          <p class="font-serif italic text-lg sm:text-xl text-[#F0EDE8]/80 leading-relaxed font-light text-glow">
+          <p class="font-serif italic text-lg sm:text-xl text-[#1A1A1A]/80 leading-relaxed font-light">
             "${project.message}"
           </p>
           <p class="font-serif italic text-sm text-[#C9A96E] mt-3">
-            — Mavestone Media
+            — Mavestone
           </p>
         </div>` : ''}
       </section>
@@ -179,17 +187,17 @@ export function generatePortalHtml(project: ClientPortal): string {
         ${project.videos && project.videos.length > 0 ? project.videos.map((video) => `
         <div class="space-y-4 group">
           <!-- Video Header info -->
-          <div class="flex items-baseline justify-between border-b border-[#F0EDE8]/5 pb-3">
-            <h3 class="font-serif text-xl sm:text-2xl font-light text-[#F0EDE8] group-hover:text-[#C9A96E] transition-colors duration-300">
+          <div class="flex items-baseline justify-between border-b border-[#1A1A1A]/5 pb-3">
+            <h3 class="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] group-hover:text-[#C9A96E] transition-colors duration-300">
               ${video.title}
             </h3>
-            <span class="font-mono text-xs text-[#F0EDE8]/40 uppercase tracking-wider">
+            <span class="font-mono text-xs text-[#1A1A1A]/40 uppercase tracking-wider">
               ${video.duration}
             </span>
           </div>
 
           <!-- Vimeo Video Embed Container -->
-          <div class="relative aspect-video bg-[#111111] overflow-hidden border border-[#F0EDE8]/5 hover:border-[#C9A96E]/30 transition-all duration-300 shadow-2xl">
+          <div class="relative aspect-video bg-[#111111] overflow-hidden border border-black/5 hover:border-[#C9A96E]/30 transition-all duration-300 shadow-xl">
             ${video.vimeoId ? `
             <iframe
               src="https://player.vimeo.com/video/${video.vimeoId}?color=C9A96E&title=0&byline=0&portrait=0&badge=0"
@@ -199,26 +207,87 @@ export function generatePortalHtml(project: ClientPortal): string {
               allowfullscreen
               title="${video.title}"
             ></iframe>` : `
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-[#F0EDE8]/30 space-y-2 font-mono text-xs">
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white/30 space-y-2 font-mono text-xs">
               <p>VIMEO ID NOT CONFIGURED</p>
             </div>`}
           </div>
         </div>`).join('\n') : `
         <div class="text-center py-12 border border-dashed border-[#C9A96E]/20 rounded p-6">
-          <p class="font-serif italic text-base text-[#F0EDE8]/50">No delivery films loaded yet.</p>
+          <p class="font-serif italic text-base text-[#1A1A1A]/50">No delivery films loaded yet.</p>
         </div>`}
+      </section>
+
+      <!-- SHARE SECTION -->
+      <section class="pt-8 border-t border-[#1A1A1A]/10 space-y-6">
+        <div class="text-center space-y-2">
+          <h3 class="font-serif text-xl italic text-[#C9A96E]">
+            Share Your Story
+          </h3>
+          <p class="text-xs text-[#1A1A1A]/50 font-sans max-w-md mx-auto">
+            Share this secure personal workspace directly with family and friends, or publish it to your social feeds.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <!-- Facebook -->
+          <button
+            onclick="shareFacebook()"
+            class="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+            title="Share on Facebook"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 8H7v3h2v9h4v-9h3.615L17 8h-3V6.157C13 5.37 13.5 5 14.285 5H17V2h-3c-3.3 0-5 1.557-5 4.5V8z"/></svg>
+          </button>
+
+          <!-- Twitter / X -->
+          <button
+            onclick="shareX()"
+            class="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+            title="Share on X (Twitter)"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </button>
+
+          <!-- WhatsApp -->
+          <button
+            onclick="shareWhatsApp()"
+            class="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+            title="Share on WhatsApp"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.462 3.483 1.34 5.008L2 22l5.122-1.34c1.472.802 3.12 1.228 4.882 1.228 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2zm5.72 13.985c-.235.66-1.356 1.282-1.854 1.343-.473.056-.938.03-2.923-.746-2.54-1.026-4.17-3.626-4.298-3.797-.124-.17-.992-1.32-.992-2.52s.624-1.79.847-2.036c.224-.246.488-.308.65-.308.163 0 .326.002.468.008.148.006.347-.056.544.421.2.488.683 1.662.742 1.782.06.12.098.26.018.421-.08.16-.12.26-.24.4-.12.14-.253.313-.36.42-.12.12-.246.252-.105.493.14.24.623 1.022 1.336 1.657.918.816 1.69 1.07 1.934 1.19.244.12.388.1.53-.06.14-.16.613-.715.776-.96.16-.244.32-.2.54-.12s1.402.66 1.643.78c.24.12.4.18.46.28.06.1.06.58-.175 1.24z"/></svg>
+          </button>
+
+          <!-- Email -->
+          <button
+            onclick="shareEmail()"
+            class="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+            title="Share via Email"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"></path></svg>
+          </button>
+
+          <!-- Copy Link -->
+          <button
+            onclick="copyLinkToClipboard()"
+            id="copy-btn"
+            class="flex items-center gap-2 px-4 py-2.5 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm text-xs font-mono active:scale-95"
+            title="Copy Link to Clipboard"
+          >
+            <svg id="copy-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
+            <span id="copy-text">Copy Link</span>
+          </button>
+        </div>
       </section>
 
       <!-- DOWNLOAD SECTION -->
       ${project.downloadLink && project.downloadLink.trim() !== '' ? `
       <section class="pt-8 sm:pt-12">
-        <div class="border border-[#C9A96E]/30 bg-[#111111]/40 p-8 sm:p-10 text-center space-y-6 relative overflow-hidden">
+        <div class="border border-[#C9A96E]/30 bg-white p-8 sm:p-10 text-center space-y-6 relative overflow-hidden shadow-sm">
           <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/50 to-transparent"></div>
           <div class="max-w-md mx-auto space-y-3">
             <h3 class="font-serif text-2xl font-light text-[#C9A96E]">
               Master Deliverables
             </h3>
-            <p class="text-sm font-sans text-[#F0EDE8]/60 leading-relaxed">
+            <p class="text-sm font-sans text-[#1A1A1A]/60 leading-relaxed">
               Access high-bitrate ProRes masters and distribution formats. Your source media will remain hosted and accessible at this secure archive.
             </p>
           </div>
@@ -228,10 +297,10 @@ export function generatePortalHtml(project: ClientPortal): string {
               href="${project.downloadLink}"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-3 bg-[#C9A96E] text-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] font-sans text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 transition-all duration-300 shadow-xl hover:shadow-[#C9A96E]/10"
+              class="inline-flex items-center gap-3 bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-white font-sans text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 transition-all duration-300 shadow-md hover:shadow-lg"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
               </svg>
               <span>Download Archive</span>
             </a>
@@ -242,8 +311,8 @@ export function generatePortalHtml(project: ClientPortal): string {
     </main>
 
     <!-- PORTAL FOOTER -->
-    <footer class="py-16 text-center text-[10px] uppercase tracking-[0.3em] text-[#F0EDE8]/20 relative z-10">
-      <span>© ${new Date().getFullYear()} Mavestone Media · All Rights Reserved</span>
+    <footer class="py-16 text-center text-[10px] uppercase tracking-[0.3em] text-[#1A1A1A]/30 relative z-10">
+      <span>© 2026 Mavestone · All Rights Reserved</span>
     </footer>
   </div>
 
@@ -295,13 +364,52 @@ export function generatePortalHtml(project: ClientPortal): string {
       content.classList.remove('opacity-0', 'translate-y-4');
       content.classList.add('opacity-100', 'translate-y-0');
     }
+
+    // Social Sharing JS
+    function shareFacebook() {
+      window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank');
+    }
+
+    function shareX() {
+      window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent('Watch our cinematic film delivered by Mavestone!'), '_blank');
+    }
+
+    function shareWhatsApp() {
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent('Watch our cinematic film delivered by Mavestone: ' + window.location.href), '_blank');
+    }
+
+    function shareEmail() {
+      const subject = encodeURIComponent(PROJECT.clientName + ' - ' + PROJECT.projectTitle);
+      const body = encodeURIComponent('Watch our cinematic film delivered by Mavestone: ' + window.location.href);
+      window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+    }
+
+    function copyLinkToClipboard() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const btn = document.getElementById('copy-btn');
+        const text = document.getElementById('copy-text');
+        const icon = document.getElementById('copy-icon');
+        
+        text.innerText = 'Link Copied';
+        text.classList.add('text-green-600', 'font-medium');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>';
+        icon.classList.add('text-green-600');
+        
+        setTimeout(() => {
+          text.innerText = 'Copy Link';
+          text.classList.remove('text-green-600', 'font-medium');
+          icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path>';
+          icon.classList.remove('text-green-600');
+        }, 2000);
+      });
+    }
   </script>
 </body>
 </html>
 
 <!--
 ================================================================================
-HOW TO DEPLOY A NEW CLIENT PORTAL (Mavestone Media Guide)
+HOW TO DEPLOY A NEW CLIENT PORTAL (Mavestone Guide)
 ================================================================================
 1. Duplicate this file and rename it to match your client's slug (e.g. ${project.slug || 'slug'}.html).
 2. Edit the PROJECT config object inside the script tag at the bottom of the file with your client's details.

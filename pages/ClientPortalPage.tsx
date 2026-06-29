@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
-import { Shield, ArrowRight, Download } from 'lucide-react';
+import { Shield, ArrowRight, Download, Facebook, Twitter, MessageCircle, Mail, Link as LinkIcon, Check } from 'lucide-react';
 
 export const ClientPortalPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -13,9 +13,11 @@ export const ClientPortalPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [isShaking, setIsShaking] = useState(false);
   const [revealPortal, setRevealPortal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Find corresponding portal by slug
   const portal = clientPortals.find(p => p.slug === slug);
+  const shareUrl = window.location.href;
 
   useEffect(() => {
     if (!isLoading && !portal) {
@@ -39,6 +41,38 @@ export const ClientPortalPage: React.FC = () => {
     }
   }, [portal]);
 
+  useEffect(() => {
+    if (portal) {
+      // Set page title dynamically
+      document.title = `${portal.projectTitle} — ${portal.clientName} | Mavestone`;
+
+      // Dynamically manage OpenGraph social share meta tags
+      let metaOgImage = document.querySelector('meta[property="og:image"]');
+      if (!metaOgImage) {
+        metaOgImage = document.createElement('meta');
+        metaOgImage.setAttribute('property', 'og:image');
+        document.head.appendChild(metaOgImage);
+      }
+      metaOgImage.setAttribute('content', 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&h=630&q=80');
+
+      let metaOgTitle = document.querySelector('meta[property="og:title"]');
+      if (!metaOgTitle) {
+        metaOgTitle = document.createElement('meta');
+        metaOgTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(metaOgTitle);
+      }
+      metaOgTitle.setAttribute('content', `${portal.projectTitle} for ${portal.clientName} | Mavestone`);
+
+      let metaOgDesc = document.querySelector('meta[property="og:description"]');
+      if (!metaOgDesc) {
+        metaOgDesc = document.createElement('meta');
+        metaOgDesc.setAttribute('property', 'og:description');
+        document.head.appendChild(metaOgDesc);
+      }
+      metaOgDesc.setAttribute('content', portal.message || 'Secure delivery workspace by Mavestone.');
+    }
+  }, [portal]);
+
   const handleVerifyPasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (!portal) return;
@@ -55,12 +89,18 @@ export const ClientPortalPage: React.FC = () => {
     }
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-[#F0EDE8] flex items-center justify-center font-sans">
+      <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs uppercase tracking-widest text-[#F0EDE8]/40 font-mono">Securing Connection...</p>
+          <p className="text-xs uppercase tracking-widest text-[#1A1A1A]/40 font-mono">Securing Connection...</p>
         </div>
       </div>
     );
@@ -68,39 +108,39 @@ export const ClientPortalPage: React.FC = () => {
 
   if (!portal) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-[#F0EDE8] flex flex-col items-center justify-center font-sans p-6 text-center">
+      <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex flex-col items-center justify-center font-sans p-6 text-center">
         <h1 className="text-4xl font-light font-serif tracking-tight text-[#C9A96E] mb-4">404</h1>
-        <p className="text-lg font-serif italic text-[#F0EDE8]/70 max-w-md mb-8">This private delivery workspace could not be found or has expired.</p>
-        <p className="text-xs uppercase tracking-widest text-[#F0EDE8]/40 font-mono">Redirecting to Mavestone Media...</p>
+        <p className="text-lg font-serif italic text-[#1A1A1A]/70 max-w-md mb-8">This private delivery workspace could not be found or has expired.</p>
+        <p className="text-xs uppercase tracking-widest text-[#1A1A1A]/40 font-mono">Redirecting to Mavestone...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#F0EDE8] relative overflow-hidden selection:bg-[#C9A96E]/20 selection:text-white">
-      {/* Dynamic grain overlay */}
-      <div className="fixed inset-[-80px] pointer-events-none opacity-[0.035] mix-blend-screen bg-repeat z-50 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>')] bg-[size:160px_160px] animate-[noise_1.6s_steps(3)_infinite]"></div>
+    <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] relative overflow-hidden selection:bg-[#C9A96E]/20 selection:text-black">
+      {/* Dynamic grain overlay for premium organic film texture */}
+      <div className="fixed inset-[-80px] pointer-events-none opacity-[0.045] mix-blend-multiply bg-repeat z-50 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>')] bg-[size:160px_160px] animate-[noise_1.6s_steps(3)_infinite]"></div>
 
       {/* LOCK SCREEN PASSCODE GATE */}
       {!isUnlocked && (
-        <div className="min-h-screen flex items-center justify-center p-6 relative z-10 bg-[#0A0A0A]">
+        <div className="min-h-screen flex items-center justify-center p-6 relative z-10 bg-[#FAF9F6]">
           <div className="max-w-sm w-full space-y-10 text-center">
             {/* Logo Wordmark */}
             <div className="space-y-1">
-              <h2 className="text-[28px] sm:text-[34px] font-extralight tracking-[0.2em] uppercase font-serif text-[#F0EDE8] leading-tight">
-                Mavestone
+              <h2 className="text-[34px] font-bold tracking-tighter text-[#1A1A1A] font-manrope leading-tight">
+                Mavestone<span className="text-[#C9A96E]">.</span>
               </h2>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-[#C9A96E] font-sans font-light">
-                Media
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[#1A1A1A]/40 font-sans font-medium">
+                Private Delivery Portal
               </p>
             </div>
 
             {/* Input Form */}
             <form onSubmit={handleVerifyPasscode} className="space-y-6">
               <div className="space-y-2 text-center">
-                <p className="text-xs uppercase tracking-[0.2em] text-[#F0EDE8]/40 font-mono">Private Access Only</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#1A1A1A]/40 font-mono">Private Access Only</p>
                 {portal.clientName && (
-                  <p className="text-sm italic font-serif text-[#F0EDE8]/70">Delivery portal for {portal.clientName}</p>
+                  <p className="text-sm italic font-serif text-[#1A1A1A]/70">Delivery portal for {portal.clientName}</p>
                 )}
               </div>
 
@@ -113,20 +153,20 @@ export const ClientPortalPage: React.FC = () => {
                     setPasscodeAttempt(e.target.value);
                     if (errorMsg) setErrorMsg('');
                   }}
-                  className="w-full bg-[#111111]/80 border border-[#C9A96E]/20 hover:border-[#C9A96E]/40 focus:border-[#C9A96E] rounded-none py-3.5 px-5 text-center text-sm text-[#F0EDE8] placeholder-[#F0EDE8]/30 tracking-widest focus:outline-none transition-all font-mono"
+                  className="w-full bg-white border border-[#C9A96E]/20 hover:border-[#C9A96E]/40 focus:border-[#C9A96E] rounded-none py-3.5 px-5 text-center text-sm text-[#1A1A1A] placeholder-[#1A1A1A]/30 tracking-widest focus:outline-none transition-all font-mono"
                   autoFocus
                 />
               </div>
 
               {errorMsg && (
-                <p className="text-xs text-red-400/80 tracking-widest uppercase font-mono animate-fade-in">
+                <p className="text-xs text-red-500/80 tracking-widest uppercase font-mono animate-fade-in">
                   {errorMsg}
                 </p>
               )}
 
               <button
                 type="submit"
-                className="w-full group bg-transparent border border-[#C9A96E] text-[#C9A96E] hover:bg-[#C9A96E] hover:text-[#0A0A0A] font-sans text-xs uppercase tracking-[0.2em] py-3.5 px-8 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98]"
+                className="w-full group bg-[#1A1A1A] hover:bg-[#C9A96E] text-white hover:text-white font-sans text-xs uppercase tracking-[0.2em] py-3.5 px-8 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] shadow-sm hover:shadow-md"
               >
                 <span>Access Workspace</span>
                 <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-1" />
@@ -141,32 +181,46 @@ export const ClientPortalPage: React.FC = () => {
         <div className={`transition-all duration-1000 ease-out transform ${revealPortal ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           
           {/* HEADER */}
-          <header className="max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-between border-b border-[#F0EDE8]/10 relative z-10">
-            <div className="flex flex-col">
-              <span className="font-serif italic text-base sm:text-lg text-[#C9A96E] tracking-tight">
-                Mavestone Media
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.3em] text-[#F0EDE8]/30 font-sans mt-0.5">
-                Client Workspace
-              </span>
+          <header className="max-w-7xl mx-auto px-6 sm:px-12 py-8 flex items-center justify-between border-b border-[#1A1A1A]/10 relative z-10">
+            <div className="flex items-center gap-2.5">
+              <Shield size={14} className="text-[#C9A96E]" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#1A1A1A]/80 font-sans">
+                  Client Workspace
+                </span>
+                <span className="text-[8px] uppercase tracking-[0.2em] text-[#1A1A1A]/40 font-mono mt-0.5">
+                  Secure Delivery Portal
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-[#C9A96E]/60 text-[10px] uppercase tracking-widest font-mono">
-              <Shield size={10} />
-              <span>Secure Link</span>
-            </div>
+            
+            <a href="/" className="text-xl font-bold tracking-tighter text-[#1A1A1A] cursor-pointer hover:opacity-80 transition-opacity font-manrope select-none">
+              Mavestone<span className="text-[#C9A96E]">.</span>
+            </a>
           </header>
 
           <main className="max-w-4xl mx-auto px-6 sm:px-12 py-16 sm:py-24 relative z-10 space-y-16 sm:space-y-24">
             
+            {/* CINEMATIC COVER BANNER */}
+            <div className="relative aspect-[21/9] w-full bg-[#1A1A1A] overflow-hidden border border-[#C9A96E]/20 shadow-lg group">
+              <img
+                src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1600&h=900&q=80"
+                alt="Cinematic Cover"
+                className="w-full h-full object-cover opacity-90 group-hover:scale-[1.01] transition-transform duration-700 ease-out"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            </div>
+
             {/* HERO SECTION */}
             <section className="space-y-6">
-              <div className="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] text-[#F0EDE8]/40">
+              <div className="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] text-[#1A1A1A]/40">
                 <span>Client: {portal.clientName}</span>
                 <span>{portal.deliveryDate}</span>
               </div>
               
               <div className="space-y-2">
-                <h1 className="text-4xl sm:text-6xl font-light font-serif tracking-tight text-[#F0EDE8] leading-tight">
+                <h1 className="text-4xl sm:text-6xl font-light font-serif tracking-tight text-[#1A1A1A] leading-tight">
                   {portal.projectTitle}
                 </h1>
                 <div className="h-[1px] w-full bg-gradient-to-r from-[#C9A96E] via-[#C9A96E]/20 to-transparent"></div>
@@ -174,11 +228,11 @@ export const ClientPortalPage: React.FC = () => {
 
               {portal.message && (
                 <div className="pt-4 max-w-xl">
-                  <p className="font-serif italic text-lg sm:text-xl text-[#F0EDE8]/80 leading-relaxed font-light text-glow">
+                  <p className="font-serif italic text-lg sm:text-xl text-[#1A1A1A]/80 leading-relaxed font-light">
                     "{portal.message}"
                   </p>
                   <p className="font-serif italic text-sm text-[#C9A96E] mt-3">
-                    — Mavestone Media
+                    — Mavestone
                   </p>
                 </div>
               )}
@@ -190,17 +244,17 @@ export const ClientPortalPage: React.FC = () => {
                 portal.videos.map((video, index) => (
                   <div key={index} className="space-y-4 group">
                     {/* Video Header info */}
-                    <div className="flex items-baseline justify-between border-b border-[#F0EDE8]/5 pb-3">
-                      <h3 className="font-serif text-xl sm:text-2xl font-light text-[#F0EDE8] group-hover:text-[#C9A96E] transition-colors duration-300">
+                    <div className="flex items-baseline justify-between border-b border-[#1A1A1A]/5 pb-3">
+                      <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] group-hover:text-[#C9A96E] transition-colors duration-300">
                         {video.title}
                       </h3>
-                      <span className="font-mono text-xs text-[#F0EDE8]/40 uppercase tracking-wider">
+                      <span className="font-mono text-xs text-[#1A1A1A]/40 uppercase tracking-wider">
                         {video.duration}
                       </span>
                     </div>
 
                     {/* Vimeo Video Embed Container */}
-                    <div className="video-container relative aspect-video bg-[#111111] overflow-hidden border border-[#F0EDE8]/5 hover:border-[#C9A96E]/30 transition-all duration-300 shadow-2xl">
+                    <div className="video-container relative aspect-video bg-[#111111] overflow-hidden border border-black/5 hover:border-[#C9A96E]/30 transition-all duration-300 shadow-xl">
                       {video.vimeoId ? (
                         <iframe
                           src={`https://player.vimeo.com/video/${video.vimeoId}?color=C9A96E&title=0&byline=0&portrait=0&badge=0`}
@@ -211,7 +265,7 @@ export const ClientPortalPage: React.FC = () => {
                           title={video.title}
                         ></iframe>
                       ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-[#F0EDE8]/30 space-y-2 font-mono text-xs">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white/30 space-y-2 font-mono text-xs">
                           <p>VIMEO ID NOT CONFIGURED</p>
                         </div>
                       )}
@@ -220,21 +274,96 @@ export const ClientPortalPage: React.FC = () => {
                 ))
               ) : (
                 <div className="text-center py-12 border border-dashed border-[#C9A96E]/20 rounded p-6">
-                  <p className="font-serif italic text-base text-[#F0EDE8]/50">No delivery films loaded yet.</p>
+                  <p className="font-serif italic text-base text-[#1A1A1A]/50">No delivery films loaded yet.</p>
                 </div>
               )}
+            </section>
+
+            {/* SHARE SECTION */}
+            <section className="pt-8 border-t border-[#1A1A1A]/10 space-y-6">
+              <div className="text-center space-y-2">
+                <h3 className="font-serif text-xl italic text-[#C9A96E]">
+                  Share Your Story
+                </h3>
+                <p className="text-xs text-[#1A1A1A]/50 font-sans max-w-md mx-auto">
+                  Share this secure personal workspace directly with family and friends, or publish it to your social feeds.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                {/* Facebook */}
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+                  title="Share on Facebook"
+                >
+                  <Facebook size={16} />
+                </a>
+
+                {/* Twitter / X */}
+                <a
+                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Watch our cinematic film delivered by Mavestone!`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+                  title="Share on X (Twitter)"
+                >
+                  <Twitter size={16} />
+                </a>
+
+                {/* WhatsApp */}
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Watch our cinematic film delivered by Mavestone: ${shareUrl}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+                  title="Share on WhatsApp"
+                >
+                  <MessageCircle size={16} />
+                </a>
+
+                {/* Email */}
+                <a
+                  href={`mailto:?subject=${encodeURIComponent(`${portal.clientName} - ${portal.projectTitle}`)}&body=${encodeURIComponent(`Watch our cinematic film delivered by Mavestone: ${shareUrl}`)}`}
+                  className="p-3 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm active:scale-95"
+                  title="Share via Email"
+                >
+                  <Mail size={16} />
+                </a>
+
+                {/* Copy Link */}
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-black/5 rounded-full hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#1A1A1A] transition-all shadow-sm text-xs font-mono active:scale-95"
+                  title="Copy Link to Clipboard"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={14} className="text-green-600 animate-scale-in" />
+                      <span className="text-green-600 font-medium">Link Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon size={14} />
+                      <span>Copy Link</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </section>
 
             {/* DOWNLOAD SECTION */}
             {portal.downloadLink && portal.downloadLink.trim() !== '' && (
               <section className="pt-8 sm:pt-12">
-                <div className="border border-[#C9A96E]/30 bg-[#111111]/40 p-8 sm:p-10 text-center space-y-6 relative overflow-hidden">
+                <div className="border border-[#C9A96E]/30 bg-white p-8 sm:p-10 text-center space-y-6 relative overflow-hidden shadow-sm">
                   <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/50 to-transparent"></div>
                   <div className="max-w-md mx-auto space-y-3">
                     <h3 className="font-serif text-2xl font-light text-[#C9A96E]">
                       Master Deliverables
                     </h3>
-                    <p className="text-sm font-sans text-[#F0EDE8]/60 leading-relaxed">
+                    <p className="text-sm font-sans text-[#1A1A1A]/60 leading-relaxed">
                       Access high-bitrate ProRes masters and distribution formats. Your source media will remain hosted and accessible at this secure archive.
                     </p>
                   </div>
@@ -244,7 +373,7 @@ export const ClientPortalPage: React.FC = () => {
                       href={portal.downloadLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-3 bg-[#C9A96E] text-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] font-sans text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 transition-all duration-300 shadow-xl hover:shadow-[#C9A96E]/10"
+                      className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-white font-sans text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 transition-all duration-300 shadow-md hover:shadow-lg"
                     >
                       <Download size={14} />
                       <span>Download Archive</span>
@@ -257,8 +386,8 @@ export const ClientPortalPage: React.FC = () => {
           </main>
 
           {/* PORTAL FOOTER */}
-          <footer className="py-16 text-center text-[10px] uppercase tracking-[0.3em] text-[#F0EDE8]/20 relative z-10">
-            <span>© {new Date().getFullYear()} Mavestone Media · All Rights Reserved</span>
+          <footer className="py-16 text-center text-[10px] uppercase tracking-[0.3em] text-[#1A1A1A]/30 relative z-10">
+            <span>© 2026 Mavestone · All Rights Reserved</span>
           </footer>
         </div>
       )}

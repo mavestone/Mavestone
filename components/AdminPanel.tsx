@@ -1674,7 +1674,7 @@ export const AdminPanel: React.FC = () => {
                                                             <span>Plain-English Hosting & Deployment Guide</span>
                                                         </h3>
                                                         <div className="text-xs text-white/70 leading-relaxed space-y-2 font-sans">
-                                                            <p>Mavestone Media client delivery portals can be served natively in this full-stack React environment via pretty-links like <code className="px-1 py-0.5 bg-white/10 rounded font-mono text-[#C9A96E]">mavestone.com/{portal.slug}</code>.</p>
+                                                            <p>Mavestone client delivery portals can be served natively in this full-stack React environment via pretty-links like <code className="px-1 py-0.5 bg-white/10 rounded font-mono text-[#C9A96E]">mavestone.com/{portal.slug}</code>.</p>
                                                             <p>Alternatively, if you want a **pure, single-file HTML deliverable** to email or host independently:</p>
                                                             <ol className="list-decimal pl-5 space-y-1">
                                                                 <li>Click the gold <strong className="text-white">Download HTML</strong> button above to download <code className="font-mono text-yellow-300">{portal.slug}.html</code>.</li>
