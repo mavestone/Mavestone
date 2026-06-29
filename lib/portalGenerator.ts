@@ -206,7 +206,7 @@ export function generatePortalHtml(project: ClientPortal): string {
 
         ${project.message ? `
         <div class="pt-4 max-w-xl">
-          <p class="text-lg sm:text-xl ${isClean ? styles.textMainMuted + ' font-light font-sans' : 'font-serif italic text-[#1A1A1A]/80 font-light'} leading-relaxed">
+          <p class="text-lg sm:text-xl ${isClean ? 'font-sans font-light' : 'font-serif italic font-light'} ${isDark ? 'text-white/80' : 'text-[#1A1A1A]/80'} leading-relaxed">
             "${project.message}"
           </p>
         </div>` : ''}
@@ -314,7 +314,7 @@ export function generatePortalHtml(project: ClientPortal): string {
         <div class="border p-8 sm:p-10 text-center space-y-6 relative overflow-hidden shadow-sm ${styles.cardBg} ${styles.rounded}">
           ${!isDark ? `<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/50 to-transparent"></div>` : ''}
           <div class="max-w-md mx-auto space-y-3">
-            <h3 class="text-2xl ${styles.fontDisplay} ${isClean ? 'text-white' : 'text-[#C9A96E]'}">
+            <h3 class="text-2xl ${styles.fontDisplay} ${isClean ? (isDark ? 'text-white' : 'text-[#1A1A1A]') : 'text-[#C9A96E]'}">
               Master Deliverables
             </h3>
             <p class="text-sm font-sans ${styles.textBodyMuted} leading-relaxed">
@@ -322,7 +322,7 @@ export function generatePortalHtml(project: ClientPortal): string {
             </p>
           </div>
           
-          <div class="pt-2">
+          <div id="download-unlocked-container" class="pt-2 ${project.downloadPasscode && project.downloadPasscode.trim() !== '' ? 'hidden' : ''}">
             <a
               href="${project.downloadLink}"
               target="_blank"
@@ -335,6 +335,34 @@ export function generatePortalHtml(project: ClientPortal): string {
               <span>Download Archive</span>
             </a>
           </div>
+
+          ${project.downloadPasscode && project.downloadPasscode.trim() !== '' ? `
+          <form id="download-lock-form" onsubmit="submitDownloadPasscode(event)" class="max-w-sm mx-auto space-y-4 pt-2 transition-all">
+            <div class="relative" id="download-input-wrapper">
+              <input
+                id="download-password-input"
+                type="password"
+                class="w-full text-center py-3 px-10 text-xs tracking-widest uppercase focus:outline-none focus:ring-0 ${styles.input}"
+                placeholder="ENTER ARCHIVE PASSCODE"
+              />
+              <button
+                type="submit"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#C9A96E] hover:scale-110 transition-transform"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                </svg>
+              </button>
+            </div>
+            <p id="download-error-message" class="text-[10px] uppercase tracking-wider text-red-500 font-mono font-medium hidden">Incorrect passcode</p>
+            <p class="text-[9px] uppercase tracking-widest ${styles.textMuted} font-mono flex items-center justify-center gap-1.5">
+              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path>
+              </svg>
+              <span>Secondary passcode required</span>
+            </p>
+          </form>
+          ` : ''}
         </div>
       </section>` : ''}
 
@@ -358,6 +386,20 @@ export function generatePortalHtml(project: ClientPortal): string {
       if (!passcode || passcode.trim() === '' || isUnlocked) {
         document.getElementById('passcode-gate').style.display = 'none';
         revealContent();
+      }
+
+      // Check download passcode requirements on load
+      const downloadPasscode = PROJECT.downloadPasscode;
+      const isDownloadUnlocked = sessionStorage.getItem('download_unlocked_' + PROJECT.id) === 'true';
+
+      if (!downloadPasscode || downloadPasscode.trim() === '' || isDownloadUnlocked) {
+        const form = document.getElementById('download-lock-form');
+        const container = document.getElementById('download-unlocked-container');
+        if (form) form.style.display = 'none';
+        if (container) {
+          container.classList.remove('hidden');
+          container.classList.add('opacity-100');
+        }
       }
     });
 
@@ -385,6 +427,37 @@ export function generatePortalHtml(project: ClientPortal): string {
         input.value = '';
         setTimeout(() => {
           wrapper.classList.remove('animate-shake');
+        }, 500);
+      }
+    }
+
+    function submitDownloadPasscode(e) {
+      e.preventDefault();
+      const input = document.getElementById('download-password-input');
+      const value = input.value;
+      const form = document.getElementById('download-lock-form');
+      const container = document.getElementById('download-unlocked-container');
+      const err = document.getElementById('download-error-message');
+      const wrapper = document.getElementById('download-input-wrapper');
+
+      if (value === PROJECT.downloadPasscode) {
+        if (err) err.classList.add('hidden');
+        sessionStorage.setItem('download_unlocked_' + PROJECT.id, 'true');
+        
+        form.classList.add('opacity-0');
+        setTimeout(() => {
+          form.style.display = 'none';
+          if (container) {
+            container.classList.remove('hidden');
+            container.classList.add('opacity-100');
+          }
+        }, 400);
+      } else {
+        if (err) err.classList.remove('hidden');
+        if (wrapper) wrapper.classList.add('animate-shake');
+        input.value = '';
+        setTimeout(() => {
+          if (wrapper) wrapper.classList.remove('animate-shake');
         }, 500);
       }
     }

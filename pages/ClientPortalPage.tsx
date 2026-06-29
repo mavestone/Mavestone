@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
-import { Shield, ArrowRight, Download, Facebook, Twitter, MessageCircle, Mail, Link as LinkIcon, Check } from 'lucide-react';
+import { Shield, ArrowRight, Download, Facebook, Twitter, MessageCircle, Mail, Link as LinkIcon, Check, Lock } from 'lucide-react';
 
 export const ClientPortalPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -14,6 +14,11 @@ export const ClientPortalPage: React.FC = () => {
   const [isShaking, setIsShaking] = useState(false);
   const [revealPortal, setRevealPortal] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const [downloadPasscodeAttempt, setDownloadPasscodeAttempt] = useState('');
+  const [isDownloadUnlocked, setIsDownloadUnlocked] = useState(false);
+  const [downloadErrorMsg, setDownloadErrorMsg] = useState('');
+  const [isDownloadShaking, setIsDownloadShaking] = useState(false);
 
   // Find corresponding portal by slug
   const portal = clientPortals.find(p => p.slug === slug);
@@ -37,6 +42,16 @@ export const ClientPortalPage: React.FC = () => {
         setIsUnlocked(true);
         // Add a gentle delay to trigger the fade-in animation
         setTimeout(() => setRevealPortal(true), 100);
+      }
+
+      // Check if download passcode is empty or already unlocked in session storage
+      const hasDownloadPasscode = portal.downloadPasscode && portal.downloadPasscode.trim() !== '';
+      const isDownloadAlreadyUnlocked = sessionStorage.getItem(`download_unlocked_${portal.id}`) === 'true';
+
+      if (!hasDownloadPasscode || isDownloadAlreadyUnlocked) {
+        setIsDownloadUnlocked(true);
+      } else {
+        setIsDownloadUnlocked(false);
       }
     }
   }, [portal]);
@@ -88,6 +103,21 @@ export const ClientPortalPage: React.FC = () => {
       setErrorMsg('Incorrect passcode');
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
+    }
+  };
+
+  const handleVerifyDownloadPasscode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!portal) return;
+
+    if (downloadPasscodeAttempt === portal.downloadPasscode) {
+      setDownloadErrorMsg('');
+      sessionStorage.setItem(`download_unlocked_${portal.id}`, 'true');
+      setIsDownloadUnlocked(true);
+    } else {
+      setDownloadErrorMsg('Incorrect passcode');
+      setIsDownloadShaking(true);
+      setTimeout(() => setIsDownloadShaking(false), 500);
     }
   };
 
@@ -181,7 +211,7 @@ export const ClientPortalPage: React.FC = () => {
               <div className="space-y-2 text-center">
                 <p className={`text-xs uppercase tracking-[0.2em] ${styles.textMuted} font-mono`}>Private Access Only</p>
                 {portal.clientName && (
-                  <p className={`text-sm ${isClean ? 'text-white/70' : 'italic font-serif text-[#1A1A1A]/70'}`}>Delivery portal for {portal.clientName}</p>
+                  <p className={`text-sm ${isClean ? 'font-sans' : 'italic font-serif'} ${isDark ? 'text-white/70' : 'text-[#1A1A1A]/70'}`}>Delivery portal for {portal.clientName}</p>
                 )}
               </div>
 
@@ -226,7 +256,7 @@ export const ClientPortalPage: React.FC = () => {
             <div className="flex items-center gap-2.5">
               <Shield size={14} className="text-[#C9A96E]" />
               <div className="flex flex-col">
-                <span className={`text-[10px] font-bold uppercase tracking-[0.25em] ${isClean ? 'text-white/80' : 'text-[#1A1A1A]/80'} font-sans`}>
+                <span className={`text-[10px] font-bold uppercase tracking-[0.25em] ${isDark ? 'text-white/80' : 'text-[#1A1A1A]/80'} font-sans`}>
                   Client Workspace
                 </span>
                 <span className={`text-[8px] uppercase tracking-[0.2em] ${styles.textMuted} font-mono mt-0.5`}>
@@ -257,7 +287,7 @@ export const ClientPortalPage: React.FC = () => {
 
               {portal.message && (
                 <div className="pt-4 max-w-xl">
-                  <p className={`text-lg sm:text-xl ${isClean ? styles.textMainMuted + ' font-light' : 'font-serif italic text-[#1A1A1A]/80 font-light'} leading-relaxed`}>
+                  <p className={`text-lg sm:text-xl ${isClean ? 'font-sans font-light' : 'font-serif italic font-light'} ${isDark ? 'text-white/80' : 'text-[#1A1A1A]/80'} leading-relaxed`}>
                     "{portal.message}"
                   </p>
                 </div>
@@ -308,7 +338,7 @@ export const ClientPortalPage: React.FC = () => {
             {/* SHARE SECTION */}
             <section className={`pt-8 border-t ${styles.border} space-y-6`}>
               <div className="text-center space-y-2">
-                <h3 className={`text-xl ${isClean ? 'font-manrope font-bold text-white' : 'font-serif italic text-[#C9A96E]'}`}>
+                <h3 className={`text-xl ${isClean ? 'font-manrope font-bold' : 'font-serif italic'} ${isClean ? (isDark ? 'text-white' : 'text-[#1A1A1A]') : 'text-[#C9A96E]'}`}>
                   Share Your Story
                 </h3>
                 <p className={`text-xs ${styles.textBodyMuted} font-sans max-w-md mx-auto`}>
@@ -386,7 +416,7 @@ export const ClientPortalPage: React.FC = () => {
                 <div className={`border p-8 sm:p-10 text-center space-y-6 relative overflow-hidden shadow-sm ${styles.cardBg} ${styles.rounded}`}>
                   {!isClean && <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/50 to-transparent"></div>}
                   <div className="max-w-md mx-auto space-y-3">
-                    <h3 className={`text-2xl ${styles.fontDisplay} ${isClean ? 'text-white' : 'text-[#C9A96E]'}`}>
+                    <h3 className={`text-2xl ${styles.fontDisplay} ${isClean ? (isDark ? 'text-white' : 'text-[#1A1A1A]') : 'text-[#C9A96E]'}`}>
                       Master Deliverables
                     </h3>
                     <p className={`text-sm font-sans ${styles.textBodyMuted} leading-relaxed`}>
@@ -394,17 +424,44 @@ export const ClientPortalPage: React.FC = () => {
                     </p>
                   </div>
                   
-                  <div className="pt-2">
-                    <a
-                      href={portal.downloadLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-3 font-sans text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 transition-all duration-300 shadow-md hover:shadow-lg ${styles.downloadBtn}`}
-                    >
-                      <Download size={14} />
-                      <span>Download Archive</span>
-                    </a>
-                  </div>
+                  {isDownloadUnlocked ? (
+                    <div className="pt-2">
+                      <a
+                        href={portal.downloadLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center gap-3 font-sans text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 transition-all duration-300 shadow-md hover:shadow-lg ${styles.downloadBtn}`}
+                      >
+                        <Download size={14} />
+                        <span>Download Archive</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleVerifyDownloadPasscode} className={`max-w-sm mx-auto space-y-4 pt-2 transition-all ${isDownloadShaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+                      <div className="relative">
+                        <input
+                          type="password"
+                          value={downloadPasscodeAttempt}
+                          onChange={(e) => setDownloadPasscodeAttempt(e.target.value)}
+                          className={`w-full text-center py-3 px-10 text-xs tracking-widest uppercase focus:outline-none focus:ring-0 ${styles.input}`}
+                          placeholder="ENTER ARCHIVE PASSCODE"
+                        />
+                        <button
+                          type="submit"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#C9A96E] hover:scale-110 transition-transform"
+                        >
+                          <ArrowRight size={14} />
+                        </button>
+                      </div>
+                      {downloadErrorMsg && (
+                        <p className="text-[10px] uppercase tracking-wider text-red-500 font-mono font-medium">{downloadErrorMsg}</p>
+                      )}
+                      <p className={`text-[9px] uppercase tracking-widest ${styles.textMuted} font-mono flex items-center justify-center gap-1.5`}>
+                        <Lock size={10} />
+                        <span>Secondary passcode required</span>
+                      </p>
+                    </form>
+                  )}
                 </div>
               </section>
             )}
@@ -412,7 +469,7 @@ export const ClientPortalPage: React.FC = () => {
           </main>
 
           {/* PORTAL FOOTER */}
-          <footer className={`py-16 text-center text-[10px] uppercase tracking-[0.3em] ${isClean ? 'text-white/20' : 'text-[#1A1A1A]/30'} relative z-10`}>
+          <footer className={`py-16 text-center text-[10px] uppercase tracking-[0.3em] ${isDark ? 'text-white/20' : 'text-[#1A1A1A]/30'} relative z-10`}>
             <span>© 2026 Mavestone · All Rights Reserved</span>
           </footer>
         </div>

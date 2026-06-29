@@ -128,6 +128,7 @@ export interface ClientPortal {
   passcode: string;
   videos: ClientPortalVideo[];
   downloadLink: string;
+  downloadPasscode?: string;
   stylingType?: 'traditional' | 'clean';
   themeMode?: 'light' | 'dark';
 }

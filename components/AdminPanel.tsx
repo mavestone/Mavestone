@@ -1721,17 +1721,29 @@ export const AdminPanel: React.FC = () => {
                                                     {/* MASTER ARCHIVES */}
                                                     <div className="p-8 rounded-2xl admin-glass space-y-6 text-left">
                                                         <h3 className="admin-label text-yellow-400 border-b border-white/5 pb-4">Master Archives (Downloads)</h3>
-                                                        <div className="space-y-1.5">
-                                                            <label className="admin-label opacity-45 font-manrope">Google Drive, Dropbox, or Frame.io Master Archive Link</label>
-                                                            <input
-                                                                type="text"
-                                                                value={portal.downloadLink || ''}
-                                                                onChange={(e) => updateClientPortal(portal.id, { downloadLink: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all font-mono"
-                                                                placeholder="e.g. https://drive.google.com/drive/folders/your-folder-id"
-                                                            />
-                                                            <p className="text-[10px] text-white/40 mt-1">If specified, a dedicated gold bordered "Master Deliverables" section will render at the bottom of the portal.</p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45 font-manrope">Google Drive, Dropbox, or Frame.io Master Archive Link</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.downloadLink || ''}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { downloadLink: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all font-mono"
+                                                                    placeholder="e.g. https://drive.google.com/drive/folders/your-folder-id"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45 font-manrope">Deliverables Passcode (Optional)</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.downloadPasscode || ''}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { downloadPasscode: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all font-mono"
+                                                                    placeholder="e.g. masterkey2026"
+                                                                />
+                                                            </div>
                                                         </div>
+                                                        <p className="text-[10px] text-white/40 mt-1">If specified, a dedicated gold bordered "Master Deliverables" section will render at the bottom of the portal. You can enforce a separate security passcode that must be entered by the client before revealing the master archive link.</p>
                                                     </div>
 
                                                     {/* REAL-TIME PREVIEW WINDOW */}
