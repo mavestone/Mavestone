@@ -7,6 +7,7 @@ import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
 import { Projects } from './pages/Projects';
 import { Hiring } from './pages/Hiring';
+import { ClientPortalPage } from './pages/ClientPortalPage';
 import { AdminPanel } from './components/AdminPanel';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
@@ -213,6 +214,7 @@ const AppContent: React.FC = () => {
             <Route path="/admin" element={<Admin />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/hiring" element={<Hiring />} />
+            <Route path="/:slug" element={<ClientPortalPage />} />
         </Routes>
         
         <AdminPanel />

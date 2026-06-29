@@ -112,6 +112,24 @@ export interface HiringData {
   card3Media?: string;
 }
 
+export interface ClientPortalVideo {
+  title: string;
+  duration: string;
+  vimeoId: string;
+}
+
+export interface ClientPortal {
+  id: string;
+  clientName: string;
+  slug: string;
+  projectTitle: string;
+  deliveryDate: string;
+  message: string;
+  passcode: string;
+  videos: ClientPortalVideo[];
+  downloadLink: string;
+}
+
 declare global {
   interface Window {
     YT: any;

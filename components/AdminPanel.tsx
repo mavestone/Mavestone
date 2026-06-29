@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload } from 'lucide-react';
+import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload, Share2, Globe, Copy, ExternalLink, Code, DownloadCloud, Check } from 'lucide-react';
+import { generatePortalHtml } from '../lib/portalGenerator';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
 import ReactQuill from 'react-quill';
@@ -350,11 +351,15 @@ export const AdminPanel: React.FC = () => {
     aboutData, updateAboutData, updateTestimonial, addTestimonial, deleteTestimonial,
     projectConfig, updateProjectConfig,
     hiringData, updateHiringData,
+    clientPortals, updateClientPortal, addClientPortal, deleteClientPortal,
     saveChanges, uploadImage,
     isAuthenticated, fetchMessages, messages, markMessageRead, updateMessage, deleteMessage, logout
   } = useContent();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'hiring' | 'crm'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'projects' | 'shorts' | 'about' | 'hiring' | 'crm' | 'portals'>('home');
+  
+  const [selectedPortalId, setSelectedPortalId] = useState<string | null>(null);
+  const [copiedPortalId, setCopiedPortalId] = useState<string | null>(null);
   
   const [crmView, setCrmView] = useState<'cards' | 'spreadsheet'>('spreadsheet');
   const [highlightedLeadId, setHighlightedLeadId] = useState<string | null>(null);
@@ -507,6 +512,7 @@ export const AdminPanel: React.FC = () => {
                                         <NavItem id="shorts" label="Shorts" icon={Youtube} />
                                         <NavItem id="about" label="About" icon={User} />
                                         <NavItem id="hiring" label="Hiring" icon={FileText} />
+                                        <NavItem id="portals" label="Client Portals" icon={Share2} />
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -588,7 +594,7 @@ export const AdminPanel: React.FC = () => {
                 <div className="flex-shrink-0 sticky top-0 z-20 bg-[#0f0f0f]/80 backdrop-blur-xl border-b border-white/5 px-10 py-6 flex justify-between items-center">
                     <div className="flex items-center gap-4">
                         <h1 className="text-2xl font-bold text-white tracking-tight font-manrope">
-                            {activeTab === 'crm' ? 'Leads' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                            {activeTab === 'crm' ? 'Leads' : activeTab === 'portals' ? 'Client Portals' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                         </h1>
                     </div>
                     <div className="flex items-center gap-6">
@@ -1321,6 +1327,375 @@ export const AdminPanel: React.FC = () => {
                                         </>
                                     );
                                 })()}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* CLIENT PORTALS TAB */}
+                    {activeTab === 'portals' && (
+                        <div className="space-y-8">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+                                <div>
+                                    <h3 className="text-xl font-light font-manrope text-white">Secure Delivery Portals</h3>
+                                    <p className="text-xs text-white/40 mt-1 font-manrope">Manage and generate premium, private video client workspaces.</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        addClientPortal();
+                                        // Set timeout so state update completes before selecting
+                                        setTimeout(() => {
+                                            if (clientPortals && clientPortals.length > 0) {
+                                                setSelectedPortalId(clientPortals[clientPortals.length - 1].id);
+                                            } else {
+                                                setSelectedPortalId('new');
+                                            }
+                                        }, 100);
+                                    }}
+                                    className="px-5 py-3.5 bg-[#C9A96E]/10 hover:bg-[#C9A96E]/20 border border-[#C9A96E]/20 text-[#C9A96E] rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-98"
+                                >
+                                    <Plus size={14} />
+                                    <span>Create Client Workspace</span>
+                                </button>
+                            </div>
+
+                            {/* Portals List & Workspace Split View */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                                {/* Left Side: List of Portals */}
+                                <div className="lg:col-span-4 space-y-3">
+                                    <p className="admin-label text-[#C9A96E]">Deliveries</p>
+                                    
+                                    {clientPortals && clientPortals.length > 0 ? (
+                                        clientPortals.map((portal) => {
+                                            const isSelected = selectedPortalId === portal.id;
+                                            return (
+                                                <div
+                                                    key={portal.id}
+                                                    onClick={() => setSelectedPortalId(portal.id)}
+                                                    className={`p-5 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${
+                                                        isSelected
+                                                            ? 'bg-[#C9A96E]/10 border-[#C9A96E]/40'
+                                                            : 'bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10'
+                                                    }`}
+                                                >
+                                                    <div className="flex justify-between items-start gap-2">
+                                                        <h4 className="font-medium text-sm text-white font-manrope">{portal.clientName}</h4>
+                                                        <span className="text-[10px] font-mono opacity-40 px-2 py-0.5 bg-black/40 rounded-full border border-white/5">
+                                                            {portal.deliveryDate}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-white/50 font-serif italic mt-1 line-clamp-1">"{portal.projectTitle}"</p>
+                                                    
+                                                    <div className="flex items-center gap-3 mt-4 pt-3 border-t border-white/5">
+                                                        <div className="flex items-center gap-1 text-[10px] font-mono text-[#C9A96E]">
+                                                            <Globe size={11} />
+                                                            <span>/{portal.slug}</span>
+                                                        </div>
+                                                        <div className="text-[9px] font-mono text-white/40 ml-auto">
+                                                            {portal.videos ? portal.videos.length : 0} {portal.videos?.length === 1 ? 'Film' : 'Films'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="p-8 text-center border border-dashed border-white/10 rounded-2xl text-white/30 font-manrope text-xs">
+                                            No delivery portals created yet.
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Right Side: Portal Editor Workspace */}
+                                <div className="lg:col-span-8">
+                                    {selectedPortalId ? (
+                                        (() => {
+                                            const portal = clientPortals.find(p => p.id === selectedPortalId);
+                                            if (!portal) return null;
+
+                                            const portalHtml = generatePortalHtml(portal);
+
+                                            const handleCopyHtml = () => {
+                                                navigator.clipboard.writeText(portalHtml);
+                                                setCopiedPortalId(portal.id);
+                                                setTimeout(() => setCopiedPortalId(null), 2000);
+                                            };
+
+                                            const handleDownloadHtml = () => {
+                                                const blob = new Blob([portalHtml], { type: 'text/html' });
+                                                const url = URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = `${portal.slug || 'client-delivery'}.html`;
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                document.body.removeChild(a);
+                                                URL.revokeObjectURL(url);
+                                            };
+
+                                            return (
+                                                <div className="space-y-8">
+                                                    {/* Workspace Action Bar */}
+                                                    <div className="p-6 bg-[#C9A96E]/5 border border-[#C9A96E]/10 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+                                                        <div className="space-y-0.5">
+                                                            <span className="text-[10px] uppercase tracking-widest text-[#C9A96E] font-bold font-manrope">Workspace: {portal.clientName}</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <Globe size={12} className="opacity-40" />
+                                                                <a href={`/${portal.slug}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white hover:text-[#C9A96E] hover:underline flex items-center gap-1 font-mono">
+                                                                    <span>mavestone.com/{portal.slug}</span>
+                                                                    <ExternalLink size={10} />
+                                                                </a>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={handleCopyHtml}
+                                                                className="px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white/80 hover:bg-white/10 hover:text-white transition-all flex items-center gap-2 active:scale-95"
+                                                                title="Copy Self-Contained HTML Code"
+                                                            >
+                                                                {copiedPortalId === portal.id ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+                                                                <span>{copiedPortalId === portal.id ? 'Copied Code' : 'Copy HTML'}</span>
+                                                            </button>
+
+                                                            <button
+                                                                onClick={handleDownloadHtml}
+                                                                className="px-3.5 py-2 bg-[#C9A96E] hover:bg-white text-black border border-transparent rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95"
+                                                                title="Download Self-Contained Client Portal HTML file"
+                                                            >
+                                                                <DownloadCloud size={12} />
+                                                                <span>Download HTML</span>
+                                                            </button>
+
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (confirm(`Are you sure you want to permanently delete the delivery workspace for "${portal.clientName}"?`)) {
+                                                                        deleteClientPortal(portal.id);
+                                                                        setSelectedPortalId(null);
+                                                                    }
+                                                                }}
+                                                                className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/10 rounded-xl transition-all"
+                                                                title="Delete Workspace"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* CUSTOMIZER SECTIONS */}
+                                                    <div className="p-8 rounded-2xl admin-glass space-y-6 text-left">
+                                                        <h3 className="admin-label text-yellow-400 border-b border-white/5 pb-4">Client Information</h3>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45">Client Name</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.clientName}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { clientName: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all"
+                                                                    placeholder="e.g. Brandon & Tia"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45">Slug (Custom URL Path)</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.slug}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all font-mono"
+                                                                    placeholder="e.g. brandon-tia"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="p-8 rounded-2xl admin-glass space-y-6 text-left">
+                                                        <h3 className="admin-label text-yellow-400 border-b border-white/5 pb-4">Core Setup</h3>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45">Project Title</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.projectTitle}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { projectTitle: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all"
+                                                                    placeholder="e.g. Wedding Film"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45">Delivery Date</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.deliveryDate}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { deliveryDate: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all"
+                                                                    placeholder="e.g. June 2026"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45">Personal Message (Italic Notes)</label>
+                                                                <textarea
+                                                                    value={portal.message}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { message: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all min-h-[100px]"
+                                                                    placeholder="Write a warm note to your clients..."
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="admin-label opacity-45">Security Passcode (Leave empty to disable)</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={portal.passcode || ''}
+                                                                    onChange={(e) => updateClientPortal(portal.id, { passcode: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all font-mono"
+                                                                    placeholder="e.g. armgard2026"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* DELIVERABLE FILMS */}
+                                                    <div className="p-8 rounded-2xl admin-glass space-y-6 text-left">
+                                                        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                                                            <h3 className="admin-label text-yellow-400">Delivery Videos</h3>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const currentVideos = portal.videos || [];
+                                                                    updateClientPortal(portal.id, {
+                                                                        videos: [...currentVideos, { title: 'New Film', duration: '5:00', vimeoId: '' }]
+                                                                    });
+                                                                }}
+                                                                className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider hover:bg-white/10 transition-all flex items-center gap-1.5"
+                                                            >
+                                                                <Plus size={12} />
+                                                                <span>Add Video</span>
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="space-y-4">
+                                                            {portal.videos && portal.videos.length > 0 ? (
+                                                                portal.videos.map((video, idx) => {
+                                                                    const updateVideoField = (field: string, val: string) => {
+                                                                        const updated = [...portal.videos];
+                                                                        updated[idx] = { ...updated[idx], [field]: val };
+                                                                        updateClientPortal(portal.id, { videos: updated });
+                                                                    };
+
+                                                                    const removeVideo = () => {
+                                                                        const updated = portal.videos.filter((_, i) => i !== idx);
+                                                                        updateClientPortal(portal.id, { videos: updated });
+                                                                    };
+
+                                                                    return (
+                                                                        <div key={idx} className="p-5 bg-white/2 rounded-xl border border-white/5 space-y-4">
+                                                                            <div className="flex items-center justify-between">
+                                                                                <span className="text-[10px] font-mono font-bold text-white/30 uppercase">Film #{idx + 1}</span>
+                                                                                <button onClick={removeVideo} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors">
+                                                                                    <Trash2 size={13} />
+                                                                                </button>
+                                                                            </div>
+                                                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                                                <div className="space-y-1">
+                                                                                    <label className="text-[10px] uppercase tracking-wider text-white/30">Film Title</label>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={video.title}
+                                                                                        onChange={(e) => updateVideoField('title', e.target.value)}
+                                                                                        className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-white/20"
+                                                                                        placeholder="e.g. Feature Film"
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <label className="text-[10px] uppercase tracking-wider text-white/30">Duration</label>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={video.duration}
+                                                                                        onChange={(e) => updateVideoField('duration', e.target.value)}
+                                                                                        className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-white/20"
+                                                                                        placeholder="e.g. 12:47"
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="space-y-1">
+                                                                                    <label className="text-[10px] uppercase tracking-wider text-white/30">Vimeo ID</label>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={video.vimeoId}
+                                                                                        onChange={(e) => updateVideoField('vimeoId', e.target.value)}
+                                                                                        className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-white/20 font-mono"
+                                                                                        placeholder="e.g. 123456789"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            ) : (
+                                                                <div className="text-center py-6 border border-dashed border-white/5 rounded-xl text-white/30 text-xs">
+                                                                    No deliverable films specified. Click "Add Video" to add one.
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* MASTER ARCHIVES */}
+                                                    <div className="p-8 rounded-2xl admin-glass space-y-6 text-left">
+                                                        <h3 className="admin-label text-yellow-400 border-b border-white/5 pb-4">Master Archives (Downloads)</h3>
+                                                        <div className="space-y-1.5">
+                                                            <label className="admin-label opacity-45 font-manrope">Google Drive, Dropbox, or Frame.io Master Archive Link</label>
+                                                            <input
+                                                                type="text"
+                                                                value={portal.downloadLink || ''}
+                                                                onChange={(e) => updateClientPortal(portal.id, { downloadLink: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-[#C9A96E]/40 focus:bg-white/8 transition-all font-mono"
+                                                                placeholder="e.g. https://drive.google.com/drive/folders/your-folder-id"
+                                                            />
+                                                            <p className="text-[10px] text-white/40 mt-1">If specified, a dedicated gold bordered "Master Deliverables" section will render at the bottom of the portal.</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* REAL-TIME PREVIEW WINDOW */}
+                                                    <div className="p-8 rounded-2xl admin-glass space-y-6 text-left">
+                                                        <h3 className="admin-label text-[#C9A96E] border-b border-white/5 pb-4">Live Preview (Within Client Context)</h3>
+                                                        <div className="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 relative shadow-inner">
+                                                            <iframe
+                                                                src={`/${portal.slug}`}
+                                                                key={`${portal.id}-${portal.slug}`}
+                                                                className="w-full h-full border-none"
+                                                                title="Workspace Live Preview"
+                                                            />
+                                                        </div>
+                                                        <p className="text-[10px] text-center text-white/30 italic">Interactive portal editor: modifications above reload instantly inside this live iframe window.</p>
+                                                    </div>
+
+                                                    {/* PLAIN-ENGLISH DEPLOYMENT REFERENCE CARD */}
+                                                    <div className="p-8 rounded-2xl border border-white/10 bg-white/2 space-y-4 text-left">
+                                                        <h3 className="admin-label text-indigo-400 font-bold flex items-center gap-2">
+                                                            <Code size={14} />
+                                                            <span>Plain-English Hosting & Deployment Guide</span>
+                                                        </h3>
+                                                        <div className="text-xs text-white/70 leading-relaxed space-y-2 font-sans">
+                                                            <p>Mavestone Media client delivery portals can be served natively in this full-stack React environment via pretty-links like <code className="px-1 py-0.5 bg-white/10 rounded font-mono text-[#C9A96E]">mavestone.com/{portal.slug}</code>.</p>
+                                                            <p>Alternatively, if you want a **pure, single-file HTML deliverable** to email or host independently:</p>
+                                                            <ol className="list-decimal pl-5 space-y-1">
+                                                                <li>Click the gold <strong className="text-white">Download HTML</strong> button above to download <code className="font-mono text-yellow-300">{portal.slug}.html</code>.</li>
+                                                                <li>Upload this file directly to any static web hosting (e.g., Netlify, Vercel, GitHub Pages, or any shared hosting).</li>
+                                                                <li>For pretty clean URLs without the <code className="font-mono">.html</code> suffix, configure your server redirect rules as documented in the comments at the bottom of the downloaded file.</li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()
+                                    ) : (
+                                        <div className="p-16 text-center border border-dashed border-white/10 rounded-2xl bg-white/2 flex flex-col items-center justify-center space-y-4">
+                                            <Share2 size={36} className="text-[#C9A96E] opacity-40" />
+                                            <div className="space-y-1">
+                                                <h4 className="font-medium text-sm text-white">No Selected Workspace</h4>
+                                                <p className="text-xs text-white/40 max-w-xs mx-auto">Select an existing delivery workspace from the left column, or create a brand new one to configure and generate deliverables.</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

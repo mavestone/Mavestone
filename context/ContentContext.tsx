@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT, HIRING_DATA } from '../constants';
-import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial, HiringData } from '../types';
+import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial, HiringData, ClientPortal } from '../types';
 
 interface ContentContextType {
   latestVideo: LatestVideoData;
@@ -50,6 +50,10 @@ interface ContentContextType {
   markMessageRead: (id: string) => Promise<void>;
   updateMessage: (id: string, data: Partial<Message>) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
+  clientPortals: ClientPortal[];
+  updateClientPortal: (id: string, data: Partial<ClientPortal>) => void;
+  addClientPortal: () => void;
+  deleteClientPortal: (id: string) => void;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -78,6 +82,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [hiringData, setHiringData] = useState<HiringData>(HIRING_DATA);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [clientPortals, setClientPortals] = useState<ClientPortal[]>([]);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -164,6 +169,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (key === 'project_config') setProjectConfig(content);
             if (key === 'about_data') setAboutData(content);
             if (key === 'hiring_data') setHiringData(content);
+            if (key === 'client_portals') setClientPortals(content);
           });
         }
         await fetchMessages();
@@ -262,6 +268,34 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
   const deleteClientWork = (id: string) => setClientWork(prev => prev.filter(item => item.id !== id));
   
+  const updateClientPortal = (id: string, data: Partial<ClientPortal>) => {
+    setClientPortals(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+  };
+
+  const addClientPortal = () => {
+    setClientPortals(prev => [...prev, {
+      id: Math.random().toString(36).substr(2, 9),
+      clientName: "New Client",
+      slug: "new-client",
+      projectTitle: "Cinematic Film",
+      deliveryDate: "June 2026",
+      message: "It was a privilege to document your day. These films are yours to keep forever.",
+      passcode: "mavestone2026",
+      videos: [
+        {
+          title: "Feature Film",
+          duration: "10:00",
+          vimeoId: "123456789"
+        }
+      ],
+      downloadLink: ""
+    }]);
+  };
+
+  const deleteClientPortal = (id: string) => {
+    setClientPortals(prev => prev.filter(item => item.id !== id));
+  };
+
   const saveChanges = async () => {
     if (!isAuthenticated) return;
     
@@ -280,7 +314,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           { id: 'client_work', data: clientWork },
           { id: 'project_config', data: projectConfig },
           { id: 'about_data', data: aboutData },
-          { id: 'hiring_data', data: hiringData }
+          { id: 'hiring_data', data: hiringData },
+          { id: 'client_portals', data: clientPortals }
         ];
 
         const { error } = await supabase
@@ -410,7 +445,31 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         { id: 'client_work', data: CLIENT_WORK },
         { id: 'project_config', data: PROJECT_PAGE_CONFIG },
         { id: 'about_data', data: DEFAULT_ABOUT },
-        { id: 'hiring_data', data: HIRING_DATA }
+        { id: 'hiring_data', data: HIRING_DATA },
+        { id: 'client_portals', data: [
+          {
+            id: "brandon-tia-default",
+            clientName: "Brandon & Tia",
+            slug: "brandon-tia",
+            projectTitle: "Wedding Film",
+            deliveryDate: "June 2026",
+            message: "It was a privilege to document your day. These films are yours to keep forever.",
+            passcode: "armgard2026",
+            videos: [
+              {
+                title: "Feature Film",
+                duration: "12:47",
+                vimeoId: "123456789"
+              },
+              {
+                title: "Highlight Reel",
+                duration: "3:22",
+                vimeoId: "987654321"
+              }
+            ],
+            downloadLink: "https://drive.google.com/drive/folders/your-folder-id"
+          }
+        ] }
       ];
 
       await supabase.from('site_content').upsert(updates, { onConflict: 'id' });
@@ -437,7 +496,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
     updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
     saveChanges, uploadImage, login, loginWithGoogle, logout, seedDatabase,
-    sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
+    sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage,
+    clientPortals, updateClientPortal, addClientPortal, deleteClientPortal
   }), [
     latestVideo, inProduction, shorts, films, clientWork, aboutData, hiringData, messages, projectConfig,
     isAdminOpen, isAuthenticated, isLoading,
@@ -446,7 +506,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateShort, setShorts, addShort, bulkAddShorts, deleteShort,
     updateFilm, addFilm, deleteFilm, updateClientWork, addClientWork, deleteClientWork, updateProjectConfig,
     saveChanges, uploadImage, login, loginWithGoogle, logout, seedDatabase,
-    sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage
+    sendMessage, fetchMessages, markMessageRead, updateMessage, deleteMessage,
+    clientPortals, updateClientPortal, addClientPortal, deleteClientPortal
   ]);
 
   return (
