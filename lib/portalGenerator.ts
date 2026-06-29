@@ -14,6 +14,13 @@ export function generatePortalHtml(project: ClientPortal): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${project.projectTitle} — ${project.clientName} | Mavestone</title>
   
+  <!-- OpenGraph Metadata for Facebook and Social Sharing -->
+  <meta property="og:title" content="${project.videos && project.videos.length > 0 ? project.videos[0].title : project.projectTitle} — Delivered by Mavestone">
+  <meta property="og:description" content="${project.message ? project.message.replace(/"/g, '&quot;') : `Secure client delivery portal for ${project.clientName}.`}">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&h=630&q=80">
+  <meta property="og:type" content="video.other">
+  <meta name="twitter:card" content="summary_large_image">
+  
   <!-- Google Fonts: Cormorant Garamond & DM Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -147,16 +154,6 @@ export function generatePortalHtml(project: ClientPortal): string {
 
     <main class="max-w-4xl mx-auto px-6 sm:px-12 py-16 sm:py-24 relative z-10 space-y-16 sm:space-y-24">
       
-      <!-- CINEMATIC COVER BANNER -->
-      <div class="relative aspect-[21/9] w-full bg-[#1A1A1A] overflow-hidden border border-[#C9A96E]/20 shadow-lg group">
-        <img
-          src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1600&h=900&q=80"
-          alt="Cinematic Cover"
-          class="w-full h-full object-cover opacity-90 transition-transform duration-700 ease-out"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-      </div>
-
       <!-- HERO SECTION -->
       <section class="space-y-6">
         <div class="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] text-[#1A1A1A]/40">

@@ -43,8 +43,10 @@ export const ClientPortalPage: React.FC = () => {
 
   useEffect(() => {
     if (portal) {
+      const firstVideoTitle = portal.videos && portal.videos.length > 0 ? portal.videos[0].title : portal.projectTitle;
+      
       // Set page title dynamically
-      document.title = `${portal.projectTitle} — ${portal.clientName} | Mavestone`;
+      document.title = `${firstVideoTitle} — ${portal.clientName} | Mavestone`;
 
       // Dynamically manage OpenGraph social share meta tags
       let metaOgImage = document.querySelector('meta[property="og:image"]');
@@ -61,7 +63,7 @@ export const ClientPortalPage: React.FC = () => {
         metaOgTitle.setAttribute('property', 'og:title');
         document.head.appendChild(metaOgTitle);
       }
-      metaOgTitle.setAttribute('content', `${portal.projectTitle} for ${portal.clientName} | Mavestone`);
+      metaOgTitle.setAttribute('content', `${firstVideoTitle} — Delivered by Mavestone`);
 
       let metaOgDesc = document.querySelector('meta[property="og:description"]');
       if (!metaOgDesc) {
@@ -69,7 +71,7 @@ export const ClientPortalPage: React.FC = () => {
         metaOgDesc.setAttribute('property', 'og:description');
         document.head.appendChild(metaOgDesc);
       }
-      metaOgDesc.setAttribute('content', portal.message || 'Secure delivery workspace by Mavestone.');
+      metaOgDesc.setAttribute('content', portal.message || `Secure client delivery portal for ${portal.clientName}.`);
     }
   }, [portal]);
 
@@ -201,17 +203,6 @@ export const ClientPortalPage: React.FC = () => {
 
           <main className="max-w-4xl mx-auto px-6 sm:px-12 py-16 sm:py-24 relative z-10 space-y-16 sm:space-y-24">
             
-            {/* CINEMATIC COVER BANNER */}
-            <div className="relative aspect-[21/9] w-full bg-[#1A1A1A] overflow-hidden border border-[#C9A96E]/20 shadow-lg group">
-              <img
-                src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1600&h=900&q=80"
-                alt="Cinematic Cover"
-                className="w-full h-full object-cover opacity-90 group-hover:scale-[1.01] transition-transform duration-700 ease-out"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            </div>
-
             {/* HERO SECTION */}
             <section className="space-y-6">
               <div className="flex items-center justify-between gap-4 text-xs font-mono uppercase tracking-[0.15em] text-[#1A1A1A]/40">
