@@ -203,10 +203,15 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       testimonials: [...prev.testimonials, {
           id: Math.random().toString(36).substr(2, 9),
-          name: "New Client",
-          company: "Company",
-          text: "Review text here...",
-          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200"
+          name: "Creator Name",
+          username: "creator_handle",
+          platform: "instagram" as const,
+          text: "Such a breathtaking piece of cinematography 🔥",
+          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200",
+          likes: "45",
+          timeAgo: "2d",
+          verified: true,
+          company: "Creator"
       }]
   }));
   const deleteTestimonial = (id: string) => setAboutData(prev => ({

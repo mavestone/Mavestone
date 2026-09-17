@@ -1,9 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SectionWrapper } from './ui/SectionWrapper';
-import { MagneticButton } from './ui/MagneticButton';
-import { Send, Linkedin, CheckCircle, Loader2 } from 'lucide-react';
-import { useContent } from '../context/ContentContext';
+import { Linkedin, Instagram } from 'lucide-react';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -12,184 +10,67 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 export const Contact: React.FC = () => {
-  const { sendMessage } = useContent();
-  const [formData, setFormData] = useState({ 
-    name: '', 
-    email: '', 
-    phone: '',
-    company: '',
-    source: '',
-    message: '' 
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) {
-        setError("Please fill in all required fields.");
-        return;
-    }
-    
-    setError('');
-    setLoading(true);
-
-    const { success } = await sendMessage(formData);
-
-    if (success) {
-        setSuccess(true);
-        setFormData({ name: '', email: '', phone: '', company: '', source: '', message: '' });
-        setTimeout(() => setSuccess(false), 5000);
-    } else {
-        setError("Failed to send message. Please try again.");
-    }
-    setLoading(false);
-  };
-
   return (
     <SectionWrapper id="contact" className="mb-12 md:mb-24">
-      <div className="w-full max-w-5xl mx-auto bg-[#0A0A0A] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-8 md:p-16 overflow-hidden relative shadow-2xl">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+      <div className="w-full max-w-4xl mx-auto bg-[#0A0A0A] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] md:rounded-[3.5rem] p-8 sm:p-12 md:p-16 overflow-hidden relative shadow-2xl text-center">
+        <div className="absolute top-0 right-1/2 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
         
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
-            <div className="flex flex-col justify-between">
-                <div>
-                    <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">Let's craft a <br/><span className="text-white/40">masterpiece.</span></h2>
-                    <p className="text-gray-400 mb-8 font-medium text-sm md:text-base">Tell us your vision, and we'll engineer the cinematic outcome.</p>
-                    
-                    <div className="flex gap-4 md:gap-6 mb-8">
-                        <a 
-                            href="https://www.linkedin.com/in/liamleslie/" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#0077b5] border border-[#0077b5] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
-                            aria-label="LinkedIn"
-                        >
-                            <Linkedin size={20} className="md:w-6 md:h-6" fill="currentColor" strokeWidth={0} />
-                        </a>
-                        <a 
-                            href="https://wa.me/61449035614" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] border border-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg duration-300"
-                            aria-label="WhatsApp"
-                        >
-                            <WhatsAppIcon className="w-6 h-6 md:w-7 md:h-7" />
-                        </a>
-                    </div>
+        <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#C9A96E] block mb-4">
+            Connect & Collaborate
+          </span>
+          
+          <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-tight">
+            Let's craft a <br />
+            <span className="text-white/40">masterpiece.</span>
+          </h2>
+          
+          <p className="text-gray-400 mb-10 font-medium text-sm sm:text-base md:text-lg max-w-lg leading-relaxed">
+            Tell us your vision, and we'll engineer the cinematic outcome. Reach out directly through our primary channels.
+          </p>
+          
+          {/* Social Action Buttons */}
+          <div className="flex items-center justify-center gap-5 sm:gap-6 md:gap-8 mb-10">
+            <a 
+              href="https://www.linkedin.com/in/liamleslie/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#0077b5] border border-[#0077b5] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg hover:shadow-[#0077b5]/30 duration-300 group"
+              aria-label="LinkedIn"
+            >
+              <Linkedin size={22} className="sm:w-7 sm:h-7" fill="currentColor" strokeWidth={0} />
+            </a>
 
-                    <div className="space-y-6 hidden md:block">
-                        <div>
-                            <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Primary Contact</h4>
-                            <a href="mailto:hello@mavestone.com" className="text-2xl font-bold text-white hover:text-white/60 transition-colors tracking-tight">hello@mavestone.com</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <a 
+              href="https://wa.me/61449035614" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] border border-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg hover:shadow-[#25D366]/30 duration-300 group"
+              aria-label="WhatsApp"
+            >
+              <WhatsAppIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+            </a>
 
-            <div className="relative">
-                {success ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/20 text-center p-8 animate-in fade-in duration-500">
-                        <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
-                            <CheckCircle size={32} className="text-white" />
-                        </div>
-                        <h3 className="text-2xl font-black text-white mb-2">Sent Successfully</h3>
-                        <p className="text-gray-300 font-medium">Liam will review your inquiry shortly.</p>
-                    </div>
-                ) : (
-                    <form className="space-y-5 md:space-y-6" onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Identity</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
-                                    placeholder="YOUR FULL NAME"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Email</label>
-                                <input 
-                                    type="email" 
-                                    required
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
-                                    placeholder="YOUR@EMAIL.COM"
-                                />
-                            </div>
-                        </div>
+            <a 
+              href="https://www.instagram.com/mavestonemedia" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] border border-pink-500/20 flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg hover:shadow-pink-500/30 duration-300 group"
+              aria-label="Instagram"
+            >
+              <Instagram size={22} className="sm:w-7 sm:h-7" strokeWidth={2} />
+            </a>
+          </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Phone</label>
-                                <input 
-                                    type="tel" 
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
-                                    placeholder="+1 234 567 890"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">Company</label>
-                                <input 
-                                    type="text" 
-                                    value={formData.company}
-                                    onChange={(e) => setFormData({...formData, company: e.target.value})}
-                                    className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium placeholder:text-white/20"
-                                    placeholder="ORGANIZATION NAME"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">How did you hear about us?</label>
-                            <select 
-                                value={formData.source}
-                                onChange={(e) => setFormData({...formData, source: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all font-medium appearance-none"
-                            >
-                                <option value="" disabled className="bg-charcoal">SELECT AN OPTION</option>
-                                <option value="Social Media" className="bg-charcoal">Social Media</option>
-                                <option value="Referral" className="bg-charcoal">Referral</option>
-                                <option value="Search Engine" className="bg-charcoal">Search Engine</option>
-                                <option value="Previous Client" className="bg-charcoal">Previous Client</option>
-                                <option value="Other" className="bg-charcoal">Other</option>
-                            </select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 ml-1">The Vision</label>
-                            <textarea 
-                                rows={4}
-                                required
-                                value={formData.message}
-                                onChange={(e) => setFormData({...formData, message: e.target.value})}
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-white text-base focus:outline-none focus:border-white/30 focus:bg-white/[0.05] transition-all resize-none font-medium placeholder:text-white/20"
-                                placeholder="DESCRIBE YOUR PROJECT..."
-                            ></textarea>
-                        </div>
-                        
-                        {error && <p className="text-red-400 text-xs font-bold text-center">{error}</p>}
-
-                        <div className="pt-2 md:pt-4">
-                            <MagneticButton variant="primary" className="w-full !py-4 md:!py-5 !font-black !text-xs md:!text-sm uppercase tracking-widest justify-center">
-                                {loading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
-                                <span>{loading ? 'Transmitting...' : 'Initiate Project'}</span>
-                            </MagneticButton>
-                        </div>
-
-                         <div className="block md:hidden text-center mt-6">
-                            <a href="mailto:hello@mavestone.com" className="text-sm font-bold text-white/80 hover:text-white transition-colors tracking-tight">hello@mavestone.com</a>
-                        </div>
-                    </form>
-                )}
-            </div>
+          <div className="pt-8 border-t border-white/5 w-full flex flex-col items-center justify-center">
+            <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Primary Contact</h4>
+            <a 
+              href="mailto:hello@mavestone.com" 
+              className="text-xl sm:text-2xl md:text-3xl font-bold text-white hover:text-[#C9A96E] transition-colors tracking-tight font-sans"
+            >
+              hello@mavestone.com
+            </a>
+          </div>
         </div>
       </div>
     </SectionWrapper>

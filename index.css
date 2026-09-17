@@ -120,18 +120,61 @@ h1, h2, h3, h4, h5, h6, .font-manrope {
   background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
 }
 
-/* Marquee Animation */
+/* Seamless Marquee Animations */
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-100% - var(--gap, 1.25rem)), 0, 0);
+  }
+}
+
+@keyframes marquee-reverse {
+  from {
+    transform: translate3d(calc(-100% - var(--gap, 1.25rem)), 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, calc(-100% - var(--gap, 1.25rem)), 0);
+  }
+}
+
+@keyframes marquee-vertical-reverse {
+  from {
+    transform: translate3d(0, calc(-100% - var(--gap, 1.25rem)), 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 .animate-marquee {
-  animation: marquee 40s linear infinite;
+  animation: marquee var(--duration, 40s) linear infinite;
+  will-change: transform;
 }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
+.animate-marquee-reverse {
+  animation: marquee-reverse var(--duration, 40s) linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration, 40s) linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-vertical-reverse {
+  animation: marquee-vertical-reverse var(--duration, 40s) linear infinite;
+  will-change: transform;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Message } from '../types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { SocialCommentCard } from './SocialCommentCard';
 
 const getLeadNumber = (id: string) => {
     let hash = 0;
@@ -667,25 +668,176 @@ export const AdminPanel: React.FC = () => {
                              </div>
 
                              <div className="space-y-8">
-                                 <div className="flex justify-between items-center px-2">
-                                     <h3 className="text-xl font-medium text-white">Client Reviews</h3>
-                                     <button onClick={() => addTestimonial()} className="px-6 py-2.5 bg-white/10 border border-white/10 backdrop-blur-md text-white rounded-full text-xs font-semibold flex items-center gap-2 hover:bg-white/20 transition-all"><Plus size={14} /> Add Review</button>
+                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
+                                     <div>
+                                         <h3 className="text-xl font-medium text-white">Social Testimonials & Comments</h3>
+                                         <p className="text-xs text-white/40 mt-1">
+                                             Add, edit, and style comments for Instagram, YouTube, or Twitter floating in the 3D Visionaries section.
+                                         </p>
+                                     </div>
+                                     <button 
+                                         type="button"
+                                         onClick={() => addTestimonial()} 
+                                         className="px-5 py-2.5 bg-[#C9A96E]/10 border border-[#C9A96E]/30 text-[#C9A96E] hover:bg-[#C9A96E]/20 rounded-full text-xs font-semibold flex items-center gap-2 transition-all shadow-sm"
+                                     >
+                                         <Plus size={14} /> Add Social Comment
+                                     </button>
                                  </div>
 
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div className="space-y-6">
                                      {aboutData.testimonials.map((t) => (
-                                         <div key={t.id} className="p-8 rounded-2xl admin-glass group relative">
-                                             <button onClick={() => deleteTestimonial(t.id)} className="absolute top-6 right-6 text-white/20 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
-                                             <div className="space-y-6">
-                                                 <textarea rows={3} value={t.text} onChange={(e) => updateTestimonial(t.id, { text: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white/80 italic focus:outline-none focus:border-white/20 transition-all" placeholder="Review Text" />
-                                                 <div className="flex items-center gap-4">
-                                                     <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 group/av border border-white/10">
-                                                         <img src={t.avatar} className="w-full h-full object-cover" />
-                                                         <label className="absolute inset-0 bg-black/60 opacity-0 group-hover/av:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"><Camera size={16} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateTestimonial(t.id, { avatar: url }))} /></label>
+                                         <div key={t.id} className="p-6 md:p-8 rounded-2xl admin-glass group relative space-y-6">
+                                             {/* Top bar: Platform selection & Delete button */}
+                                             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/5">
+                                                 <div className="flex items-center gap-2 flex-wrap">
+                                                     <span className="text-[10px] uppercase font-bold tracking-widest text-white/40 mr-1">Style As:</span>
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => updateTestimonial(t.id, { platform: 'instagram' })}
+                                                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                                                             (t.platform || 'instagram') === 'instagram'
+                                                                 ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-pink-300 border border-pink-500/30 shadow-sm'
+                                                                 : 'bg-white/5 text-white/40 hover:text-white border border-white/5'
+                                                         }`}
+                                                     >
+                                                         <span>Instagram</span>
+                                                     </button>
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => updateTestimonial(t.id, { platform: 'youtube' })}
+                                                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                                                             t.platform === 'youtube'
+                                                                 ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-sm'
+                                                                 : 'bg-white/5 text-white/40 hover:text-white border border-white/5'
+                                                         }`}
+                                                     >
+                                                         <span>YouTube</span>
+                                                     </button>
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => updateTestimonial(t.id, { platform: 'twitter' })}
+                                                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                                                             t.platform === 'twitter'
+                                                                 ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30 shadow-sm'
+                                                                 : 'bg-white/5 text-white/40 hover:text-white border border-white/5'
+                                                         }`}
+                                                     >
+                                                         <span>Twitter / X</span>
+                                                     </button>
+                                                 </div>
+
+                                                 <button 
+                                                     type="button"
+                                                     onClick={() => deleteTestimonial(t.id)} 
+                                                     className="p-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium"
+                                                     title="Delete this comment"
+                                                 >
+                                                     <Trash2 size={16} />
+                                                     <span className="hidden sm:inline">Delete</span>
+                                                 </button>
+                                             </div>
+
+                                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                                 {/* Left Column: Editable Fields */}
+                                                 <div className="lg:col-span-7 space-y-4">
+                                                     <div>
+                                                         <label className="admin-label block opacity-50 mb-1.5">Comment Text</label>
+                                                         <textarea 
+                                                             rows={3} 
+                                                             value={t.text} 
+                                                             onChange={(e) => updateTestimonial(t.id, { text: e.target.value })} 
+                                                             className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all font-sans" 
+                                                             placeholder="What did they comment? (e.g. That color grade was masterclass 🔥)" 
+                                                         />
                                                      </div>
-                                                     <div className="flex-1 grid grid-cols-2 gap-3">
-                                                         <input type="text" value={t.name} onChange={(e) => updateTestimonial(t.id, { name: e.target.value })} className="bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" placeholder="Name" />
-                                                         <input type="text" value={t.company} onChange={(e) => updateTestimonial(t.id, { company: e.target.value })} className="bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" placeholder="Company" />
+
+                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                         <div>
+                                                             <label className="admin-label block opacity-50 mb-1.5">Username / Handle</label>
+                                                             <input 
+                                                                 type="text" 
+                                                                 value={t.username || ''} 
+                                                                 onChange={(e) => updateTestimonial(t.id, { username: e.target.value })} 
+                                                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all font-mono" 
+                                                                 placeholder="e.g. marcusvance.cin" 
+                                                             />
+                                                         </div>
+                                                         <div>
+                                                             <label className="admin-label block opacity-50 mb-1.5">Display Name</label>
+                                                             <input 
+                                                                 type="text" 
+                                                                 value={t.name} 
+                                                                 onChange={(e) => updateTestimonial(t.id, { name: e.target.value })} 
+                                                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" 
+                                                                 placeholder="e.g. Marcus Vance" 
+                                                             />
+                                                         </div>
+                                                     </div>
+
+                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                         <div>
+                                                             <label className="admin-label block opacity-50 mb-1.5">Likes Count</label>
+                                                             <input 
+                                                                 type="text" 
+                                                                 value={t.likes || ''} 
+                                                                 onChange={(e) => updateTestimonial(t.id, { likes: e.target.value })} 
+                                                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all font-mono" 
+                                                                 placeholder="e.g. 418 or 1.2k" 
+                                                             />
+                                                         </div>
+                                                         <div>
+                                                             <label className="admin-label block opacity-50 mb-1.5">Time Ago</label>
+                                                             <input 
+                                                                 type="text" 
+                                                                 value={t.timeAgo || ''} 
+                                                                 onChange={(e) => updateTestimonial(t.id, { timeAgo: e.target.value })} 
+                                                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" 
+                                                                 placeholder="e.g. 2d or 1w" 
+                                                             />
+                                                         </div>
+                                                         <div>
+                                                             <label className="admin-label block opacity-50 mb-1.5">Verified Badge</label>
+                                                             <button
+                                                                 type="button"
+                                                                 onClick={() => updateTestimonial(t.id, { verified: !(t.verified ?? true) })}
+                                                                 className={`w-full p-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
+                                                                     (t.verified ?? true)
+                                                                         ? 'bg-[#0095F6]/20 border-[#0095F6]/40 text-[#0095F6]'
+                                                                         : 'bg-white/5 border-white/10 text-white/40'
+                                                                 }`}
+                                                             >
+                                                                 <Check size={14} className={(t.verified ?? true) ? 'opacity-100' : 'opacity-20'} />
+                                                                 <span>{(t.verified ?? true) ? 'Verified' : 'Unverified'}</span>
+                                                             </button>
+                                                         </div>
+                                                     </div>
+
+                                                     <div>
+                                                         <label className="admin-label block opacity-50 mb-1.5">Avatar Image</label>
+                                                         <div className="flex gap-3 items-center">
+                                                             <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-white/10">
+                                                                 <img src={t.avatar} className="w-full h-full object-cover" alt={t.name} />
+                                                                 <label className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                                                     <Camera size={14} className="text-white" />
+                                                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateTestimonial(t.id, { avatar: url }))} />
+                                                                 </label>
+                                                             </div>
+                                                             <input 
+                                                                 type="text" 
+                                                                 value={t.avatar} 
+                                                                 onChange={(e) => updateTestimonial(t.id, { avatar: e.target.value })} 
+                                                                 className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-white/50 focus:outline-none focus:border-white/20 transition-all font-mono" 
+                                                                 placeholder="Avatar Image URL" 
+                                                             />
+                                                         </div>
+                                                     </div>
+                                                 </div>
+
+                                                 {/* Right Column: Live Card Preview */}
+                                                 <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 bg-black/40 rounded-2xl border border-white/5 min-h-[220px]">
+                                                     <span className="text-[10px] uppercase font-bold tracking-widest text-white/30 mb-4">Live Preview</span>
+                                                     <div className="w-full flex justify-center">
+                                                         <SocialCommentCard testimonial={t} className="w-full max-w-[320px]" />
                                                      </div>
                                                  </div>
                                              </div>

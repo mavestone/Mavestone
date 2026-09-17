@@ -28,9 +28,14 @@ export interface Short {
 export interface Testimonial {
   id: string;
   name: string;
-  company: string;
+  username?: string;
+  platform?: 'instagram' | 'twitter' | 'youtube';
   text: string;
   avatar: string;
+  likes?: string;
+  timeAgo?: string;
+  verified?: boolean;
+  company?: string;
 }
 
 export interface AboutData {

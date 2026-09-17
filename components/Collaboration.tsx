@@ -4,14 +4,31 @@ import { SectionWrapper } from './ui/SectionWrapper';
 import { MagneticButton } from './ui/MagneticButton';
 import { motion } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
-import { Quote, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { Marquee } from './ui/3d-testimonails';
+import { SocialCommentCard } from './SocialCommentCard';
 
 export const Collaboration: React.FC = () => {
   const { aboutData } = useContent();
   const { subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
   
-  // Create a quadrupled array to ensure smooth infinite looping on large screens
-  const marqueeItems = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
+  // Distribute testimonials across 5 columns with diverse creators and platforms in each
+  const getColItems = (offset: number) => {
+    if (!testimonials || testimonials.length === 0) return [];
+    const count = testimonials.length;
+    return [
+      testimonials[offset % count],
+      testimonials[(offset + 2) % count],
+      testimonials[(offset + 4) % count],
+      testimonials[(offset + 6) % count],
+    ];
+  };
+
+  const col1 = getColItems(0);
+  const col2 = getColItems(1);
+  const col3 = getColItems(2);
+  const col4 = getColItems(3);
+  const col5 = getColItems(4);
 
   // Optimize image size function
   const getOptimizedBg = (url?: string) => {
@@ -108,78 +125,99 @@ export const Collaboration: React.FC = () => {
         </div>
       </SectionWrapper>
 
-      {/* Testimonials - Distinct ID for snapping */}
-      <section id="testimonials" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative">
-        {/* Background with optimized gradients - removed backdrop blur for performance */}
+      {/* Slim Header Section - Pure clean title without subtitle or community tag */}
+      <section id="testimonials" className="pt-16 pb-8 sm:pt-20 sm:pb-10 md:pt-24 md:pb-12 bg-[#050505] relative z-10">
+        <div className="container px-6 md:px-12 lg:px-24 mx-auto">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none">
+                Trusted by Visionaries<span className="text-[#C9A96E]">.</span>
+            </h2>
+        </div>
+      </section>
+
+      {/* 3D Floating Social Cards Stage - Dedicated full-height section without hard cutting lines */}
+      <section className="relative w-full h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] bg-[#050505] overflow-hidden flex items-center justify-center select-none">
+        {/* Atmosphere Background */}
         {testimonialsBackground && (
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
                 <img 
                     src={getOptimizedBg(testimonialsBackground)} 
-                    alt="Background" 
-                    className="w-full h-full object-cover opacity-60" 
+                    alt="Atmosphere" 
+                    className="w-full h-full object-cover object-center opacity-40 filter contrast-110" 
                 />
-                <div className="absolute inset-0 bg-[#050505]/60"></div>
-                {/* Smoother vertical gradients to prevent glitching at edges */}
-                <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#050505] to-transparent pointer-events-none z-10"></div>
-                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-10"></div>
             </div>
         )}
 
-        <div className="container px-6 md:px-12 lg:px-24 mx-auto mb-12 md:mb-16 relative z-10">
-            <div className="max-w-3xl">
-                <span className="text-[10px] font-black uppercase tracking-[0.6em] text-white/60 block mb-4">Partners</span>
-                <h2 className="text-4xl sm:text-6xl md:text-8xl font-black text-white tracking-tighter leading-none">
-                    Trusted by <br />
-                    <span className="text-white/90">Visionaries.</span>
-                </h2>
-            </div>
-        </div>
-
-        <div className="relative flex overflow-hidden z-10 w-full">
-            <motion.div 
-                className="flex gap-4 md:gap-12 py-10 pl-6 md:pl-12 w-max"
-                // Animate from 0 to -50% creates a perfect loop if items are doubled/quadrupled
-                animate={{ x: ["0%", "-50%"] }}
-                transition={{ 
-                    duration: 60, 
-                    repeat: Infinity, 
-                    ease: "linear"
+        {/* 3D Stage - Full height and fluid perspective without intermediate overflow-hidden cutting */}
+        <div className="relative flex w-full h-full items-center justify-center [perspective:1000px] z-10">
+            <div
+                className="flex flex-row items-center justify-center gap-3.5 sm:gap-5 md:gap-6 scale-[0.76] sm:scale-[0.84] md:scale-[0.92] lg:scale-100 shrink-0 select-none [transform-style:preserve-3d]"
+                style={{
+                    transform:
+                        'rotateX(12deg) rotateY(-5deg) rotateZ(10deg)',
                 }}
             >
-                {marqueeItems.map((testimonial, i) => (
-                    <div
-                        key={`${testimonial.id}-${i}`}
-                        className="w-[280px] md:w-[540px] p-8 md:p-16 rounded-[2rem] md:rounded-[4rem] flex flex-col justify-between border border-white/10 relative group transition-all duration-700 hover:border-white/20 shadow-2xl bg-white/[0.03] backdrop-blur-3xl hover:bg-white/[0.06]"
-                    >
-                        <div className="relative z-10">
-                            {/* Adjusted Quote position to not overlap text */}
-                            <Quote size={40} className="text-white/10 absolute -top-4 -left-2 md:-top-8 md:-left-6 group-hover:text-white/20 transition-colors duration-700 z-0 md:w-[60px] md:h-[60px]" />
-                            <p className="text-base md:text-3xl text-white font-light italic leading-snug mb-8 md:mb-16 tracking-tight relative z-10 mt-4 md:mt-4">
-                                "{testimonial.text}"
-                            </p>
-                        </div>
+                {/* Column 1 - Downwards */}
+                <Marquee 
+                    vertical 
+                    pauseOnHover={false} 
+                    className="[--duration:46s] shrink-0"
+                    animationDelay="-12s"
+                >
+                    {col1.map((testimonial, i) => (
+                        <SocialCommentCard key={`c1-${testimonial.id}-${i}`} testimonial={testimonial} />
+                    ))}
+                </Marquee>
 
-                        <div className="flex items-center gap-4 md:gap-8 mt-auto">
-                            {/* Logo instead of Avatar */}
-                            <div className="h-8 md:h-12 w-auto opacity-70 group-hover:opacity-100 transition-opacity duration-500">
-                                <img 
-                                    src={testimonial.avatar} 
-                                    alt={testimonial.company} 
-                                    className="h-full w-auto object-contain brightness-0 invert" 
-                                />
-                            </div>
-                            
-                            {/* Vertical Separator */}
-                            <div className="h-8 w-[1px] bg-white/20"></div>
+                {/* Column 2 - Upwards (Reverse) */}
+                <Marquee 
+                    vertical 
+                    reverse 
+                    pauseOnHover={false} 
+                    className="[--duration:54s] shrink-0"
+                    animationDelay="-26s"
+                >
+                    {col2.map((testimonial, i) => (
+                        <SocialCommentCard key={`c2-${testimonial.id}-${i}`} testimonial={testimonial} />
+                    ))}
+                </Marquee>
 
-                            <div className="space-y-0.5">
-                                <h4 className="text-white font-black text-xs md:text-sm uppercase tracking-wider">{testimonial.name}</h4>
-                                <p className="text-gray-400 text-[8px] md:text-[10px] uppercase tracking-[0.2em] font-bold">{testimonial.company}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </motion.div>
+                {/* Column 3 - Downwards */}
+                <Marquee 
+                    vertical 
+                    pauseOnHover={false} 
+                    className="[--duration:48s] shrink-0"
+                    animationDelay="-18s"
+                >
+                    {col3.map((testimonial, i) => (
+                        <SocialCommentCard key={`c3-${testimonial.id}-${i}`} testimonial={testimonial} />
+                    ))}
+                </Marquee>
+
+                {/* Column 4 - Upwards (Reverse) */}
+                <Marquee 
+                    vertical 
+                    reverse 
+                    pauseOnHover={false} 
+                    className="[--duration:56s] shrink-0 hidden sm:flex"
+                    animationDelay="-32s"
+                >
+                    {col4.map((testimonial, i) => (
+                        <SocialCommentCard key={`c4-${testimonial.id}-${i}`} testimonial={testimonial} />
+                    ))}
+                </Marquee>
+
+                {/* Column 5 - Downwards */}
+                <Marquee 
+                    vertical 
+                    pauseOnHover={false} 
+                    className="[--duration:50s] shrink-0 hidden lg:flex"
+                    animationDelay="-8s"
+                >
+                    {col5.map((testimonial, i) => (
+                        <SocialCommentCard key={`c5-${testimonial.id}-${i}`} testimonial={testimonial} />
+                    ))}
+                </Marquee>
+            </div>
         </div>
       </section>
     </div>

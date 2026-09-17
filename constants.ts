@@ -49,32 +49,99 @@ export const LIAM_PORTRAIT = "https://images.unsplash.com/photo-1516035069371-29
 export const TESTIMONIALS = [
   {
     id: '1',
-    name: "Zoe Grace",
-    company: "Levee",
-    text: "Mavestone doesn't just deliver content; they deliver a feeling. The cinematic weight of their work is unmatched.",
-    // Using abstract geometric shapes/symbols to simulate logos
-    avatar: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=200&auto=format&fit=crop"
+    name: "Marcus Vance",
+    username: "marcusvance.cin",
+    platform: "instagram" as const,
+    text: "The color grade on this project is unreal. That 35mm film emulation in the intro gave me actual chills 🔥",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
+    likes: "418",
+    timeAgo: "2d",
+    verified: true,
+    company: "Levee"
   },
   {
     id: '2',
-    name: "Rob Robinson",
-    company: "ILAN",
-    text: "Working with Liam transformed our brand's visual identity. He brings an editorial soul to commercial briefs.",
-    avatar: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?q=80&w=200&auto=format&fit=crop"
+    name: "Elena Rostova",
+    username: "elenarostova",
+    platform: "instagram" as const,
+    text: "Watched this three times back to back. The sound design alone deserves an award. Pure cinema 🙌",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop",
+    likes: "285",
+    timeAgo: "4d",
+    verified: true,
+    company: "ILAN"
   },
   {
     id: '3',
-    name: "Sarah Jenkins",
-    company: "Flux Media",
-    text: "The ability to find the human heart in a complex story is what makes Mavestone a global standout.",
-    avatar: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=200&auto=format&fit=crop"
+    name: "Kai Takahashi",
+    username: "kaitakahashi_",
+    platform: "instagram" as const,
+    text: "Mavestone never misses. That anamorphic flare transition into the final scene was masterclass 👏",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
+    likes: "192",
+    timeAgo: "1w",
+    verified: false,
+    company: "Flux Media"
   },
   {
     id: '4',
-    name: "Mark Thorne",
-    company: "Peak Performance",
-    text: "Absolute precision from storyboard to screen. Professional, visionary, and technically flawless.",
-    avatar: "https://images.unsplash.com/photo-1563694983011-6f4d90358083?q=80&w=200&auto=format&fit=crop"
+    name: "David Chen",
+    username: "davidchenfilms",
+    platform: "youtube" as const,
+    text: "This isn't just commercial work, this is genuine narrative filmmaking. Inspiring as always!",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
+    likes: "1.2k",
+    timeAgo: "3 weeks ago",
+    verified: true,
+    company: "Peak Performance"
+  },
+  {
+    id: '5',
+    name: "Sofia Alvarez",
+    username: "sofia.alvarez",
+    platform: "instagram" as const,
+    text: "Every single frame could be printed and hung in a gallery. Extraordinary visual storytelling.",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
+    likes: "340",
+    timeAgo: "5d",
+    verified: true,
+    company: "Vogue Creative"
+  },
+  {
+    id: '6',
+    name: "Julian Gray",
+    username: "juliangray",
+    platform: "twitter" as const,
+    text: "Still thinking about the pacing in that last short. Liam’s team operate on a completely different level.",
+    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop",
+    likes: "892",
+    timeAgo: "18h",
+    verified: true,
+    company: "Aperture"
+  },
+  {
+    id: '7',
+    name: "Maya Sterling",
+    username: "mayasterling_",
+    platform: "instagram" as const,
+    text: "The storytelling is so raw and authentic. Best production studio in the game right now.",
+    avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=200&auto=format&fit=crop",
+    likes: "512",
+    timeAgo: "6d",
+    verified: true,
+    company: "Monolith"
+  },
+  {
+    id: '8',
+    name: "Leo Dubois",
+    username: "leodubois",
+    platform: "instagram" as const,
+    text: "That transition at 0:42 made my jaw drop. The craft in your edits is unmatched 🤯",
+    avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=200&auto=format&fit=crop",
+    likes: "167",
+    timeAgo: "2w",
+    verified: false,
+    company: "CineCore"
   }
 ];
 
