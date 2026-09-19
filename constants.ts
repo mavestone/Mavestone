@@ -1,5 +1,5 @@
 
-import { Film, Short, NavItem, InProductionData, ProjectHeroConfig, HiringData } from './types';
+import { Film, Short, NavItem, InProductionData, ProjectHeroConfig, HiringData, Testimonial } from './types';
 
 export const HIRING_DATA: HiringData = {
   titleLine1: "I'm hiring a",
@@ -46,16 +46,15 @@ export const NAV_ITEMS: NavItem[] = [
 // High-end cinematic portrait of a creator in a vast landscape (matches drone pilot vibe)
 export const LIAM_PORTRAIT = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop"; 
 
-export const TESTIMONIALS = [
+export const TESTIMONIALS: Testimonial[] = [
   {
     id: '1',
     name: "Marcus Vance",
     username: "marcusvance.cin",
-    platform: "instagram" as const,
+    platform: "instagram",
     text: "The color grade on this project is unreal. That 35mm film emulation in the intro gave me actual chills 🔥",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
     likes: "418",
-    timeAgo: "2d",
     verified: true,
     company: "Levee"
   },
@@ -63,11 +62,10 @@ export const TESTIMONIALS = [
     id: '2',
     name: "Elena Rostova",
     username: "elenarostova",
-    platform: "instagram" as const,
+    platform: "instagram",
     text: "Watched this three times back to back. The sound design alone deserves an award. Pure cinema 🙌",
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop",
     likes: "285",
-    timeAgo: "4d",
     verified: true,
     company: "ILAN"
   },
@@ -75,11 +73,10 @@ export const TESTIMONIALS = [
     id: '3',
     name: "Kai Takahashi",
     username: "kaitakahashi_",
-    platform: "instagram" as const,
+    platform: "instagram",
     text: "Mavestone never misses. That anamorphic flare transition into the final scene was masterclass 👏",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
     likes: "192",
-    timeAgo: "1w",
     verified: false,
     company: "Flux Media"
   },
@@ -87,23 +84,22 @@ export const TESTIMONIALS = [
     id: '4',
     name: "David Chen",
     username: "davidchenfilms",
-    platform: "youtube" as const,
+    platform: "youtube",
     text: "This isn't just commercial work, this is genuine narrative filmmaking. Inspiring as always!",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
     likes: "1.2k",
-    timeAgo: "3 weeks ago",
     verified: true,
+    likedByMe: true,
     company: "Peak Performance"
   },
   {
     id: '5',
     name: "Sofia Alvarez",
     username: "sofia.alvarez",
-    platform: "instagram" as const,
+    platform: "instagram",
     text: "Every single frame could be printed and hung in a gallery. Extraordinary visual storytelling.",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
     likes: "340",
-    timeAgo: "5d",
     verified: true,
     company: "Vogue Creative"
   },
@@ -111,11 +107,10 @@ export const TESTIMONIALS = [
     id: '6',
     name: "Julian Gray",
     username: "juliangray",
-    platform: "twitter" as const,
+    platform: "twitter",
     text: "Still thinking about the pacing in that last short. Liam’s team operate on a completely different level.",
     avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop",
     likes: "892",
-    timeAgo: "18h",
     verified: true,
     company: "Aperture"
   },
@@ -123,11 +118,10 @@ export const TESTIMONIALS = [
     id: '7',
     name: "Maya Sterling",
     username: "mayasterling_",
-    platform: "instagram" as const,
+    platform: "instagram",
     text: "The storytelling is so raw and authentic. Best production studio in the game right now.",
     avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=200&auto=format&fit=crop",
     likes: "512",
-    timeAgo: "6d",
     verified: true,
     company: "Monolith"
   },
@@ -135,11 +129,10 @@ export const TESTIMONIALS = [
     id: '8',
     name: "Leo Dubois",
     username: "leodubois",
-    platform: "instagram" as const,
+    platform: "instagram",
     text: "That transition at 0:42 made my jaw drop. The craft in your edits is unmatched 🤯",
     avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=200&auto=format&fit=crop",
     likes: "167",
-    timeAgo: "2w",
     verified: false,
     company: "CineCore"
   },
@@ -147,25 +140,25 @@ export const TESTIMONIALS = [
     id: '9',
     name: "Rachel Thorne",
     username: "rachel-thorne-creative",
-    platform: "linkedin" as const,
+    platform: "linkedin",
     text: "Partnering with Liam and the Mavestone team on our global commercial reset our standards for pacing and visual grade. Extraordinary storytelling.",
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
     likes: "412",
-    timeAgo: "3d",
     verified: true,
-    company: "VP Global Creative · Zenith Media"
+    company: "VP Global Creative · Zenith Media",
+    reactions: ['like', 'love', 'insightful']
   },
   {
     id: '10',
     name: "Marcus Vance",
     username: "marcusvance-dir",
-    platform: "linkedin" as const,
+    platform: "linkedin",
     text: "Mavestone brings narrative film caliber to commercial storytelling. A genuine masterclass in tone, lens selection, and sound design.",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop",
     likes: "689",
-    timeAgo: "1w",
     verified: true,
-    company: "Executive Creative Director · Aperture Media"
+    company: "Executive Creative Director · Aperture Media",
+    reactions: ['like', 'celebrate', 'insightful']
   }
 ];
 

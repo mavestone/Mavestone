@@ -4,6 +4,16 @@ import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { Heart, ThumbsUp, ThumbsDown, MessageCircle, Repeat, Share2 } from 'lucide-react';
 import { Testimonial } from '../types';
 import { cn } from '../lib/utils';
+import { LIAM_PORTRAIT } from '../constants';
+
+export const LINKEDIN_REACTION_MAP: Record<string, { label: string; emoji: string; bg: string }> = {
+  like: { label: 'Like', emoji: '👍', bg: 'bg-[#0A66C2]' },
+  celebrate: { label: 'Celebrate', emoji: '👏', bg: 'bg-[#2E7D32]' },
+  support: { label: 'Support', emoji: '🤝', bg: 'bg-[#705FC9]' },
+  love: { label: 'Love', emoji: '❤️', bg: 'bg-[#DF704D]' },
+  insightful: { label: 'Insightful', emoji: '💡', bg: 'bg-[#E7A33E]' },
+  funny: { label: 'Funny', emoji: '😂', bg: 'bg-[#00A0DC]' },
+};
 
 interface SocialCommentCardProps {
   testimonial: Testimonial;
@@ -14,7 +24,6 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
   const platform = testimonial.platform || 'instagram';
   const username = testimonial.username || (testimonial.name ? testimonial.name.toLowerCase().replace(/\s+/g, '_') : 'creator');
   const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
-  const timeAgo = testimonial.timeAgo || '3d';
   const likes = testimonial.likes || '245';
   const isVerified = testimonial.verified ?? true;
 
@@ -68,7 +77,7 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
       }
       if (part.startsWith('#')) {
         return (
-          <span key={index} className="text-[#0095F6]/90 hover:underline cursor-pointer">
+          <span key={index} className="text-[#0095F6] font-medium hover:underline cursor-pointer">
             {part}
           </span>
         );
@@ -105,7 +114,6 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
                 {cleanUsername}
               </span>
               {isVerified && <VerifiedBadge />}
-              <span className="text-white/35 text-[11px] ml-1 font-sans">{timeAgo}</span>
             </div>
 
             <p className="text-[13px] text-white/90 leading-snug mt-1 font-normal break-words font-sans">
@@ -163,7 +171,6 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
                   @{cleanUsername}
                 </span>
                 {isVerified && <VerifiedBadge />}
-                <span className="text-white/40 text-[11px]">{timeAgo}</span>
               </div>
               <YouTubeGlyph />
             </div>
@@ -172,7 +179,7 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
               {renderFormattedText(testimonial.text)}
             </p>
 
-            <div className="flex items-center gap-4 mt-2.5 text-[11px] text-white/50">
+            <div className="flex items-center gap-3 mt-2.5 text-[11px] text-white/50">
               <div className="flex items-center gap-1 hover:text-white cursor-pointer transition-colors">
                 <ThumbsUp size={13} />
                 <span className="text-[10px] font-mono">{likes}</span>
@@ -180,6 +187,27 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
               <div className="hover:text-white cursor-pointer transition-colors">
                 <ThumbsDown size={13} />
               </div>
+
+              {/* YouTube Creator Heart Badge */}
+              {testimonial.likedByMe && (
+                <div className="flex items-center ml-0.5" title="Hearted by creator">
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full overflow-hidden border border-white/20">
+                      <img 
+                        src={LIAM_PORTRAIT} 
+                        alt="Creator" 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 bg-[#0f0f15] rounded-full p-[1px]">
+                      <svg className="w-2.5 h-2.5 text-red-500 fill-red-500" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <span className="font-medium hover:text-white cursor-pointer transition-colors ml-1">
                 Reply
               </span>
@@ -193,6 +221,10 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
   // 3. LINKEDIN COMMENT / RECOMMENDATION LAYOUT
   if (platform === 'linkedin') {
     const headline = testimonial.company || (testimonial.username ? `@${cleanUsername}` : 'Creative Director & Producer');
+    const activeReactions = (testimonial.reactions && testimonial.reactions.length > 0)
+      ? testimonial.reactions
+      : (['like', 'love', 'celebrate'] as (keyof typeof LINKEDIN_REACTION_MAP)[]);
+
     return (
       <Card
         className={cn(
@@ -220,11 +252,6 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
                 <p className="text-[10px] text-white/50 font-normal truncate font-sans max-w-[185px] leading-tight mt-0.5">
                   {headline}
                 </p>
-                <div className="flex items-center gap-1 text-[10px] text-white/35 font-sans mt-0.5">
-                  <span>{timeAgo}</span>
-                  <span>·</span>
-                  <span title="Public">🌐</span>
-                </div>
               </div>
               <LinkedInGlyph />
             </div>
@@ -237,9 +264,18 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
             <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5 text-[11px] text-white/40">
               <div className="flex items-center gap-1.5">
                 <span className="inline-flex -space-x-1 items-center">
-                  <span className="w-4 h-4 rounded-full bg-[#0A66C2] flex items-center justify-center text-[8px] text-white border border-[#0a0f16]">👍</span>
-                  <span className="w-4 h-4 rounded-full bg-[#DF704D] flex items-center justify-center text-[8px] text-white border border-[#0a0f16]">❤️</span>
-                  <span className="w-4 h-4 rounded-full bg-[#2E7D32] flex items-center justify-center text-[8px] text-white border border-[#0a0f16]">👏</span>
+                  {activeReactions.map((rKey) => {
+                    const r = LINKEDIN_REACTION_MAP[rKey] || LINKEDIN_REACTION_MAP.like;
+                    return (
+                      <span 
+                        key={rKey} 
+                        className={cn("w-4 h-4 rounded-full flex items-center justify-center text-[8px] text-white border border-[#0a0f16]", r.bg)}
+                        title={r.label}
+                      >
+                        {r.emoji}
+                      </span>
+                    );
+                  })}
                 </span>
                 <span className="text-[10px] font-mono text-white/50">{likes}</span>
               </div>
@@ -281,8 +317,6 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
               <span className="text-white/40 text-[11px] truncate font-sans">
                 @{cleanUsername}
               </span>
-              <span className="text-white/30 text-[11px]">·</span>
-              <span className="text-white/40 text-[11px] shrink-0 font-sans">{timeAgo}</span>
             </div>
             <TwitterGlyph />
           </div>

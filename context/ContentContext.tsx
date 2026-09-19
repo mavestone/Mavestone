@@ -209,9 +209,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           text: "Such a breathtaking piece of cinematography 🔥",
           avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200",
           likes: "45",
-          timeAgo: "2d",
           verified: true,
-          company: "Creator"
+          company: "Creator",
+          likedByMe: false,
+          reactions: ['like', 'love', 'celebrate']
       }]
   }));
   const deleteTestimonial = (id: string) => setAboutData(prev => ({

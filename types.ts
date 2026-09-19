@@ -25,6 +25,8 @@ export interface Short {
   category?: string;
 }
 
+export type LinkedInReactionType = 'like' | 'celebrate' | 'support' | 'love' | 'insightful' | 'funny';
+
 export interface Testimonial {
   id: string;
   name: string;
@@ -36,6 +38,8 @@ export interface Testimonial {
   timeAgo?: string;
   verified?: boolean;
   company?: string;
+  likedByMe?: boolean;
+  reactions?: LinkedInReactionType[];
 }
 
 export interface AboutData {

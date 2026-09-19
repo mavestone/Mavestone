@@ -785,18 +785,91 @@ export const AdminPanel: React.FC = () => {
                                                          </div>
                                                      </div>
 
-                                                     <div>
-                                                         <label className="admin-label block opacity-50 mb-1.5">Company / Role / Headline (LinkedIn)</label>
-                                                         <input 
-                                                             type="text" 
-                                                             value={t.company || ''} 
-                                                             onChange={(e) => updateTestimonial(t.id, { company: e.target.value })} 
-                                                             className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" 
-                                                             placeholder="e.g. Executive Creative Director · Aperture Media" 
-                                                         />
-                                                     </div>
+                                                     {/* Conditional Platform Specific Settings */}
+                                                     {t.platform === 'linkedin' && (
+                                                         <div className="space-y-3 p-3.5 bg-[#0A66C2]/10 border border-[#0A66C2]/25 rounded-xl">
+                                                             <div>
+                                                                 <label className="admin-label block opacity-70 mb-1.5 text-xs text-[#70B5F9]">Company / Role / Headline (LinkedIn)</label>
+                                                                 <input 
+                                                                     type="text" 
+                                                                     value={t.company || ''} 
+                                                                     onChange={(e) => updateTestimonial(t.id, { company: e.target.value })} 
+                                                                     className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#0A66C2]/50 transition-all" 
+                                                                     placeholder="e.g. Executive Creative Director · Aperture Media" 
+                                                                 />
+                                                             </div>
+                                                             
+                                                             <div>
+                                                                 <div className="flex items-center justify-between mb-1.5">
+                                                                     <label className="admin-label block opacity-70 text-xs text-[#70B5F9]">Choose LinkedIn Reactions</label>
+                                                                     <span className="text-[10px] text-white/40">Click to toggle on / off</span>
+                                                                 </div>
+                                                                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                                                                     {[
+                                                                         { id: 'like', label: 'Like', emoji: '👍', activeBg: 'bg-[#0A66C2] text-white border-[#0A66C2]' },
+                                                                         { id: 'celebrate', label: 'Celebrate', emoji: '👏', activeBg: 'bg-[#2E7D32] text-white border-[#2E7D32]' },
+                                                                         { id: 'support', label: 'Support', emoji: '🤝', activeBg: 'bg-[#705FC9] text-white border-[#705FC9]' },
+                                                                         { id: 'love', label: 'Love', emoji: '❤️', activeBg: 'bg-[#DF704D] text-white border-[#DF704D]' },
+                                                                         { id: 'insightful', label: 'Insightful', emoji: '💡', activeBg: 'bg-[#E7A33E] text-white border-[#E7A33E]' },
+                                                                         { id: 'funny', label: 'Funny', emoji: '😂', activeBg: 'bg-[#00A0DC] text-white border-[#00A0DC]' },
+                                                                     ].map((reaction) => {
+                                                                         const currentReactions = t.reactions || ['like', 'love', 'celebrate'];
+                                                                         const isSelected = currentReactions.includes(reaction.id as any);
+                                                                         return (
+                                                                             <button
+                                                                                 key={reaction.id}
+                                                                                 type="button"
+                                                                                 onClick={() => {
+                                                                                     let next: any[];
+                                                                                     if (isSelected) {
+                                                                                         next = currentReactions.filter((r) => r !== reaction.id);
+                                                                                         if (next.length === 0) next = [reaction.id]; // keep at least 1
+                                                                                     } else {
+                                                                                         next = [...currentReactions, reaction.id];
+                                                                                     }
+                                                                                     updateTestimonial(t.id, { reactions: next });
+                                                                                 }}
+                                                                                 className={`p-2 rounded-lg text-xs font-semibold transition-all flex flex-col items-center gap-1 border ${
+                                                                                     isSelected
+                                                                                         ? `${reaction.activeBg} shadow-md shadow-black/40`
+                                                                                         : 'bg-white/5 border-white/5 text-white/40 hover:text-white hover:bg-white/10'
+                                                                                 }`}
+                                                                             >
+                                                                                 <span className="text-base leading-none">{reaction.emoji}</span>
+                                                                                 <span className="text-[10px] leading-tight truncate">{reaction.label}</span>
+                                                                             </button>
+                                                                         );
+                                                                     })}
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                     )}
 
-                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                     {t.platform === 'youtube' && (
+                                                         <div className="p-3.5 bg-red-500/10 border border-red-500/25 rounded-xl flex items-center justify-between">
+                                                             <div className="flex items-center gap-2.5">
+                                                                 <span className="text-lg">❤️</span>
+                                                                 <div>
+                                                                     <span className="text-xs font-semibold text-white block">Liked by me</span>
+                                                                     <span className="text-[10px] text-white/50 block">Show creator avatar & YouTube love heart badge on comment</span>
+                                                                 </div>
+                                                             </div>
+                                                             <button
+                                                                 type="button"
+                                                                 onClick={() => updateTestimonial(t.id, { likedByMe: !t.likedByMe })}
+                                                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
+                                                                     t.likedByMe
+                                                                         ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30'
+                                                                         : 'bg-white/5 border-white/10 text-white/40 hover:text-white'
+                                                                 }`}
+                                                             >
+                                                                 <Check size={13} className={t.likedByMe ? 'opacity-100' : 'opacity-20'} />
+                                                                 <span>{t.likedByMe ? 'Hearted' : 'Not Hearted'}</span>
+                                                             </button>
+                                                         </div>
+                                                     )}
+
+                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                          <div>
                                                              <label className="admin-label block opacity-50 mb-1.5">Likes Count</label>
                                                              <input 
@@ -805,16 +878,6 @@ export const AdminPanel: React.FC = () => {
                                                                  onChange={(e) => updateTestimonial(t.id, { likes: e.target.value })} 
                                                                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all font-mono" 
                                                                  placeholder="e.g. 418 or 1.2k" 
-                                                             />
-                                                         </div>
-                                                         <div>
-                                                             <label className="admin-label block opacity-50 mb-1.5">Time Ago</label>
-                                                             <input 
-                                                                 type="text" 
-                                                                 value={t.timeAgo || ''} 
-                                                                 onChange={(e) => updateTestimonial(t.id, { timeAgo: e.target.value })} 
-                                                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" 
-                                                                 placeholder="e.g. 2d or 1w" 
                                                              />
                                                          </div>
                                                          <div>
