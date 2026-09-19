@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from './ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
-import { Heart, ThumbsUp, ThumbsDown, MessageCircle, Repeat, Share2 } from 'lucide-react';
+import { Heart, ThumbsUp, ThumbsDown, MessageCircle, Repeat, Share2, User } from 'lucide-react';
 import { Testimonial } from '../types';
 import { cn } from '../lib/utils';
 import { LIAM_PORTRAIT } from '../constants';
@@ -26,6 +26,7 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
   const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
   const likes = testimonial.likes || '245';
   const isVerified = testimonial.verified ?? true;
+  const hasAvatar = Boolean(testimonial.avatar && testimonial.avatar.trim() !== '');
 
   // Instagram Verified Badge SVG
   const VerifiedBadge = () => (
@@ -96,15 +97,23 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
         )}
       >
         <div className="flex items-start gap-3">
-          {/* Avatar with subtle gradient story ring effect */}
+          {/* Avatar: story ring if custom pfp, or clean neutral blank silhouette */}
           <div className="relative shrink-0">
-            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] opacity-75 group-hover:opacity-100 transition-opacity blur-[1px]"></div>
-            <Avatar className="relative h-9 w-9 border border-black">
-              <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
-              <AvatarFallback className="bg-white/10 text-white text-[10px] font-bold">
-                {testimonial.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            {hasAvatar ? (
+              <>
+                <div className="absolute -inset-0.5 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] opacity-75 group-hover:opacity-100 transition-opacity blur-[1px]"></div>
+                <Avatar className="relative h-9 w-9 border border-black">
+                  <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
+                  <AvatarFallback className="bg-[#1b1b26] text-white/30 flex items-center justify-center">
+                    <User size={16} />
+                  </AvatarFallback>
+                </Avatar>
+              </>
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-[#1b1b26] border border-white/10 flex items-center justify-center text-white/30 group-hover:border-white/20 transition-colors">
+                <User size={16} />
+              </div>
+            )}
           </div>
 
           {/* Comment Body */}
@@ -157,12 +166,18 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
         )}
       >
         <div className="flex items-start gap-3">
-          <Avatar className="h-9 w-9 shrink-0 border border-white/10">
-            <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
-            <AvatarFallback className="bg-white/10 text-white text-[10px] font-bold">
-              {testimonial.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          {hasAvatar ? (
+            <Avatar className="h-9 w-9 shrink-0 border border-white/10">
+              <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
+              <AvatarFallback className="bg-[#202028] text-white/30 flex items-center justify-center">
+                <User size={16} />
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="h-9 w-9 shrink-0 rounded-full bg-[#202028] border border-white/10 flex items-center justify-center text-white/30 group-hover:border-white/20 transition-colors">
+              <User size={16} />
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
@@ -233,12 +248,18 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
         )}
       >
         <div className="flex items-start gap-3">
-          <Avatar className="h-9 w-9 shrink-0 border border-white/10 rounded-full">
-            <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
-            <AvatarFallback className="bg-white/10 text-white text-[10px] font-bold">
-              {testimonial.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          {hasAvatar ? (
+            <Avatar className="h-9 w-9 shrink-0 border border-white/10 rounded-full">
+              <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
+              <AvatarFallback className="bg-[#182230] text-white/30 flex items-center justify-center">
+                <User size={16} />
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="h-9 w-9 shrink-0 rounded-full bg-[#182230] border border-white/15 flex items-center justify-center text-white/30 group-hover:border-[#0A66C2]/30 transition-colors">
+              <User size={16} />
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-1">
@@ -300,12 +321,18 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
       )}
     >
       <div className="flex items-start gap-3">
-        <Avatar className="h-9 w-9 shrink-0 border border-white/10">
-          <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
-          <AvatarFallback className="bg-white/10 text-white text-[10px] font-bold">
-            {testimonial.name.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        {hasAvatar ? (
+          <Avatar className="h-9 w-9 shrink-0 border border-white/10">
+            <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
+            <AvatarFallback className="bg-[#1a1a24] text-white/30 flex items-center justify-center">
+              <User size={16} />
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="h-9 w-9 shrink-0 rounded-full bg-[#1a1a24] border border-white/10 flex items-center justify-center text-white/30 group-hover:border-white/20 transition-colors">
+            <User size={16} />
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-1">

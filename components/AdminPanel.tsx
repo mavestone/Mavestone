@@ -898,23 +898,42 @@ export const AdminPanel: React.FC = () => {
                                                      </div>
 
                                                      <div>
-                                                         <label className="admin-label block opacity-50 mb-1.5">Avatar Image</label>
+                                                         <div className="flex items-center justify-between mb-1.5">
+                                                             <label className="admin-label block opacity-50">Profile Picture (PFP)</label>
+                                                             {t.avatar && (
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => updateTestimonial(t.id, { avatar: '' })}
+                                                                     className="text-[10px] text-white/40 hover:text-red-400 transition-colors"
+                                                                     title="Remove photo and leave blank"
+                                                                 >
+                                                                     Clear (Leave Blank)
+                                                                 </button>
+                                                             )}
+                                                         </div>
                                                          <div className="flex gap-3 items-center">
-                                                             <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-white/10">
-                                                                 <img src={t.avatar} className="w-full h-full object-cover" alt={t.name} />
-                                                                 <label className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                                             <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-white/10 bg-white/5 flex items-center justify-center">
+                                                                 {t.avatar ? (
+                                                                     <img src={t.avatar} className="w-full h-full object-cover" alt={t.name} />
+                                                                 ) : (
+                                                                     <User size={18} className="text-white/30" />
+                                                                 )}
+                                                                 <label className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity" title="Upload avatar">
                                                                      <Camera size={14} className="text-white" />
                                                                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateTestimonial(t.id, { avatar: url }))} />
                                                                  </label>
                                                              </div>
                                                              <input 
                                                                  type="text" 
-                                                                 value={t.avatar} 
+                                                                 value={t.avatar || ''} 
                                                                  onChange={(e) => updateTestimonial(t.id, { avatar: e.target.value })} 
-                                                                 className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-white/50 focus:outline-none focus:border-white/20 transition-all font-mono" 
-                                                                 placeholder="Avatar Image URL" 
+                                                                 className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-white/70 focus:outline-none focus:border-white/20 transition-all font-mono placeholder:text-white/25" 
+                                                                 placeholder="Avatar Image URL (leave blank for neutral silhouette)" 
                                                              />
                                                          </div>
+                                                         {!t.avatar && (
+                                                             <span className="text-[10px] text-white/30 mt-1 block">Blank: Displays authentic platform silhouette until you add a photo.</span>
+                                                         )}
                                                      </div>
                                                  </div>
 

@@ -207,7 +207,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           username: "creator_handle",
           platform: "instagram" as const,
           text: "Such a breathtaking piece of cinematography 🔥",
-          avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200",
+          avatar: "",
           likes: "45",
           verified: true,
           company: "Creator",
