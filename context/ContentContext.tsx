@@ -78,7 +78,22 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [shorts, setShorts] = useState<Short[]>(SHORTS);
   const [films, setFilms] = useState<Film[]>(FILMS);
   const [clientWork, setClientWork] = useState<Film[]>(CLIENT_WORK);
-  const [aboutData, setAboutData] = useState<AboutData>(DEFAULT_ABOUT);
+  const [aboutData, setAboutData] = useState<AboutData>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('mavestone_about_data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && Array.isArray(parsed.testimonials) && parsed.testimonials.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error("Error reading saved aboutData:", e);
+      }
+    }
+    return DEFAULT_ABOUT;
+  });
   const [hiringData, setHiringData] = useState<HiringData>(HIRING_DATA);
   const [projectConfig, setProjectConfig] = useState<ProjectHeroConfig>(PROJECT_PAGE_CONFIG);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -125,6 +140,16 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error("Error updating message:", e);
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && aboutData) {
+      try {
+        localStorage.setItem('mavestone_about_data', JSON.stringify(aboutData));
+      } catch (e) {
+        console.error("Failed to persist aboutData to localStorage", e);
+      }
+    }
+  }, [aboutData]);
 
   useEffect(() => {
     let subscription: { unsubscribe: () => void } | null = null;
@@ -306,6 +331,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const saveChanges = async () => {
+    if (typeof window !== 'undefined' && aboutData) {
+      try {
+        localStorage.setItem('mavestone_about_data', JSON.stringify(aboutData));
+      } catch (e) {}
+    }
+
     if (!isAuthenticated) return;
     
     return new Promise<void>(async (resolve, reject) => {

@@ -672,7 +672,7 @@ export const AdminPanel: React.FC = () => {
                                      <div>
                                          <h3 className="text-xl font-medium text-white">Social Testimonials & Comments</h3>
                                          <p className="text-xs text-white/40 mt-1">
-                                             Add, edit, and style comments for Instagram, YouTube, or Twitter floating in the 3D Visionaries section.
+                                             Add, edit, and style comments for Instagram, YouTube, LinkedIn, or Twitter floating in the 3D 'The People Have Spoken' section.
                                          </p>
                                      </div>
                                      <button 

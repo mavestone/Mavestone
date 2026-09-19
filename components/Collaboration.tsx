@@ -12,38 +12,66 @@ export const Collaboration: React.FC = () => {
   const { aboutData } = useContent();
   const { subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
   
-  // Ensure EVERY single testimonial added in the backend is included and cycled through
-  const totalCount = testimonials?.length || 0;
-
-  const getColItems = (colIndex: number) => {
-    if (!testimonials || totalCount === 0) return [];
-
-    // Distribute starting offset evenly across columns so adjacent columns don't display the exact same item
-    const step = Math.max(1, Math.floor(totalCount / 5));
-    const offset = (colIndex * step) % totalCount;
-
-    // Build the rotated sequence containing ALL testimonials
-    const rotated: typeof testimonials = [];
-    for (let i = 0; i < totalCount; i++) {
-      rotated.push(testimonials[(offset + i) % totalCount]);
+  // Generate randomized column tracks ensuring every testimonial is included,
+  // but randomized rather than displayed in backend sequential order.
+  const { col1, col2, col3, col4, col5, trackCount } = React.useMemo(() => {
+    if (!testimonials || testimonials.length === 0) {
+      return { col1: [], col2: [], col3: [], col4: [], col5: [], trackCount: 0 };
     }
 
-    // Ensure there are at least 6 cards per column track so the marquee height covers the viewport seamlessly
-    let fullTrack = [...rotated];
-    while (fullTrack.length < 6) {
-      fullTrack = [...fullTrack, ...rotated];
-    }
-    return fullTrack;
-  };
+    const n = testimonials.length;
 
-  const col1 = getColItems(0);
-  const col2 = getColItems(1);
-  const col3 = getColItems(2);
-  const col4 = getColItems(3);
-  const col5 = getColItems(4);
+    // Helper: Generate a unique pseudo-random shuffle for a given column
+    const createShuffledColumn = (colIndex: number) => {
+      const items = [...testimonials];
+
+      // Use a deterministic seed per column based on column index and testimonial IDs
+      // so the shuffle is well-scrambled, unique per column, but stable across minor re-renders
+      let seed = (colIndex + 1) * 7919;
+      for (let i = 0; i < n; i++) {
+        const idStr = items[i].id || '';
+        for (let c = 0; c < idStr.length; c++) {
+          seed = (seed + idStr.charCodeAt(c) * (c + 1)) % 1000003;
+        }
+      }
+
+      const prng = () => {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
+
+      // Fisher-Yates shuffle
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(prng() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+
+      // Ensure that if there are fewer than 6 cards, repeat so the vertical marquee never has blank gaps
+      let fullTrack = [...items];
+      while (fullTrack.length < 6) {
+        fullTrack = [...fullTrack, ...items];
+      }
+
+      return fullTrack;
+    };
+
+    const c1 = createShuffledColumn(0);
+    const c2 = createShuffledColumn(1);
+    const c3 = createShuffledColumn(2);
+    const c4 = createShuffledColumn(3);
+    const c5 = createShuffledColumn(4);
+
+    return {
+      col1: c1,
+      col2: c2,
+      col3: c3,
+      col4: c4,
+      col5: c5,
+      trackCount: c1.length,
+    };
+  }, [testimonials]);
 
   // Dynamically compute scroll duration based on the number of items so the scroll pace remains steady and comfortable
-  const trackCount = col1.length;
   const baseDuration = Math.max(36, Math.round(trackCount * 4.8));
   const dur1 = `${baseDuration}s`;
   const dur2 = `${Math.round(baseDuration * 1.16)}s`;
@@ -69,7 +97,7 @@ export const Collaboration: React.FC = () => {
   return (
     <div className="bg-[#050505]">
       {/* Bio Section - Distinct ID for snapping */}
-      <SectionWrapper id="about" className="!pb-24 border-b border-white/5 relative overflow-hidden">
+      <SectionWrapper id="about" className="!pb-10 md:!pb-14 relative overflow-hidden">
         {/* Subtle white atmosphere */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
         
@@ -146,16 +174,16 @@ export const Collaboration: React.FC = () => {
         </div>
       </SectionWrapper>
 
-      {/* Slim Header Section - Pure clean title without subtitle or community tag */}
-      <section id="testimonials" className="pt-16 pb-8 sm:pt-20 sm:pb-10 md:pt-24 md:pb-12 bg-[#050505] relative z-10">
+      {/* Slim Header Section - Pure clean title fading smoothly into the floating cards below */}
+      <section id="testimonials" className="pt-6 pb-4 sm:pt-8 sm:pb-5 md:pt-10 md:pb-6 bg-[#050505] relative z-10">
         <div className="container px-6 md:px-12 lg:px-24 mx-auto">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none">
-                Trusted by Visionaries<span className="text-[#C9A96E]">.</span>
+                The People Have Spoken<span className="text-[#C9A96E]">.</span>
             </h2>
         </div>
       </section>
 
-      {/* 3D Floating Social Cards Stage - Dedicated full-height section without hard cutting lines */}
+      {/* 3D Floating Social Cards Stage - Seamless atmospheric stage with soft fading boundaries */}
       <section className="relative w-full h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] bg-[#050505] overflow-hidden flex items-center justify-center select-none">
         {/* Atmosphere Background */}
         {testimonialsBackground && (
@@ -168,10 +196,16 @@ export const Collaboration: React.FC = () => {
             </div>
         )}
 
-        {/* 3D Stage - Full height and fluid perspective without intermediate overflow-hidden cutting */}
+        {/* Top atmospheric fade - subtle soft edge transition */}
+        <div className="absolute top-0 inset-x-0 h-16 sm:h-20 bg-gradient-to-b from-[#050505] to-transparent pointer-events-none z-20" />
+
+        {/* Bottom atmospheric fade */}
+        <div className="absolute bottom-0 inset-x-0 h-16 sm:h-20 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-20" />
+
+        {/* 3D Stage - Full height and fluid perspective with direct 3D preserve hierarchy */}
         <div className="relative flex w-full h-full items-center justify-center [perspective:1000px] z-10">
             <div
-                className="flex flex-row items-center justify-center gap-3.5 sm:gap-5 md:gap-6 scale-[0.76] sm:scale-[0.84] md:scale-[0.92] lg:scale-100 shrink-0 select-none [transform-style:preserve-3d]"
+                className="flex flex-row items-center justify-center gap-3.5 sm:gap-5 md:gap-6 scale-[0.76] sm:scale-[0.84] md:scale-[0.92] lg:scale-100 shrink-0 select-none [transform-style:preserve-3d] -ml-4 sm:-ml-8 md:-ml-12 lg:-ml-16"
                 style={{
                     transform:
                         'rotateX(12deg) rotateY(-5deg) rotateZ(10deg)',
