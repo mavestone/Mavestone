@@ -724,6 +724,17 @@ export const AdminPanel: React.FC = () => {
                                                      >
                                                          <span>Twitter / X</span>
                                                      </button>
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => updateTestimonial(t.id, { platform: 'linkedin' })}
+                                                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                                                             t.platform === 'linkedin'
+                                                                 ? 'bg-[#0A66C2]/20 text-[#70B5F9] border border-[#0A66C2]/40 shadow-sm'
+                                                                 : 'bg-white/5 text-white/40 hover:text-white border border-white/5'
+                                                         }`}
+                                                     >
+                                                         <span>LinkedIn</span>
+                                                     </button>
                                                  </div>
 
                                                  <button 
@@ -772,6 +783,17 @@ export const AdminPanel: React.FC = () => {
                                                                  placeholder="e.g. Marcus Vance" 
                                                              />
                                                          </div>
+                                                     </div>
+
+                                                     <div>
+                                                         <label className="admin-label block opacity-50 mb-1.5">Company / Role / Headline (LinkedIn)</label>
+                                                         <input 
+                                                             type="text" 
+                                                             value={t.company || ''} 
+                                                             onChange={(e) => updateTestimonial(t.id, { company: e.target.value })} 
+                                                             className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all" 
+                                                             placeholder="e.g. Executive Creative Director · Aperture Media" 
+                                                         />
                                                      </div>
 
                                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

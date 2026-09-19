@@ -48,6 +48,13 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
     </svg>
   );
 
+  // LinkedIn Glyph
+  const LinkedInGlyph = () => (
+    <svg className="w-3.5 h-3.5 text-[#0A66C2] shrink-0 fill-current" viewBox="0 0 24 24">
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.76-1.75 1.76m1.4 9.74v-8.37H5.06v8.37h2.8z" />
+    </svg>
+  );
+
   // Helper to format comment text and highlight @mentions and #hashtags
   const renderFormattedText = (text: string) => {
     const parts = text.split(/(\s+)/);
@@ -183,7 +190,72 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
     );
   }
 
-  // 3. TWITTER / X REPLY LAYOUT
+  // 3. LINKEDIN COMMENT / RECOMMENDATION LAYOUT
+  if (platform === 'linkedin') {
+    const headline = testimonial.company || (testimonial.username ? `@${cleanUsername}` : 'Creative Director & Producer');
+    return (
+      <Card
+        className={cn(
+          "w-72 sm:w-80 shrink-0 p-4 bg-[#0a0f16] border border-white/10 rounded-2xl shadow-xl hover:border-[#0A66C2]/40 hover:bg-[#0e141f] hover:shadow-2xl transition-all duration-300 group select-none text-left [backface-visibility:hidden] [transform:translateZ(0)]",
+          className
+        )}
+      >
+        <div className="flex items-start gap-3">
+          <Avatar className="h-9 w-9 shrink-0 border border-white/10 rounded-full">
+            <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
+            <AvatarFallback className="bg-white/10 text-white text-[10px] font-bold">
+              {testimonial.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-1">
+              <div className="min-w-0 pr-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-bold text-xs text-white hover:text-[#70B5F9] transition-colors cursor-pointer font-sans truncate">
+                    {testimonial.name}
+                  </span>
+                  <span className="text-white/35 text-[10px] font-medium font-sans">· 1st</span>
+                </div>
+                <p className="text-[10px] text-white/50 font-normal truncate font-sans max-w-[185px] leading-tight mt-0.5">
+                  {headline}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] text-white/35 font-sans mt-0.5">
+                  <span>{timeAgo}</span>
+                  <span>·</span>
+                  <span title="Public">🌐</span>
+                </div>
+              </div>
+              <LinkedInGlyph />
+            </div>
+
+            <p className="text-[13px] text-white/90 leading-snug mt-2 font-normal break-words font-sans">
+              {renderFormattedText(testimonial.text)}
+            </p>
+
+            {/* LinkedIn Reactions & Actions */}
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5 text-[11px] text-white/40">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex -space-x-1 items-center">
+                  <span className="w-4 h-4 rounded-full bg-[#0A66C2] flex items-center justify-center text-[8px] text-white border border-[#0a0f16]">👍</span>
+                  <span className="w-4 h-4 rounded-full bg-[#DF704D] flex items-center justify-center text-[8px] text-white border border-[#0a0f16]">❤️</span>
+                  <span className="w-4 h-4 rounded-full bg-[#2E7D32] flex items-center justify-center text-[8px] text-white border border-[#0a0f16]">👏</span>
+                </span>
+                <span className="text-[10px] font-mono text-white/50">{likes}</span>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] font-semibold text-white/40">
+                <span className="hover:text-white transition-colors cursor-pointer">Like</span>
+                <span className="text-white/20">·</span>
+                <span className="hover:text-white transition-colors cursor-pointer">Reply</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // 4. TWITTER / X REPLY LAYOUT
   return (
     <Card
       className={cn(

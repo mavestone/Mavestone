@@ -29,7 +29,7 @@ export interface Testimonial {
   id: string;
   name: string;
   username?: string;
-  platform?: 'instagram' | 'twitter' | 'youtube';
+  platform?: 'instagram' | 'twitter' | 'youtube' | 'linkedin';
   text: string;
   avatar: string;
   likes?: string;

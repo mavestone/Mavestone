@@ -142,6 +142,30 @@ export const TESTIMONIALS = [
     timeAgo: "2w",
     verified: false,
     company: "CineCore"
+  },
+  {
+    id: '9',
+    name: "Rachel Thorne",
+    username: "rachel-thorne-creative",
+    platform: "linkedin" as const,
+    text: "Partnering with Liam and the Mavestone team on our global commercial reset our standards for pacing and visual grade. Extraordinary storytelling.",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
+    likes: "412",
+    timeAgo: "3d",
+    verified: true,
+    company: "VP Global Creative · Zenith Media"
+  },
+  {
+    id: '10',
+    name: "Marcus Vance",
+    username: "marcusvance-dir",
+    platform: "linkedin" as const,
+    text: "Mavestone brings narrative film caliber to commercial storytelling. A genuine masterclass in tone, lens selection, and sound design.",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop",
+    likes: "689",
+    timeAgo: "1w",
+    verified: true,
+    company: "Executive Creative Director · Aperture Media"
   }
 ];
 
