@@ -12,16 +12,28 @@ export const Collaboration: React.FC = () => {
   const { aboutData } = useContent();
   const { subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
   
-  // Distribute testimonials across 5 columns with diverse creators and platforms in each
-  const getColItems = (offset: number) => {
-    if (!testimonials || testimonials.length === 0) return [];
-    const count = testimonials.length;
-    return [
-      testimonials[offset % count],
-      testimonials[(offset + 2) % count],
-      testimonials[(offset + 4) % count],
-      testimonials[(offset + 6) % count],
-    ];
+  // Ensure EVERY single testimonial added in the backend is included and cycled through
+  const totalCount = testimonials?.length || 0;
+
+  const getColItems = (colIndex: number) => {
+    if (!testimonials || totalCount === 0) return [];
+
+    // Distribute starting offset evenly across columns so adjacent columns don't display the exact same item
+    const step = Math.max(1, Math.floor(totalCount / 5));
+    const offset = (colIndex * step) % totalCount;
+
+    // Build the rotated sequence containing ALL testimonials
+    const rotated: typeof testimonials = [];
+    for (let i = 0; i < totalCount; i++) {
+      rotated.push(testimonials[(offset + i) % totalCount]);
+    }
+
+    // Ensure there are at least 6 cards per column track so the marquee height covers the viewport seamlessly
+    let fullTrack = [...rotated];
+    while (fullTrack.length < 6) {
+      fullTrack = [...fullTrack, ...rotated];
+    }
+    return fullTrack;
   };
 
   const col1 = getColItems(0);
@@ -29,6 +41,15 @@ export const Collaboration: React.FC = () => {
   const col3 = getColItems(2);
   const col4 = getColItems(3);
   const col5 = getColItems(4);
+
+  // Dynamically compute scroll duration based on the number of items so the scroll pace remains steady and comfortable
+  const trackCount = col1.length;
+  const baseDuration = Math.max(36, Math.round(trackCount * 4.8));
+  const dur1 = `${baseDuration}s`;
+  const dur2 = `${Math.round(baseDuration * 1.16)}s`;
+  const dur3 = `${Math.round(baseDuration * 1.05)}s`;
+  const dur4 = `${Math.round(baseDuration * 1.2)}s`;
+  const dur5 = `${Math.round(baseDuration * 1.1)}s`;
 
   // Optimize image size function
   const getOptimizedBg = (url?: string) => {
@@ -160,7 +181,9 @@ export const Collaboration: React.FC = () => {
                 <Marquee 
                     vertical 
                     pauseOnHover={false} 
-                    className="[--duration:46s] shrink-0"
+                    repeat={trackCount <= 6 ? 4 : 3}
+                    style={{ '--duration': dur1 } as React.CSSProperties}
+                    className="shrink-0"
                     animationDelay="-12s"
                 >
                     {col1.map((testimonial, i) => (
@@ -173,7 +196,9 @@ export const Collaboration: React.FC = () => {
                     vertical 
                     reverse 
                     pauseOnHover={false} 
-                    className="[--duration:54s] shrink-0"
+                    repeat={trackCount <= 6 ? 4 : 3}
+                    style={{ '--duration': dur2 } as React.CSSProperties}
+                    className="shrink-0"
                     animationDelay="-26s"
                 >
                     {col2.map((testimonial, i) => (
@@ -185,7 +210,9 @@ export const Collaboration: React.FC = () => {
                 <Marquee 
                     vertical 
                     pauseOnHover={false} 
-                    className="[--duration:48s] shrink-0"
+                    repeat={trackCount <= 6 ? 4 : 3}
+                    style={{ '--duration': dur3 } as React.CSSProperties}
+                    className="shrink-0"
                     animationDelay="-18s"
                 >
                     {col3.map((testimonial, i) => (
@@ -198,7 +225,9 @@ export const Collaboration: React.FC = () => {
                     vertical 
                     reverse 
                     pauseOnHover={false} 
-                    className="[--duration:56s] shrink-0 hidden sm:flex"
+                    repeat={trackCount <= 6 ? 4 : 3}
+                    style={{ '--duration': dur4 } as React.CSSProperties}
+                    className="shrink-0 hidden sm:flex"
                     animationDelay="-32s"
                 >
                     {col4.map((testimonial, i) => (
@@ -210,7 +239,9 @@ export const Collaboration: React.FC = () => {
                 <Marquee 
                     vertical 
                     pauseOnHover={false} 
-                    className="[--duration:50s] shrink-0 hidden lg:flex"
+                    repeat={trackCount <= 6 ? 4 : 3}
+                    style={{ '--duration': dur5 } as React.CSSProperties}
+                    className="shrink-0 hidden lg:flex"
                     animationDelay="-8s"
                 >
                     {col5.map((testimonial, i) => (
