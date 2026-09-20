@@ -12,8 +12,12 @@ export const Collaboration: React.FC = () => {
   const { aboutData } = useContent();
   const { subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
   
-  // Generate randomized column tracks ensuring every testimonial is included,
-  // but randomized rather than displayed in backend sequential order.
+  // Generate mathematically deconflicted column tracks ensuring:
+  // 1. Adjacent columns NEVER share cards (Pool A for Odd columns 1, 3, 5; Pool B for Even columns 2, 4),
+  //    guaranteeing that adjacent columns moving in opposite directions can NEVER display the same card side-by-side!
+  // 2. Both Pool A and Pool B receive a balanced mix of platforms (Instagram, YouTube, Twitter, LinkedIn).
+  // 3. Same-direction columns (1, 3, 5) and (2, 4) are phase-staggered so duplicate cards are offset by
+  //    hundreds of pixels, ensuring as few duplicates (or zero) are visible on screen at any instant.
   const { col1, col2, col3, col4, col5, trackCount } = React.useMemo(() => {
     if (!testimonials || testimonials.length === 0) {
       return { col1: [], col2: [], col3: [], col4: [], col5: [], trackCount: 0 };
@@ -21,63 +25,147 @@ export const Collaboration: React.FC = () => {
 
     const n = testimonials.length;
 
-    // Helper: Generate a unique pseudo-random shuffle for a given column
-    const createShuffledColumn = (colIndex: number) => {
-      const items = [...testimonials];
-
-      // Use a deterministic seed per column based on column index and testimonial IDs
-      // so the shuffle is well-scrambled, unique per column, but stable across minor re-renders
-      let seed = (colIndex + 1) * 7919;
-      for (let i = 0; i < n; i++) {
-        const idStr = items[i].id || '';
-        for (let c = 0; c < idStr.length; c++) {
-          seed = (seed + idStr.charCodeAt(c) * (c + 1)) % 1000003;
-        }
+    // Helper: repeat an array until it has at least minCount elements to prevent visual gaps in vertical marquee
+    const padToMin = (arr: typeof testimonials, minCount = 6) => {
+      let res = [...arr];
+      while (res.length < minCount) {
+        res = [...res, ...arr];
       }
+      return res;
+    };
 
-      const prng = () => {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
+    // Helper: rotate array by offset
+    const rotate = (arr: typeof testimonials, offset: number) => {
+      if (arr.length === 0) return [];
+      const len = arr.length;
+      const effectiveOffset = ((offset % len) + len) % len;
+      return [...arr.slice(effectiveOffset), ...arr.slice(0, effectiveOffset)];
+    };
+
+    if (n >= 6) {
+      // Step 1: Group by platform so we can balance platforms evenly across both pools
+      const platformMap: Record<string, typeof testimonials> = {
+        instagram: [],
+        youtube: [],
+        twitter: [],
+        linkedin: [],
       };
 
-      // Fisher-Yates shuffle
-      for (let i = items.length - 1; i > 0; i--) {
-        const j = Math.floor(prng() * (i + 1));
-        [items[i], items[j]] = [items[j], items[i]];
-      }
+      testimonials.forEach((t) => {
+        const p = (t.platform || 'instagram').toLowerCase();
+        if (!platformMap[p]) platformMap[p] = [];
+        platformMap[p].push(t);
+      });
 
-      // Ensure that if there are fewer than 6 cards, repeat so the vertical marquee never has blank gaps
-      let fullTrack = [...items];
-      while (fullTrack.length < 6) {
-        fullTrack = [...fullTrack, ...items];
-      }
+      // Step 2: Deal cards alternatingly into Pool A (Down columns: 1, 3, 5) and Pool B (Up columns: 2, 4)
+      const poolA: typeof testimonials = [];
+      const poolB: typeof testimonials = [];
+      let dealToA = true;
 
-      return fullTrack;
-    };
+      const orderPlatforms = ['instagram', 'youtube', 'twitter', 'linkedin'];
+      orderPlatforms.forEach((platformKey) => {
+        const items = platformMap[platformKey] || [];
+        items.forEach((item) => {
+          if (dealToA) {
+            poolA.push(item);
+          } else {
+            poolB.push(item);
+          }
+          dealToA = !dealToA;
+        });
+      });
 
-    const c1 = createShuffledColumn(0);
-    const c2 = createShuffledColumn(1);
-    const c3 = createShuffledColumn(2);
-    const c4 = createShuffledColumn(3);
-    const c5 = createShuffledColumn(4);
+      // Guard if either pool is too small
+      if (poolA.length === 0) poolA.push(...poolB);
+      if (poolB.length === 0) poolB.push(...poolA);
 
-    return {
-      col1: c1,
-      col2: c2,
-      col3: c3,
-      col4: c4,
-      col5: c5,
-      trackCount: c1.length,
-    };
+      // Step 3: Interleave platforms within each pool to prevent consecutive cards from having the same platform
+      const interleavePool = (pool: typeof testimonials) => {
+        const byPlat: Record<string, typeof testimonials> = {};
+        pool.forEach((item) => {
+          const p = (item.platform || 'instagram').toLowerCase();
+          if (!byPlat[p]) byPlat[p] = [];
+          byPlat[p].push(item);
+        });
+
+        const interleaved: typeof testimonials = [];
+        let hasMore = true;
+        let pIdx = 0;
+        while (hasMore) {
+          hasMore = false;
+          for (const p of orderPlatforms) {
+            if (byPlat[p] && pIdx < byPlat[p].length) {
+              interleaved.push(byPlat[p][pIdx]);
+              hasMore = true;
+            }
+          }
+          pIdx++;
+        }
+        return interleaved;
+      };
+
+      const sortedPoolA = interleavePool(poolA);
+      const sortedPoolB = interleavePool(poolB);
+
+      // Step 4: Stagger starting indices for same-direction columns:
+      // Odd columns (1, 3, 5) all scroll DOWN:
+      // Col 1 starts at 0
+      // Col 3 starts offset by ~35-45% of Pool A
+      // Col 5 starts offset by ~70-80% of Pool A
+      const offsetA1 = 0;
+      const offsetA3 = Math.max(1, Math.round(sortedPoolA.length * 0.38));
+      const offsetA5 = Math.max(2, Math.round(sortedPoolA.length * 0.72));
+
+      // Even columns (2, 4) all scroll UP:
+      // Col 2 starts at 0
+      // Col 4 starts offset by ~50% of Pool B
+      const offsetB2 = 0;
+      const offsetB4 = Math.max(1, Math.round(sortedPoolB.length * 0.5));
+
+      const c1 = padToMin(rotate(sortedPoolA, offsetA1), 6);
+      const c2 = padToMin(rotate(sortedPoolB, offsetB2), 6);
+      const c3 = padToMin(rotate(sortedPoolA, offsetA3), 6);
+      const c4 = padToMin(rotate(sortedPoolB, offsetB4), 6);
+      const c5 = padToMin(rotate(sortedPoolA, offsetA5), 6);
+
+      return {
+        col1: c1,
+        col2: c2,
+        col3: c3,
+        col4: c4,
+        col5: c5,
+        trackCount: Math.max(c1.length, c2.length),
+      };
+    } else {
+      // Fallback for small collections (N < 6):
+      // Each column uses all cards with maximal cyclic stride so adjacent columns never align
+      const c1 = padToMin(rotate(testimonials, 0), 6);
+      const c2 = padToMin(rotate(testimonials, 1), 6);
+      const c3 = padToMin(rotate(testimonials, 2), 6);
+      const c4 = padToMin(rotate(testimonials, 3), 6);
+      const c5 = padToMin(rotate(testimonials, 4), 6);
+
+      return {
+        col1: c1,
+        col2: c2,
+        col3: c3,
+        col4: c4,
+        col5: c5,
+        trackCount: c1.length,
+      };
+    }
   }, [testimonials]);
 
-  // Dynamically compute scroll duration based on the number of items so the scroll pace remains steady and comfortable
-  const baseDuration = Math.max(36, Math.round(trackCount * 4.8));
+  // Synchronize same-direction columns so their spatial offsets remain constant and never drift into collision!
+  const baseDuration = Math.max(36, Math.round(trackCount * 5.2));
+  // Downwards columns (1, 3, 5): locked to baseDuration to preserve constant phase distance
   const dur1 = `${baseDuration}s`;
-  const dur2 = `${Math.round(baseDuration * 1.16)}s`;
-  const dur3 = `${Math.round(baseDuration * 1.05)}s`;
-  const dur4 = `${Math.round(baseDuration * 1.2)}s`;
-  const dur5 = `${Math.round(baseDuration * 1.1)}s`;
+  const dur3 = `${baseDuration}s`;
+  const dur5 = `${baseDuration}s`;
+  // Upwards columns (2, 4): synchronized slightly different pace for organic counter-scrolling
+  const upDuration = Math.round(baseDuration * 1.12);
+  const dur2 = `${upDuration}s`;
+  const dur4 = `${upDuration}s`;
 
   // Optimize image size function
   const getOptimizedBg = (url?: string) => {

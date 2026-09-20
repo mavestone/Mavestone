@@ -25,7 +25,7 @@ interface ContentContextType {
   updateAboutData: (data: Partial<AboutData>) => void;
   updateHiringData: (data: Partial<HiringData>) => void;
   updateTestimonial: (id: string, data: Partial<Testimonial>) => void;
-  addTestimonial: () => void;
+  addTestimonial: (initialPlatform?: 'instagram' | 'twitter' | 'youtube' | 'linkedin') => void;
   deleteTestimonial: (id: string) => void;
   updateShort: (id: string, data: Partial<Short>) => void;
   setShorts: (shorts: Short[]) => void;
@@ -224,22 +224,33 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       testimonials: prev.testimonials.map(t => t.id === id ? { ...t, ...data } : t)
   }));
-  const addTestimonial = () => setAboutData(prev => ({
-      ...prev,
-      testimonials: [...prev.testimonials, {
+  const addTestimonial = (initialPlatform?: 'instagram' | 'twitter' | 'youtube' | 'linkedin') => {
+      const platform = initialPlatform || 'instagram';
+      const defaultText = 
+          platform === 'youtube' ? "Cinematic gold right here,Liam's work never misses 🔥" :
+          platform === 'twitter' ? "The pacing, lighting, and sound design in this cut is unmatched." :
+          platform === 'linkedin' ? "Outstanding visual storytelling and premier production quality from Liam and the team." :
+          "Such a breathtaking piece of cinematography 🔥";
+
+      const newTestimonial: Testimonial = {
           id: Math.random().toString(36).substr(2, 9),
           name: "Creator Name",
           username: "creator_handle",
-          platform: "instagram" as const,
-          text: "Such a breathtaking piece of cinematography 🔥",
+          platform: platform,
+          text: defaultText,
           avatar: "",
-          likes: "45",
+          likes: platform === 'youtube' ? "1.2k" : platform === 'twitter' ? "284" : "86",
           verified: true,
-          company: "Creator",
-          likedByMe: false,
+          company: platform === 'linkedin' ? "Executive Creative Director" : "Creator",
+          likedByMe: platform === 'youtube',
           reactions: ['like', 'love', 'celebrate']
-      }]
-  }));
+      };
+
+      setAboutData(prev => ({
+          ...prev,
+          testimonials: [newTestimonial, ...prev.testimonials]
+      }));
+  };
   const deleteTestimonial = (id: string) => setAboutData(prev => ({
       ...prev,
       testimonials: prev.testimonials.filter(t => t.id !== id)
