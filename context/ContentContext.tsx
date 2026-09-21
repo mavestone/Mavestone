@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT, HIRING_DATA } from '../constants';
+import { LATEST_VIDEO, SHORTS, FILMS, CLIENT_WORK, IN_PRODUCTION, PROJECT_PAGE_CONFIG, TESTIMONIALS, LIAM_PORTRAIT, HIRING_DATA, DEFAULT_FIELD_NOTES } from '../constants';
 import { Film, Short, LatestVideoData, InProductionData, Message, ProjectHeroConfig, AboutData, Testimonial, HiringData, ClientPortal } from '../types';
 
 interface ContentContextType {
@@ -59,12 +59,22 @@ interface ContentContextType {
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 const DEFAULT_ABOUT: AboutData = {
-    title: "Visualizing The Unseen.",
-    subtitle: "01 / The Visionary",
-    description: "Liam blends editorial aesthetic with cinematic narrative. Based in Sydney & Tokyo, Mavestone Studio partners with creators who demand more than just visuals—they demand a legacy.",
+    title: "Visualizing the unseen.",
+    subtitle: "The Visionary",
+    description: "Spielberg's heart, Nolan's brain, Tarantino's unhinged dedication to cinema. Australian filmmaker, 30+ countries deep, still chasing the perfect shot.",
+    leadParagraph: "Spielberg's heart, Nolan's brain, Tarantino's unhinged dedication to cinema. Australian filmmaker, 30+ countries deep, still chasing the perfect shot.",
+    fieldNotes: DEFAULT_FIELD_NOTES,
+    brandParagraph: "Through Mavestone, Liam makes cinematic stories for founders and brands who want video that actually makes people feel something.",
+    punchline: "Completely unbiased bio, by the way. Liam definitely did not write this himself at 1:14am.",
+    showPunchline: true,
+    portraitSide: 'Left',
     portrait: LIAM_PORTRAIT,
+    portraitName: "Liam Leslie",
+    portraitRole: "Creative Director",
+    portraitLocation: "AU",
     testimonials: TESTIMONIALS,
-    testimonialsBackground: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop"
+    testimonialsBackground: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop",
+    aboutBackground: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2560&auto=format&fit=crop"
 };
 
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -85,7 +95,29 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.testimonials) && parsed.testimonials.length > 0) {
-            return parsed;
+            let loadedFieldNotes = parsed.fieldNotes && parsed.fieldNotes.length > 0 ? parsed.fieldNotes : DEFAULT_FIELD_NOTES;
+            if (Array.isArray(loadedFieldNotes)) {
+              loadedFieldNotes = loadedFieldNotes
+                .filter((fn: any) => fn.n !== '05' && fn.n !== '5' && fn.label?.toLowerCase() !== 'discomfort')
+                .map((fn: any, idx: number) => ({
+                  ...fn,
+                  image: fn.image || DEFAULT_FIELD_NOTES[idx]?.image
+                }));
+            }
+            return {
+              ...DEFAULT_ABOUT,
+              ...parsed,
+              fieldNotes: loadedFieldNotes,
+              leadParagraph: parsed.leadParagraph || DEFAULT_ABOUT.leadParagraph,
+              brandParagraph: parsed.brandParagraph || DEFAULT_ABOUT.brandParagraph,
+              punchline: parsed.punchline || DEFAULT_ABOUT.punchline,
+              showPunchline: parsed.showPunchline !== undefined ? parsed.showPunchline : DEFAULT_ABOUT.showPunchline,
+              portraitSide: parsed.portraitSide || DEFAULT_ABOUT.portraitSide,
+              portraitName: parsed.portraitName || DEFAULT_ABOUT.portraitName,
+              portraitRole: parsed.portraitRole === 'Director & Cinematographer' ? 'Creative Director' : (parsed.portraitRole || DEFAULT_ABOUT.portraitRole),
+              portraitLocation: parsed.portraitLocation || DEFAULT_ABOUT.portraitLocation,
+              aboutBackground: parsed.aboutBackground && !parsed.aboutBackground.includes('St_Michael') ? parsed.aboutBackground : DEFAULT_ABOUT.aboutBackground,
+            };
           }
         }
       } catch (e) {

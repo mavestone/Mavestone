@@ -1,16 +1,60 @@
 
 import React from 'react';
-import { SectionWrapper } from './ui/SectionWrapper';
-import { MagneticButton } from './ui/MagneticButton';
-import { motion } from 'framer-motion';
-import { useContent } from '../context/ContentContext';
 import { ArrowRight } from 'lucide-react';
+import { useContent } from '../context/ContentContext';
+import { LIAM_PORTRAIT, DEFAULT_FIELD_NOTES } from '../constants';
 import { Marquee } from './ui/3d-testimonails';
 import { SocialCommentCard } from './SocialCommentCard';
+import { MagneticButton } from './ui/MagneticButton';
 
 export const Collaboration: React.FC = () => {
   const { aboutData } = useContent();
-  const { subtitle, description, portrait, testimonials, testimonialsBackground } = aboutData;
+  const { testimonials, testimonialsBackground } = aboutData;
+
+  const [activeNote, setActiveNote] = React.useState<number | null>(null);
+  const rawNotes = aboutData.fieldNotes && aboutData.fieldNotes.length > 0 ? aboutData.fieldNotes : DEFAULT_FIELD_NOTES;
+  const notes = React.useMemo(() => {
+    return rawNotes.filter((fn) => fn.n !== '05' && fn.n !== '5' && fn.label?.toLowerCase() !== 'discomfort');
+  }, [rawNotes]);
+
+  const cards = React.useMemo(() => {
+    // Stack presets for photos peeking out in 3D around the top active card
+    const stackPresets = [
+      { rot: -6.5, x: -22, y: -16, scale: 0.95, opacity: 0.92, z: 35 },
+      { rot: 6.8, x: 24, y: -22, scale: 0.92, opacity: 0.84, z: 30 },
+      { rot: -8.5, x: -28, y: 18, scale: 0.89, opacity: 0.74, z: 25 },
+      { rot: 7.5, x: 30, y: 20, scale: 0.86, opacity: 0.64, z: 20 },
+    ];
+
+    return notes.map((it, i) => {
+      let style: React.CSSProperties;
+      if (activeNote === null) {
+        style = {
+          opacity: 0,
+          transform: `translate3d(${i % 2 === 0 ? -14 : 14}px, 24px, 0) scale(0.92) rotate(${i % 2 === 0 ? -4 : 4}deg)`,
+          pointerEvents: 'none',
+          zIndex: 10,
+        };
+      } else if (i === activeNote) {
+        style = {
+          opacity: 1,
+          zIndex: 40,
+          transform: 'translate3d(0, 0, 0) scale(1.02) rotate(0deg)',
+          pointerEvents: 'none',
+        };
+      } else {
+        const dist = (i - activeNote + notes.length) % notes.length;
+        const slot = stackPresets[Math.min(dist - 1, stackPresets.length - 1)];
+        style = {
+          opacity: slot.opacity,
+          zIndex: slot.z,
+          transform: `translate3d(${slot.x}px, ${slot.y}px, 0) scale(${slot.scale}) rotate(${slot.rot}deg)`,
+          pointerEvents: 'none',
+        };
+      }
+      return { ...it, style };
+    });
+  }, [notes, activeNote]);
   
   // Generate mathematically deconflicted column tracks ensuring:
   // 1. Adjacent columns NEVER share cards (Pool A for Odd columns 1, 3, 5; Pool B for Even columns 2, 4),
@@ -170,97 +214,222 @@ export const Collaboration: React.FC = () => {
   // Optimize image size function
   const getOptimizedBg = (url?: string) => {
     if(!url) return "";
-    // If it's unsplash, try to resize it. Otherwise return original.
     if(url.includes("images.unsplash.com")) {
-        // Replace existing w parameter or append new one. 
-        // 1200px width with 60 quality is a good balance for background blur
-        if(url.includes("?")) {
-            return `${url}&w=1200&q=60`;
-        }
-        return `${url}?w=1200&q=60`;
+      const base = url.split("?")[0];
+      return `${base}?q=80&w=2000&auto=format&fit=crop`;
     }
     return url;
   };
 
   return (
     <div className="bg-[#050505]">
-      {/* Bio Section - Distinct ID for snapping */}
-      <SectionWrapper id="about" className="!pb-10 md:!pb-14 relative overflow-hidden">
-        {/* Subtle white atmosphere */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
-        
-        {/* Responsive Layout: Stack on mobile, Side-by-Side on Desktop */}
-        <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16 lg:gap-24">
-            
-            {/* Portrait Column */}
-            <div className="w-full max-w-sm md:max-w-none md:w-[45%] lg:w-[40%] flex-shrink-0 relative order-1 md:order-1">
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="relative z-10 w-full shadow-2xl"
-                >
-                    <div className="relative aspect-[3/4.2] md:aspect-[3/4] rounded-[2rem] md:rounded-[4rem] overflow-hidden border border-white/10 group">
-                        <img 
-                            src={portrait} 
-                            alt="Liam Leslie" 
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
-                        />
-                        {/* Grain removed from here */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90"></div>
-                        
-                        {/* Caption Overlay */}
-                        <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 z-20 max-w-[85%]">
-                            <motion.div 
-                                initial={{ y: 20, opacity: 0 }}
-                                whileInView={{ y: 0, opacity: 1 }}
-                                transition={{ delay: 0.4 }}
-                                viewport={{ once: true }}
-                                className="glass-panel px-5 py-4 md:px-8 md:py-6 rounded-2xl bg-black/30 backdrop-blur-xl border border-white/10 shadow-2xl"
-                            >
-                                <p className="text-white font-black text-xl md:text-3xl lg:text-4xl tracking-tight mb-2 leading-none">Liam Leslie</p>
-                                <div className="flex items-center gap-2 md:gap-3">
-                                    <p className="text-white/90 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.25em]">Creative Director</p>
-                                </div>
-                            </motion.div>
-                        </div>
+      {/* Redesigned About Section */}
+      <section
+        id="about"
+        className="relative text-[#f4f4f2] font-archivo py-[clamp(44px,5.5vw,96px)] px-[clamp(20px,5vw,80px)] flex justify-center overflow-hidden border-b border-[#161616]"
+      >
+        {/* Atmospheric Mountain Background Image with Turned-down Black Opacity & Animated Grain */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+          <img
+            src={
+              getOptimizedBg(
+                aboutData.aboutBackground && !aboutData.aboutBackground.includes('St_Michael')
+                  ? aboutData.aboutBackground
+                  : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2560&auto=format&fit=crop'
+              )
+            }
+            alt="Mountain Landscape Background"
+            className="w-full h-full object-cover object-center scale-105 filter brightness-[0.80] contrast-110"
+          />
+          {/* Black overlay with turned-down opacity so the mountain peaks & ridges emerge with moody depth */}
+          <div className="absolute inset-0 bg-[#060606]/75" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/95 via-transparent to-[#050505]" />
+
+          {/* Animated Film Grain Overlay - Fine 35mm micro-grain, subtle opacity, non-freezing continuous jitter */}
+          <div
+            className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] pointer-events-none opacity-[0.045] mix-blend-screen animate-grain"
+            style={{
+              backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")',
+              backgroundSize: '150px 150px',
+              backgroundRepeat: 'repeat',
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 w-full max-w-[1320px] flex flex-col gap-[clamp(32px,3.8vw,64px)]">
+          {/* Header */}
+          <header className="flex flex-col gap-[clamp(16px,2vw,24px)]">
+            <h2 className="m-0 text-[clamp(40px,6.5vw,96px)] leading-[0.94] tracking-[-0.035em] font-bold font-archivo text-white max-w-[16ch] text-balance">
+              Visualizing <em className="italic text-[#f4f4f2]">the unseen.</em>
+            </h2>
+          </header>
+
+          {/* Main Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(28px,4vw,64px)] items-start">
+            {/* Portrait / Interactive Card Stack */}
+            <figure
+              className={`m-0 flex flex-col gap-4.5 ${
+                aboutData.portraitSide === 'Right' ? 'order-1 lg:order-2' : 'order-1 lg:order-1'
+              } lg:sticky lg:top-10`}
+            >
+              <div className="relative w-full aspect-[4/5] flex items-center justify-center select-none">
+                {/* Base Portrait Container (Off-White Classic Polaroid Format) */}
+                <div className="absolute inset-0 rounded-[18px] sm:rounded-[20px] will-change-transform bg-[#F4F1EA] border border-[#E2DDD2] p-3 sm:p-3.5 pb-4 sm:pb-5 flex flex-col shadow-[0_28px_65px_rgba(0,0,0,0.88),0_4px_16px_rgba(0,0,0,0.35)] overflow-hidden group">
+                  {/* Polaroid Upper Photo Aperture */}
+                  <div className="relative w-full flex-1 min-h-0 rounded-[10px] sm:rounded-[12px] overflow-hidden border border-black/15 bg-black shadow-[inset_0_1px_4px_rgba(0,0,0,0.35)]">
+                    {/* Portrait Image */}
+                    <img
+                      src={aboutData.portrait || LIAM_PORTRAIT}
+                      alt={aboutData.portraitName || 'Liam Leslie'}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 pointer-events-none"
+                    />
+
+                    {/* Subtle Vignette & Specular Glare */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none" />
+                  </div>
+
+                  {/* Polaroid Classic Bottom Chin (Liam's Portrait - Inverted Text) */}
+                  <div className="pt-2.5 sm:pt-3 pb-0.5 px-2 flex flex-col items-center justify-center text-center gap-0.5 shrink-0 relative z-10">
+                    <span className="font-archivo text-[15px] sm:text-[16px] font-bold tracking-[-0.01em] uppercase text-[#141414]">
+                      {aboutData.portraitName || 'Liam Leslie'}
+                    </span>
+                    <span
+                      style={{ fontFamily: "'Caveat', cursive" }}
+                      className="text-[20px] sm:text-[22px] leading-none text-[#2d2a26] font-semibold tracking-wide"
+                    >
+                      {aboutData.portraitRole === 'Director & Cinematographer'
+                        ? 'Creative Director'
+                        : (aboutData.portraitRole || 'Creative Director')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Floating Stacked Photo Cards Deck (Off-White Classic Polaroids) */}
+                <div className="absolute inset-0 pointer-events-none overflow-visible">
+                  {cards.map((card, idx) => (
+                    <div
+                      key={card.n || idx}
+                      style={card.style}
+                      className="absolute inset-0 rounded-[18px] sm:rounded-[20px] will-change-transform bg-[#F4F1EA] border border-[#E2DDD2] p-3 sm:p-3.5 pb-4 sm:pb-5 flex flex-col shadow-[0_28px_65px_rgba(0,0,0,0.88),0_4px_16px_rgba(0,0,0,0.35)] transition-all duration-[500ms] ease-[cubic-bezier(0.22,0.8,0.26,1)] overflow-hidden"
+                    >
+                      {/* Polaroid Upper Photo Aperture */}
+                      <div className="relative w-full flex-1 min-h-0 rounded-[10px] sm:rounded-[12px] overflow-hidden border border-black/15 bg-black shadow-[inset_0_1px_4px_rgba(0,0,0,0.35)]">
+                        {card.image ? (
+                          <>
+                            <img
+                              src={card.image}
+                              alt={card.label}
+                              className="w-full h-full object-cover select-none"
+                            />
+                            {/* Subtle Vignette & Specular Glare */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10 pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.08] via-transparent to-transparent pointer-events-none" />
+                          </>
+                        ) : (
+                          <div
+                            className="w-full h-full pointer-events-none flex items-center justify-center bg-black/40"
+                            style={{
+                              background:
+                                'repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 7px, rgba(255,255,255,0.01) 7px, rgba(255,255,255,0.01) 14px)',
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      {/* Polaroid Classic Bottom Chin: Just the location only in handwriting, centered & inverted dark text */}
+                      <div className="pt-2.5 sm:pt-3 pb-0.5 px-2 flex items-center justify-center text-center shrink-0 relative z-10">
+                        <span
+                          style={{ fontFamily: "'Caveat', cursive" }}
+                          className="text-[27px] sm:text-[30px] leading-tight text-[#141414] font-bold tracking-wide"
+                        >
+                          {card.label}
+                        </span>
+                      </div>
                     </div>
-                    <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/[0.03] rounded-full blur-[50px] md:blur-[100px] pointer-events-none"></div>
-                </motion.div>
-            </div>
+                  ))}
+                </div>
+              </div>
+            </figure>
 
             {/* Content Column */}
-            <div className="flex-1 flex flex-col justify-center text-left order-2 md:order-2">
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="space-y-6 md:space-y-12"
-                >
-                    <div>
-                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-white/40 block mb-2 md:mb-4">{subtitle}</span>
-                        <h2 className="text-4xl sm:text-5xl md:text-[clamp(1.1rem,5vw,6rem)] font-black text-white leading-[0.95] tracking-tighter">
-                            Visualizing <br className="hidden md:block" />
-                            <span className="text-white italic lowercase tracking-tight">the unseen.</span>
-                        </h2>
-                    </div>
+            <div
+              className={`flex flex-col gap-[clamp(20px,2.4vw,34px)] pt-1 ${
+                aboutData.portraitSide === 'Right' ? 'order-2 lg:order-1' : 'order-2 lg:order-2'
+              }`}
+            >
+              <p className="m-0 text-[clamp(18px,1.65vw,24px)] leading-[1.42] tracking-[-0.015em] text-[#f4f4f2] max-w-[34ch] font-archivo text-pretty">
+                {aboutData.leadParagraph || aboutData.description}
+              </p>
 
-                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 font-light leading-relaxed tracking-tight max-w-xl whitespace-pre-wrap">
-                        {description}
-                    </p>
+              {/* Field Notes Section */}
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-3 pb-2.5">
+                  <span className="font-mono text-[10px] tracking-[0.26em] uppercase text-[#8d8d89]">
+                    Field notes
+                  </span>
+                  <span className="flex-1 h-[1px] bg-[#1c1c1c] block" />
+                </div>
+                {notes.map((note, idx) => (
+                  <div
+                    key={note.n || idx}
+                    onMouseEnter={() => setActiveNote(idx)}
+                    onMouseLeave={() => setActiveNote(null)}
+                    className="grid grid-cols-[40px_1fr] gap-3.5 items-baseline py-2.5 sm:py-3 pr-2 border-b border-[#161616] cursor-pointer transition-all duration-300 hover:pl-3 hover:bg-[#0c0c0c] rounded-lg group"
+                  >
+                    <span className="font-mono text-[11px] tracking-[0.1em] text-[#8d8d89] group-hover:text-white transition-colors">
+                      {note.n}
+                    </span>
+                    <span className="text-[clamp(14px,1.1vw,16px)] leading-[1.5] text-[#c9c9c5] font-archivo group-hover:text-[#f4f4f2] transition-colors text-pretty">
+                      {note.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-                    <div className="pt-2 md:pt-6 flex flex-col sm:flex-row gap-5 md:gap-10 items-start sm:items-center">
-                        <MagneticButton variant="primary" className="!w-full sm:!w-auto !px-8 md:!px-14 !py-4 md:!py-5 !text-xs md:!text-sm !font-black uppercase tracking-widest shadow-xl justify-center">
-                            Connect
-                        </MagneticButton>
-                        <button className="flex items-center gap-2 md:gap-4 text-white font-black tracking-[0.2em] md:tracking-[0.3em] uppercase text-[10px] md:text-[11px] group">
-                            Our Story <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-white/40 group-hover:translate-x-3 transition-transform duration-500" />
-                        </button>
-                    </div>
-                </motion.div>
+              {/* Brand Statement */}
+              <p className="m-0 text-[clamp(15px,1.2vw,17.5px)] leading-[1.6] text-[#c9c9c5] max-w-[46ch] font-archivo text-pretty">
+                {aboutData.brandParagraph ? (
+                  aboutData.brandParagraph
+                ) : (
+                  <>
+                    Through <strong className="text-[#f4f4f2] font-semibold">Mavestone</strong>, Liam makes cinematic stories for founders and brands who want video that actually makes people feel something.
+                  </>
+                )}
+              </p>
+
+              {/* Inline Bottom Row: Punchline & CTA Buttons */}
+              <div className="pt-2 md:pt-3 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5">
+                {(aboutData.showPunchline ?? true) && (
+                  <p className="m-0 font-mono text-[12px] sm:text-[12.5px] leading-[1.6] tracking-[0.02em] text-[#a6a6a2] max-w-[34ch] border-l border-[#242424] pl-3.5">
+                    {aboutData.punchline || "Completely unbiased bio, by the way. Liam definitely did not write this himself at 1:14am."}
+                  </p>
+                )}
+
+                <div className="flex flex-row items-center gap-4 sm:gap-6 shrink-0">
+                  <MagneticButton
+                    variant="primary"
+                    onClick={() => {
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="!px-7 md:!px-10 !py-3.5 md:!py-4 !text-xs md:!text-sm !font-black uppercase tracking-widest shadow-xl justify-center"
+                  >
+                    Connect
+                  </MagneticButton>
+                  <button
+                    onClick={() => {
+                      document.getElementById('films')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-2 md:gap-3 text-white font-black tracking-[0.2em] md:tracking-[0.25em] uppercase text-[10px] md:text-[11px] group cursor-pointer"
+                  >
+                    View All Work <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-white/40 group-hover:translate-x-2 transition-transform duration-500" />
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-      </SectionWrapper>
+      </section>
 
       {/* Slim Header Section - Pure clean title fading smoothly into the floating cards below */}
       <section id="testimonials" className="pt-6 pb-4 sm:pt-8 sm:pb-5 md:pt-10 md:pb-6 bg-[#050505] relative z-10">

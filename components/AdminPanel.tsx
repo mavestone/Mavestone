@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
+import { DEFAULT_FIELD_NOTES } from '../constants';
 import { X, Save, Camera, Loader2, Layout, Clapperboard, Mail, Plus, Trash2, LogOut, Youtube, GripVertical, User, Users, CheckCircle2, Clock, Phone, FileText, TrendingUp, MessageSquare, Table, List, AlertCircle, Edit3, Search, ChevronDown, PanelLeftClose, PanelLeftOpen, Zap, Upload, Share2, Globe, Copy, ExternalLink, Code, DownloadCloud, Check, Sun, Moon } from 'lucide-react';
 import { generatePortalHtml } from '../lib/portalGenerator';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -646,10 +647,156 @@ export const AdminPanel: React.FC = () => {
                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                                 <div className="lg:col-span-7 space-y-6">
                                     <div className="p-8 rounded-2xl admin-glass space-y-8">
-                                        <h3 className="admin-label text-orange-400 border-b border-white/5 pb-4">Bio Details</h3>
+                                        <h3 className="admin-label text-orange-400 border-b border-white/5 pb-4">About & Bio Details</h3>
                                         <div className="space-y-4">
-                                            <input type="text" placeholder="Subtitle (e.g. 01 / The Visionary)" value={aboutData.subtitle} onChange={(e) => updateAboutData({ subtitle: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
-                                            <textarea rows={6} placeholder="Description" value={aboutData.description} onChange={(e) => updateAboutData({ description: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            <div>
+                                                <label className="admin-label block mb-2 opacity-60">Eyebrow / Subtitle</label>
+                                                <input type="text" placeholder="The Visionary" value={aboutData.subtitle} onChange={(e) => updateAboutData({ subtitle: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+
+                                            <div>
+                                                <label className="admin-label block mb-2 opacity-60">Lead Paragraph</label>
+                                                <textarea rows={4} placeholder="Spielberg's heart, Nolan's brain..." value={aboutData.leadParagraph || aboutData.description} onChange={(e) => updateAboutData({ leadParagraph: e.target.value, description: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+
+                                            <div>
+                                                <label className="admin-label block mb-2 opacity-60">Brand Narrative</label>
+                                                <textarea rows={3} placeholder="Through Mavestone, Liam makes..." value={aboutData.brandParagraph || ''} onChange={(e) => updateAboutData({ brandParagraph: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+
+                                            <div className="pt-2">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <label className="admin-label opacity-60">Punchline Quote</label>
+                                                    <label className="flex items-center gap-2 cursor-pointer text-xs text-white/60 hover:text-white">
+                                                        <input type="checkbox" checked={aboutData.showPunchline ?? true} onChange={(e) => updateAboutData({ showPunchline: e.target.checked })} className="rounded bg-white/10 border-white/20" />
+                                                        Show Punchline
+                                                    </label>
+                                                </div>
+                                                <input type="text" placeholder="Completely unbiased bio, by the way..." value={aboutData.punchline || ''} onChange={(e) => updateAboutData({ punchline: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all" />
+                                            </div>
+
+                                            <div className="pt-4 border-t border-white/5 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="admin-label opacity-60">Field Notes (Hover Cards)</label>
+                                                        <p className="text-[11px] text-white/40 mt-0.5">Customize notes, tags, and background popup photos</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                            const nextNum = String(current.length + 1).padStart(2, '0');
+                                                            current.push({
+                                                                n: nextNum,
+                                                                label: 'New Location',
+                                                                text: 'Description of field note...',
+                                                                image: ''
+                                                            });
+                                                            updateAboutData({ fieldNotes: current });
+                                                        }}
+                                                        className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-mono flex items-center gap-1.5 transition-all"
+                                                    >
+                                                        <Plus size={13} /> Add Note
+                                                    </button>
+                                                </div>
+                                                {(aboutData.fieldNotes && aboutData.fieldNotes.length > 0 ? aboutData.fieldNotes : DEFAULT_FIELD_NOTES).map((note, idx) => (
+                                                    <div key={idx} className="p-3.5 bg-white/[0.03] border border-white/5 rounded-xl space-y-3">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-2 flex-1">
+                                                                <input type="text" placeholder="01" value={note.n} onChange={(e) => {
+                                                                    const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                                    current[idx] = { ...current[idx], n: e.target.value };
+                                                                    updateAboutData({ fieldNotes: current });
+                                                                }} className="w-16 bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white text-center font-mono" />
+                                                                <input type="text" placeholder="Label (e.g. Alps)" value={note.label} onChange={(e) => {
+                                                                    const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                                    current[idx] = { ...current[idx], label: e.target.value };
+                                                                    updateAboutData({ fieldNotes: current });
+                                                                }} className="flex-1 bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white font-medium" />
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                                    current.splice(idx, 1);
+                                                                    updateAboutData({ fieldNotes: current });
+                                                                }}
+                                                                className="p-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                title="Delete note"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                        <input type="text" placeholder="Note text..." value={note.text} onChange={(e) => {
+                                                            const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                            current[idx] = { ...current[idx], text: e.target.value };
+                                                            updateAboutData({ fieldNotes: current });
+                                                        }} className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white/80" />
+
+                                                        {/* Popup Photo upload / URL */}
+                                                        <div className="pt-1">
+                                                            <label className="text-[10px] uppercase font-mono tracking-wider text-white/40 block mb-1.5">Popup Photo</label>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-14 h-14 rounded-lg overflow-hidden bg-white/5 border border-white/10 relative shrink-0 group">
+                                                                    {note.image ? (
+                                                                        <img src={note.image} alt={note.label} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-white/20">
+                                                                            <Camera size={18} />
+                                                                        </div>
+                                                                    )}
+                                                                    <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                                                        <Camera size={16} className="text-white" />
+                                                                        <input
+                                                                            type="file"
+                                                                            className="hidden"
+                                                                            accept="image/*"
+                                                                            onChange={(e) => handleImageUpload(e, (url) => {
+                                                                                const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                                                current[idx] = { ...current[idx], image: url };
+                                                                                updateAboutData({ fieldNotes: current });
+                                                                            })}
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                                <div className="flex-1 flex gap-2">
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="Photo URL or upload image"
+                                                                        value={note.image || ''}
+                                                                        onChange={(e) => {
+                                                                            const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                                            current[idx] = { ...current[idx], image: e.target.value };
+                                                                            updateAboutData({ fieldNotes: current });
+                                                                        }}
+                                                                        className="flex-1 bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white/70 focus:outline-none focus:border-white/20"
+                                                                    />
+                                                                    <label className="flex items-center px-3 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-all text-white/60 hover:text-white" title="Upload photo">
+                                                                        <Camera size={15} />
+                                                                        <input
+                                                                            type="file"
+                                                                            className="hidden"
+                                                                            accept="image/*"
+                                                                            onChange={(e) => handleImageUpload(e, (url) => {
+                                                                                const current = [...(aboutData.fieldNotes || DEFAULT_FIELD_NOTES)];
+                                                                                current[idx] = { ...current[idx], image: url };
+                                                                                updateAboutData({ fieldNotes: current });
+                                                                            })}
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <label className="admin-label block mt-6 opacity-45">About Section Background (Visualizing The Unseen)</label>
+                                            <div className="flex gap-3">
+                                                <input type="text" placeholder="Background Image URL" value={aboutData.aboutBackground || ''} onChange={(e) => updateAboutData({ aboutBackground: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
+                                                <label className="flex items-center px-5 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all"><Camera size={18} className="text-white/60" /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateAboutData({ aboutBackground: url }))} /></label>
+                                            </div>
+
                                             <label className="admin-label block mt-6 opacity-45">Testimonials Background</label>
                                             <div className="flex gap-3">
                                                 <input type="text" placeholder="Background Image URL" value={aboutData.testimonialsBackground || ''} onChange={(e) => updateAboutData({ testimonialsBackground: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-xs text-white/40 focus:outline-none focus:border-white/20 transition-all" />
@@ -659,11 +806,25 @@ export const AdminPanel: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="lg:col-span-5 space-y-4">
-                                    <div className="rounded-2xl overflow-hidden border border-white/10 aspect-[3/4] relative group admin-glass">
+                                    <div className="rounded-2xl overflow-hidden border border-white/10 aspect-[4/5] relative group admin-glass">
                                         <img src={aboutData.portrait} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all" alt="Portrait Preview" />
                                         <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white font-bold"><Camera size={32} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => updateAboutData({ portrait: url }))} /></label>
                                     </div>
                                     <input type="text" placeholder="Portrait URL" value={aboutData.portrait} onChange={(e) => updateAboutData({ portrait: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[10px] text-white/30 focus:outline-none focus:border-white/20 transition-all" />
+
+                                    <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl space-y-3">
+                                        <label className="admin-label block opacity-45">Portrait Card Details</label>
+                                        <input type="text" placeholder="Name (Liam Leslie)" value={aboutData.portraitName || ''} onChange={(e) => updateAboutData({ portraitName: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white" />
+                                        <input type="text" placeholder="Role (Creative Director)" value={aboutData.portraitRole || ''} onChange={(e) => updateAboutData({ portraitRole: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white" />
+                                        <input type="text" placeholder="Location tag (AU)" value={aboutData.portraitLocation || ''} onChange={(e) => updateAboutData({ portraitLocation: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white" />
+                                        <div className="flex items-center justify-between pt-1">
+                                            <span className="text-xs text-white/60">Position</span>
+                                            <div className="flex gap-2">
+                                                <button type="button" onClick={() => updateAboutData({ portraitSide: 'Left' })} className={`px-3 py-1.5 rounded-lg text-xs font-mono ${(aboutData.portraitSide ?? 'Left') === 'Left' ? 'bg-white text-black font-semibold' : 'bg-white/5 text-white/60'}`}>Left</button>
+                                                <button type="button" onClick={() => updateAboutData({ portraitSide: 'Right' })} className={`px-3 py-1.5 rounded-lg text-xs font-mono ${(aboutData.portraitSide ?? 'Left') === 'Right' ? 'bg-white text-black font-semibold' : 'bg-white/5 text-white/60'}`}>Right</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                              </div>
 

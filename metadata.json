@@ -1,5 +1,6 @@
 {
   "name": "Mavestone WORKING",
   "description": "A modern, cinematic creative studio website featuring high-end scroll interactions and glassmorphism design.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

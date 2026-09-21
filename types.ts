@@ -42,13 +42,30 @@ export interface Testimonial {
   reactions?: LinkedInReactionType[];
 }
 
+export interface FieldNote {
+  n: string;
+  label: string;
+  text: string;
+  image?: string;
+}
+
 export interface AboutData {
   title: string;
   subtitle: string;
   description: string;
+  leadParagraph?: string;
+  fieldNotes?: FieldNote[];
+  brandParagraph?: string;
+  punchline?: string;
+  showPunchline?: boolean;
+  portraitSide?: 'Left' | 'Right';
   portrait: string;
+  portraitName?: string;
+  portraitRole?: string;
+  portraitLocation?: string;
   testimonials: Testimonial[];
   testimonialsBackground?: string;
+  aboutBackground?: string;
 }
 
 export interface LatestVideoData {

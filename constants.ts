@@ -1,5 +1,5 @@
 
-import { Film, Short, NavItem, InProductionData, ProjectHeroConfig, HiringData, Testimonial } from './types';
+import { Film, Short, NavItem, InProductionData, ProjectHeroConfig, HiringData, Testimonial, FieldNote } from './types';
 
 export const HIRING_DATA: HiringData = {
   titleLine1: "I'm hiring a",
@@ -45,6 +45,13 @@ export const NAV_ITEMS: NavItem[] = [
 
 // High-end cinematic portrait of a creator in a vast landscape (matches drone pilot vibe)
 export const LIAM_PORTRAIT = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop"; 
+
+export const DEFAULT_FIELD_NOTES: FieldNote[] = [
+  { n: "01", label: "Alps", text: "Nearly fell off a mountain in the Alps.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop" },
+  { n: "02", label: "Iceland", text: "Drove through Icelandic storms in a very small Hyundai.", image: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?q=80&w=1000&auto=format&fit=crop" },
+  { n: "03", label: "Faroe Islands", text: "Hiked the Faroe Islands with a drone and blind optimism.", image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop" },
+  { n: "04", label: "Mauritania", text: "Rode an iron ore train across the Mauritanian desert, where most governments tell you not to go.", image: "https://images.unsplash.com/photo-1509356843151-3e7d96241e11?q=80&w=1000&auto=format&fit=crop" }
+]; 
 
 export const TESTIMONIALS: Testimonial[] = [
   {

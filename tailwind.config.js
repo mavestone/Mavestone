@@ -14,6 +14,8 @@ export default {
       fontFamily: {
         sans: ['Manrope', 'sans-serif'],
         admin: ['DM Sans', 'sans-serif'],
+        archivo: ['Archivo', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
         charcoal: '#0F0F11',
