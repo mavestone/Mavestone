@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from './ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
-import { Heart, ThumbsUp, ThumbsDown, MessageCircle, Repeat, Share2, User } from 'lucide-react';
+import { Heart, ThumbsUp, ThumbsDown, MessageCircle, Repeat, Share2, User, Building2 } from 'lucide-react';
 import { Testimonial } from '../types';
 import { cn } from '../lib/utils';
 import { LIAM_PORTRAIT } from '../constants';
@@ -32,6 +32,30 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
   const VerifiedBadge = () => (
     <svg className="w-3.5 h-3.5 text-[#0095F6] inline-block shrink-0 fill-current ml-1" viewBox="0 0 24 24">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.8 14.2l-3.7-3.7 1.41-1.41 2.29 2.29 5.88-5.88 1.41 1.41-7.29 7.29z" />
+    </svg>
+  );
+
+  // Official LinkedIn Verified Shield Badge SVG
+  const LinkedInVerifiedBadge = () => (
+    <svg
+      className="w-3.5 h-3.5 text-white/75 inline-block shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-label="LinkedIn Verified"
+    >
+      <path
+        d="M12 2L4 5.4V11.2C4 16.5 7.4 21.3 12 22.8C16.6 21.3 20 16.5 20 11.2V5.4L12 2Z"
+        className="fill-white/15 stroke-white/70"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.8 12.3L11 14.5L15.4 9.8"
+        className="stroke-white/90"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
@@ -235,7 +259,10 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
 
   // 3. LINKEDIN COMMENT / RECOMMENDATION LAYOUT
   if (platform === 'linkedin') {
-    const headline = testimonial.company || (testimonial.username ? `@${cleanUsername}` : 'Creative Director & Producer');
+    const isCompanyAccount = testimonial.linkedinAccountType === 'company';
+    const headline = isCompanyAccount
+      ? (testimonial.company || '18,400 followers')
+      : (testimonial.company || (testimonial.username ? `@${cleanUsername}` : 'Creative Director & Producer'));
     const activeReactions = (testimonial.reactions && testimonial.reactions.length > 0)
       ? testimonial.reactions
       : (['like', 'love', 'celebrate'] as (keyof typeof LINKEDIN_REACTION_MAP)[]);
@@ -249,26 +276,44 @@ export const SocialCommentCard: React.FC<SocialCommentCardProps> = ({ testimonia
       >
         <div className="flex items-start gap-3">
           {hasAvatar ? (
-            <Avatar className="h-9 w-9 shrink-0 border border-white/10 rounded-full">
+            <Avatar
+              className={cn(
+                "h-9 w-9 shrink-0 border border-white/10",
+                isCompanyAccount ? "rounded-md" : "rounded-full"
+              )}
+            >
               <AvatarImage src={testimonial.avatar} alt={testimonial.name} className="object-cover" />
-              <AvatarFallback className="bg-[#182230] text-white/30 flex items-center justify-center">
-                <User size={16} />
+              <AvatarFallback
+                className={cn(
+                  "bg-[#182230] text-white/30 flex items-center justify-center",
+                  isCompanyAccount ? "rounded-md" : "rounded-full"
+                )}
+              >
+                {isCompanyAccount ? <Building2 size={16} /> : <User size={16} />}
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="h-9 w-9 shrink-0 rounded-full bg-[#182230] border border-white/15 flex items-center justify-center text-white/30 group-hover:border-[#0A66C2]/30 transition-colors">
-              <User size={16} />
+            <div
+              className={cn(
+                "h-9 w-9 shrink-0 bg-[#182230] border border-white/15 flex items-center justify-center text-white/30 group-hover:border-[#0A66C2]/30 transition-colors",
+                isCompanyAccount ? "rounded-md" : "rounded-full"
+              )}
+            >
+              {isCompanyAccount ? <Building2 size={16} /> : <User size={16} />}
             </div>
           )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-1">
               <div className="min-w-0 pr-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1 flex-wrap">
                   <span className="font-bold text-xs text-white hover:text-[#70B5F9] transition-colors cursor-pointer font-sans truncate">
                     {testimonial.name}
                   </span>
-                  <span className="text-white/35 text-[10px] font-medium font-sans">· 1st</span>
+                  {isVerified && <LinkedInVerifiedBadge />}
+                  {!isCompanyAccount && (
+                    <span className="text-white/35 text-[10px] font-medium font-sans shrink-0">· 1st</span>
+                  )}
                 </div>
                 <p className="text-[10px] text-white/50 font-normal truncate font-sans max-w-[185px] leading-tight mt-0.5">
                   {headline}

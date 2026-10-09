@@ -32,6 +32,7 @@ export interface Testimonial {
   name: string;
   username?: string;
   platform?: 'instagram' | 'twitter' | 'youtube' | 'linkedin';
+  linkedinAccountType?: 'personal' | 'company';
   text: string;
   avatar: string;
   likes?: string;

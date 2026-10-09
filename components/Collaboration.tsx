@@ -226,7 +226,7 @@ export const Collaboration: React.FC = () => {
       {/* Redesigned About Section */}
       <section
         id="about"
-        className="relative text-[#f4f4f2] font-archivo py-[clamp(44px,5.5vw,96px)] px-[clamp(20px,5vw,80px)] flex justify-center overflow-hidden border-b border-[#161616]"
+        className="relative text-[#f4f4f2] font-archivo py-[clamp(28px,3.8vh,52px)] px-[clamp(20px,4.5vw,72px)] flex justify-center overflow-hidden border-b border-[#161616]"
       >
         {/* Atmospheric Mountain Background Image with Turned-down Black Opacity & Animated Grain */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
@@ -239,44 +239,44 @@ export const Collaboration: React.FC = () => {
               )
             }
             alt="Mountain Landscape Background"
-            className="w-full h-full object-cover object-center scale-105 filter brightness-[0.80] contrast-110"
+            className="w-full h-full object-cover object-center scale-105 filter brightness-[0.78] contrast-110"
           />
           {/* Black overlay with turned-down opacity so the mountain peaks & ridges emerge with moody depth */}
-          <div className="absolute inset-0 bg-[#060606]/75" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/95 via-transparent to-[#050505]" />
+          <div className="absolute inset-0 bg-[#060606]/72" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/92 via-transparent to-[#050505]" />
 
-          {/* Animated Film Grain Overlay - Fine 35mm micro-grain, subtle opacity, non-freezing continuous jitter */}
+          {/* Animated Film Grain Overlay - Visible, authentic 35mm moving grain */}
           <div
-            className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] pointer-events-none opacity-[0.045] mix-blend-screen animate-grain"
+            className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] pointer-events-none opacity-[0.11] animate-grain"
             style={{
               backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")',
-              backgroundSize: '150px 150px',
+              backgroundSize: '200px 200px',
               backgroundRepeat: 'repeat',
             }}
           />
         </div>
 
-        <div className="relative z-10 w-full max-w-[1320px] flex flex-col gap-[clamp(32px,3.8vw,64px)]">
+        <div className="relative z-10 w-full max-w-[1240px] flex flex-col gap-[clamp(16px,2.4vh,32px)]">
           {/* Header */}
-          <header className="flex flex-col gap-[clamp(16px,2vw,24px)]">
-            <h2 className="m-0 text-[clamp(40px,6.5vw,96px)] leading-[0.94] tracking-[-0.035em] font-bold font-archivo text-white max-w-[16ch] text-balance">
+          <header className="flex flex-col gap-1.5">
+            <h2 className="m-0 text-[clamp(30px,3.8vw,56px)] leading-[0.98] tracking-[-0.035em] font-bold font-archivo text-white max-w-[18ch] text-balance">
               Visualizing <em className="italic text-[#f4f4f2]">the unseen.</em>
             </h2>
           </header>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(28px,4vw,64px)] items-start">
+          {/* Main Grid - Scaled to fit comfortably on full screen alongside the title */}
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(230px,clamp(250px,23vw,330px))_1fr] gap-[clamp(24px,3.5vw,52px)] items-start">
             {/* Portrait / Interactive Card Stack */}
             <figure
-              className={`m-0 flex flex-col gap-4.5 ${
+              className={`m-0 flex flex-col gap-3 ${
                 aboutData.portraitSide === 'Right' ? 'order-1 lg:order-2' : 'order-1 lg:order-1'
-              } lg:sticky lg:top-10`}
+              } lg:sticky lg:top-6`}
             >
-              <div className="relative w-full aspect-[4/5] flex items-center justify-center select-none">
+              <div className="relative w-full aspect-[4/5] max-h-[min(48vh,410px)] flex items-center justify-center select-none">
                 {/* Base Portrait Container (Off-White Classic Polaroid Format) */}
-                <div className="absolute inset-0 rounded-[18px] sm:rounded-[20px] will-change-transform bg-[#F4F1EA] border border-[#E2DDD2] p-3 sm:p-3.5 pb-4 sm:pb-5 flex flex-col shadow-[0_28px_65px_rgba(0,0,0,0.88),0_4px_16px_rgba(0,0,0,0.35)] overflow-hidden group">
+                <div className="absolute inset-0 rounded-[16px] sm:rounded-[18px] will-change-transform bg-[#F4F1EA] border border-[#E2DDD2] p-2.5 sm:p-3 pb-3.5 sm:pb-4 flex flex-col shadow-[0_22px_50px_rgba(0,0,0,0.85),0_4px_14px_rgba(0,0,0,0.3)] overflow-hidden group">
                   {/* Polaroid Upper Photo Aperture */}
-                  <div className="relative w-full flex-1 min-h-0 rounded-[10px] sm:rounded-[12px] overflow-hidden border border-black/15 bg-black shadow-[inset_0_1px_4px_rgba(0,0,0,0.35)]">
+                  <div className="relative w-full flex-1 min-h-0 rounded-[9px] sm:rounded-[11px] overflow-hidden border border-black/15 bg-black shadow-[inset_0_1px_4px_rgba(0,0,0,0.35)]">
                     {/* Portrait Image */}
                     <img
                       src={aboutData.portrait || LIAM_PORTRAIT}
@@ -290,13 +290,13 @@ export const Collaboration: React.FC = () => {
                   </div>
 
                   {/* Polaroid Classic Bottom Chin (Liam's Portrait - Inverted Text) */}
-                  <div className="pt-2.5 sm:pt-3 pb-0.5 px-2 flex flex-col items-center justify-center text-center gap-0.5 shrink-0 relative z-10">
-                    <span className="font-archivo text-[15px] sm:text-[16px] font-bold tracking-[-0.01em] uppercase text-[#141414]">
+                  <div className="pt-2 sm:pt-2.5 pb-0.5 px-2 flex flex-col items-center justify-center text-center gap-0.5 shrink-0 relative z-10">
+                    <span className="font-archivo text-[13.5px] sm:text-[14.5px] font-bold tracking-[-0.01em] uppercase text-[#141414]">
                       {aboutData.portraitName || 'Liam Leslie'}
                     </span>
                     <span
                       style={{ fontFamily: "'Caveat', cursive" }}
-                      className="text-[20px] sm:text-[22px] leading-none text-[#2d2a26] font-semibold tracking-wide"
+                      className="text-[18px] sm:text-[20px] leading-none text-[#2d2a26] font-semibold tracking-wide"
                     >
                       {aboutData.portraitRole === 'Director & Cinematographer'
                         ? 'Creative Director'
@@ -311,10 +311,10 @@ export const Collaboration: React.FC = () => {
                     <div
                       key={card.n || idx}
                       style={card.style}
-                      className="absolute inset-0 rounded-[18px] sm:rounded-[20px] will-change-transform bg-[#F4F1EA] border border-[#E2DDD2] p-3 sm:p-3.5 pb-4 sm:pb-5 flex flex-col shadow-[0_28px_65px_rgba(0,0,0,0.88),0_4px_16px_rgba(0,0,0,0.35)] transition-all duration-[500ms] ease-[cubic-bezier(0.22,0.8,0.26,1)] overflow-hidden"
+                      className="absolute inset-0 rounded-[16px] sm:rounded-[18px] will-change-transform bg-[#F4F1EA] border border-[#E2DDD2] p-2.5 sm:p-3 pb-3.5 sm:pb-4 flex flex-col shadow-[0_22px_50px_rgba(0,0,0,0.85),0_4px_14px_rgba(0,0,0,0.3)] transition-all duration-[500ms] ease-[cubic-bezier(0.22,0.8,0.26,1)] overflow-hidden"
                     >
                       {/* Polaroid Upper Photo Aperture */}
-                      <div className="relative w-full flex-1 min-h-0 rounded-[10px] sm:rounded-[12px] overflow-hidden border border-black/15 bg-black shadow-[inset_0_1px_4px_rgba(0,0,0,0.35)]">
+                      <div className="relative w-full flex-1 min-h-0 rounded-[9px] sm:rounded-[11px] overflow-hidden border border-black/15 bg-black shadow-[inset_0_1px_4px_rgba(0,0,0,0.35)]">
                         {card.image ? (
                           <>
                             <img
@@ -338,10 +338,10 @@ export const Collaboration: React.FC = () => {
                       </div>
 
                       {/* Polaroid Classic Bottom Chin: Just the location only in handwriting, centered & inverted dark text */}
-                      <div className="pt-2.5 sm:pt-3 pb-0.5 px-2 flex items-center justify-center text-center shrink-0 relative z-10">
+                      <div className="pt-2 sm:pt-2.5 pb-0.5 px-2 flex items-center justify-center text-center shrink-0 relative z-10">
                         <span
                           style={{ fontFamily: "'Caveat', cursive" }}
-                          className="text-[27px] sm:text-[30px] leading-tight text-[#141414] font-bold tracking-wide"
+                          className="text-[22px] sm:text-[25px] leading-tight text-[#141414] font-bold tracking-wide"
                         >
                           {card.label}
                         </span>
@@ -354,18 +354,18 @@ export const Collaboration: React.FC = () => {
 
             {/* Content Column */}
             <div
-              className={`flex flex-col gap-[clamp(20px,2.4vw,34px)] pt-1 ${
+              className={`flex flex-col gap-[clamp(14px,1.8vh,24px)] pt-0.5 ${
                 aboutData.portraitSide === 'Right' ? 'order-2 lg:order-1' : 'order-2 lg:order-2'
               }`}
             >
-              <p className="m-0 text-[clamp(18px,1.65vw,24px)] leading-[1.42] tracking-[-0.015em] text-[#f4f4f2] max-w-[34ch] font-archivo text-pretty">
+              <p className="m-0 text-[clamp(15px,1.25vw,19px)] leading-[1.42] tracking-[-0.015em] text-[#f4f4f2] max-w-[38ch] font-archivo text-pretty">
                 {aboutData.leadParagraph || aboutData.description}
               </p>
 
               {/* Field Notes Section */}
               <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-3 pb-2.5">
-                  <span className="font-mono text-[10px] tracking-[0.26em] uppercase text-[#8d8d89]">
+                <div className="flex items-center gap-3 pb-1.5">
+                  <span className="font-mono text-[9.5px] tracking-[0.24em] uppercase text-[#8d8d89]">
                     Field notes
                   </span>
                   <span className="flex-1 h-[1px] bg-[#1c1c1c] block" />
@@ -375,12 +375,12 @@ export const Collaboration: React.FC = () => {
                     key={note.n || idx}
                     onMouseEnter={() => setActiveNote(idx)}
                     onMouseLeave={() => setActiveNote(null)}
-                    className="grid grid-cols-[40px_1fr] gap-3.5 items-baseline py-2.5 sm:py-3 pr-2 border-b border-[#161616] cursor-pointer transition-all duration-300 hover:pl-3 hover:bg-[#0c0c0c] rounded-lg group"
+                    className="grid grid-cols-[36px_1fr] gap-3 items-baseline py-1.5 sm:py-2 pr-2 border-b border-[#161616] cursor-pointer transition-all duration-300 hover:pl-2.5 hover:bg-[#0c0c0c] rounded-lg group"
                   >
-                    <span className="font-mono text-[11px] tracking-[0.1em] text-[#8d8d89] group-hover:text-white transition-colors">
+                    <span className="font-mono text-[10.5px] tracking-[0.1em] text-[#8d8d89] group-hover:text-white transition-colors">
                       {note.n}
                     </span>
-                    <span className="text-[clamp(14px,1.1vw,16px)] leading-[1.5] text-[#c9c9c5] font-archivo group-hover:text-[#f4f4f2] transition-colors text-pretty">
+                    <span className="text-[clamp(13px,0.95vw,14.5px)] leading-[1.45] text-[#c9c9c5] font-archivo group-hover:text-[#f4f4f2] transition-colors text-pretty">
                       {note.text}
                     </span>
                   </div>
@@ -388,7 +388,7 @@ export const Collaboration: React.FC = () => {
               </div>
 
               {/* Brand Statement */}
-              <p className="m-0 text-[clamp(15px,1.2vw,17.5px)] leading-[1.6] text-[#c9c9c5] max-w-[46ch] font-archivo text-pretty">
+              <p className="m-0 text-[clamp(13.5px,1vw,15.5px)] leading-[1.55] text-[#c9c9c5] max-w-[48ch] font-archivo text-pretty">
                 {aboutData.brandParagraph ? (
                   aboutData.brandParagraph
                 ) : (
@@ -399,20 +399,20 @@ export const Collaboration: React.FC = () => {
               </p>
 
               {/* Inline Bottom Row: Punchline & CTA Buttons */}
-              <div className="pt-2 md:pt-3 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5">
+              <div className="pt-1 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
                 {(aboutData.showPunchline ?? true) && (
-                  <p className="m-0 font-mono text-[12px] sm:text-[12.5px] leading-[1.6] tracking-[0.02em] text-[#a6a6a2] max-w-[34ch] border-l border-[#242424] pl-3.5">
+                  <p className="m-0 font-mono text-[11px] sm:text-[11.5px] leading-[1.5] tracking-[0.02em] text-[#a6a6a2] max-w-[32ch] border-l border-[#242424] pl-3">
                     {aboutData.punchline || "Completely unbiased bio, by the way. Liam definitely did not write this himself at 1:14am."}
                   </p>
                 )}
 
-                <div className="flex flex-row items-center gap-4 sm:gap-6 shrink-0">
+                <div className="flex flex-row items-center gap-3 sm:gap-5 shrink-0">
                   <MagneticButton
                     variant="primary"
                     onClick={() => {
                       document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="!px-7 md:!px-10 !py-3.5 md:!py-4 !text-xs md:!text-sm !font-black uppercase tracking-widest shadow-xl justify-center"
+                    className="!px-6 md:!px-8 !py-3 md:!py-3.5 !text-xs !font-black uppercase tracking-widest shadow-xl justify-center"
                   >
                     Connect
                   </MagneticButton>
@@ -420,9 +420,9 @@ export const Collaboration: React.FC = () => {
                     onClick={() => {
                       document.getElementById('films')?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="flex items-center gap-2 md:gap-3 text-white font-black tracking-[0.2em] md:tracking-[0.25em] uppercase text-[10px] md:text-[11px] group cursor-pointer"
+                    className="flex items-center gap-2 md:gap-2.5 text-white font-black tracking-[0.2em] md:tracking-[0.22em] uppercase text-[10px] md:text-[10.5px] group cursor-pointer"
                   >
-                    View All Work <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-white/40 group-hover:translate-x-2 transition-transform duration-500" />
+                    View All Work <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/40 group-hover:translate-x-1.5 transition-transform duration-500" />
                   </button>
                 </div>
               </div>

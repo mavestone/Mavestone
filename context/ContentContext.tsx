@@ -269,6 +269,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           name: "Creator Name",
           username: "creator_handle",
           platform: platform,
+          linkedinAccountType: 'personal',
           text: defaultText,
           avatar: "",
           likes: platform === 'youtube' ? "1.2k" : platform === 'twitter' ? "284" : "86",

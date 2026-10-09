@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Testimonial, AboutData } from '../types';
-import { Plus, Trash2, Camera, User, Check, Search, X, ArrowUpDown, ChevronUp, ChevronDown, Sparkles, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, Camera, User, Building2, ShieldCheck, Check, Search, X, ArrowUpDown, ChevronUp, ChevronDown, Sparkles, MessageSquare } from 'lucide-react';
 import { SocialCommentCard } from './SocialCommentCard';
 
 interface AdminTestimonialsSectionProps {
@@ -480,32 +480,97 @@ export const AdminTestimonialsSection: React.FC<AdminTestimonialsSectionProps> =
                           value={t.username || ''}
                           onChange={(e) => updateTestimonial(t.id, { username: e.target.value })}
                           className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all font-mono"
-                          placeholder="e.g. marcusvance.cin"
+                          placeholder={t.platform === 'linkedin' && t.linkedinAccountType === 'company' ? 'e.g. aperture-media' : 'e.g. marcusvance.cin'}
                         />
                       </div>
                       <div>
-                        <label className="admin-label block opacity-50 mb-1.5">Display Name</label>
+                        <label className="admin-label block opacity-50 mb-1.5">
+                          {t.platform === 'linkedin' && t.linkedinAccountType === 'company' ? 'Company Name' : 'Display Name'}
+                        </label>
                         <input
                           type="text"
                           value={t.name}
                           onChange={(e) => updateTestimonial(t.id, { name: e.target.value })}
                           className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-white/20 transition-all"
-                          placeholder="e.g. Marcus Vance"
+                          placeholder={t.platform === 'linkedin' && t.linkedinAccountType === 'company' ? 'e.g. Aperture Media' : 'e.g. Marcus Vance'}
                         />
                       </div>
                     </div>
 
                     {/* Platform Specific Settings */}
                     {t.platform === 'linkedin' && (
-                      <div className="space-y-3 p-3.5 bg-[#0A66C2]/10 border border-[#0A66C2]/25 rounded-xl">
+                      <div className="space-y-3.5 p-3.5 bg-[#0A66C2]/10 border border-[#0A66C2]/25 rounded-xl">
+                        {/* LinkedIn Account Type & Verified Badge Row */}
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                          <div className="sm:col-span-7">
+                            <label className="admin-label block opacity-70 mb-1.5 text-xs text-[#70B5F9]">LinkedIn Account Type</label>
+                            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/30 border border-white/10 rounded-xl">
+                              <button
+                                type="button"
+                                onClick={() => updateTestimonial(t.id, { linkedinAccountType: 'personal' })}
+                                className={`py-2 px-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                                  (t.linkedinAccountType || 'personal') === 'personal'
+                                    ? 'bg-[#0A66C2] text-white shadow-sm'
+                                    : 'text-white/50 hover:text-white hover:bg-white/5'
+                                }`}
+                              >
+                                <User size={13} />
+                                <span>Personal</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updates: Partial<Testimonial> = { linkedinAccountType: 'company' };
+                                  if (!t.company || t.company === 'Executive Creative Director' || t.company === 'Creator') {
+                                    updates.company = '18,400 followers';
+                                  }
+                                  updateTestimonial(t.id, updates);
+                                }}
+                                className={`py-2 px-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                                  t.linkedinAccountType === 'company'
+                                    ? 'bg-[#0A66C2] text-white shadow-sm'
+                                    : 'text-white/50 hover:text-white hover:bg-white/5'
+                                }`}
+                              >
+                                <Building2 size={13} />
+                                <span>Company</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="sm:col-span-5">
+                            <label className="admin-label block opacity-70 mb-1.5 text-xs text-[#70B5F9]">LinkedIn Verified Badge</label>
+                            <button
+                              type="button"
+                              onClick={() => updateTestimonial(t.id, { verified: !(t.verified ?? true) })}
+                              className={`w-full py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
+                                (t.verified ?? true)
+                                  ? 'bg-[#0A66C2]/30 border-[#70B5F9]/50 text-white shadow-sm'
+                                  : 'bg-white/5 border-white/10 text-white/40 hover:text-white'
+                              }`}
+                            >
+                              <ShieldCheck size={14} className={(t.verified ?? true) ? 'text-[#70B5F9]' : 'text-white/30'} />
+                              <span>{(t.verified ?? true) ? 'Verified Shield On' : 'No Shield Badge'}</span>
+                            </button>
+                          </div>
+                        </div>
+
                         <div>
-                          <label className="admin-label block opacity-70 mb-1.5 text-xs text-[#70B5F9]">Company / Role / Headline (LinkedIn)</label>
+                          <label className="admin-label block opacity-70 mb-1.5 text-xs text-[#70B5F9]">
+                            {t.linkedinAccountType === 'company'
+                              ? 'Follower Count / Subtitle (LinkedIn Company Page)'
+                              : 'Company / Role / Headline (LinkedIn Personal)'}
+                          </label>
                           <input
                             type="text"
                             value={t.company || ''}
                             onChange={(e) => updateTestimonial(t.id, { company: e.target.value })}
                             className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#0A66C2]/50 transition-all"
-                            placeholder="e.g. Executive Creative Director · Aperture Media"
+                            placeholder={
+                              t.linkedinAccountType === 'company'
+                                ? 'e.g. 24,800 followers'
+                                : 'e.g. Executive Creative Director · Aperture Media'
+                            }
                           />
                         </div>
 
@@ -622,9 +687,15 @@ export const AdminTestimonialsSection: React.FC<AdminTestimonialsSectionProps> =
                         )}
                       </div>
                       <div className="flex gap-3 items-center">
-                        <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-white/10 bg-white/5 flex items-center justify-center">
+                        <div
+                          className={`relative w-11 h-11 overflow-hidden shrink-0 border border-white/10 bg-white/5 flex items-center justify-center ${
+                            t.platform === 'linkedin' && t.linkedinAccountType === 'company' ? 'rounded-md' : 'rounded-full'
+                          }`}
+                        >
                           {t.avatar ? (
                             <img src={t.avatar} className="w-full h-full object-cover" alt={t.name} />
+                          ) : t.platform === 'linkedin' && t.linkedinAccountType === 'company' ? (
+                            <Building2 size={18} className="text-white/30" />
                           ) : (
                             <User size={18} className="text-white/30" />
                           )}
